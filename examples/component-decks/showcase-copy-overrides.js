@@ -1349,9 +1349,8 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       layout: "BT02",
       html: "这页面向真实 PPT 场景，重点是对齐目标、确认线索，并形成可追踪结论。<br>销售目标校准 · 目标<strong>目标</strong>线索",
       text: "这页面向真实 PPT 场景，重点是对齐目标、确认线索，并形成可追踪结论。 销售目标校准 · 目标目标线索",
-      colorToken: "--accent-on",
-      scope: "theme",
-      theme: "dark",
+      backgroundColorToken: "--focus-mark",
+      colorToken: "--theme-xhs-navy",
     },
     "element:rp02:18": {
       id: "element:rp02:18",
@@ -1360,6 +1359,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       slideKey: "rp02",
       layout: "RP02",
       backgroundColorToken: "transparent",
+      colorToken: "transparent",
     },
     "text:rp02:10": {
       id: "text:rp02:10",
@@ -1389,7 +1389,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       layout: "RP02",
       html: "复盘目录导航进入负责人",
       text: "复盘目录导航进入负责人",
-      colorToken: "--border-subtle",
+      colorToken: "--paper",
     },
     "text:rp03:3": {
       id: "text:rp03:3",
@@ -2367,6 +2367,43 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       backgroundColorToken: "--theme-x2-on-accent",
       colorToken: "--report-ink-fg",
     },
+    "element:xhs3_06:1": {
+      id: "element:xhs3_06:1",
+      slide: 49,
+      slideId: "xhs3_06-49",
+      slideKey: "xhs3_06",
+      layout: "XHS3-06",
+      colorToken: "--theme-panel-bg",
+    },
+    "element:xhs3_06:2": {
+      id: "element:xhs3_06:2",
+      slide: 49,
+      slideId: "xhs3_06-49",
+      slideKey: "xhs3_06",
+      layout: "XHS3-06",
+      backgroundColorToken: "--surface-fg",
+    },
+    "text:xhs3_06:7": {
+      id: "text:xhs3_06:7",
+      slide: 49,
+      slideId: "xhs3_06-49",
+      slideKey: "xhs3_06",
+      layout: "XHS3-06",
+      html: "01",
+      text: "01",
+      backgroundColorToken: "--surface-fg",
+      colorToken: "--focus-bg",
+    },
+    "text:xhs3_06:10": {
+      id: "text:xhs3_06:10",
+      slide: 49,
+      slideId: "xhs3_06-49",
+      slideKey: "xhs3_06",
+      layout: "XHS3-06",
+      html: "年度词汇进入负责人<br>用一个年度词把复杂趋势压缩成观众能记住的表达。",
+      text: "年度词汇进入负责人 用一个年度词把复杂趋势压缩成观众能记住的表达。",
+      colorToken: "--paper",
+    },
     "text:xhs3_07:7": {
       id: "text:xhs3_07:7",
       slide: 50,
@@ -2405,6 +2442,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "普通人与<br>普通人与专业受众<br><span>负责人</span>",
       text: "普通人与 普通人与专业受众 负责人",
       fontSizeToken: null,
+      colorToken: "--accent-bright",
     },
     "text:xhs3_08:7": {
       id: "text:xhs3_08:7",
@@ -2495,9 +2533,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "<span>结论提炼</span><strong>INSIGHT</strong>",
       text: "结论提炼 INSIGHT",
       fontSizeToken: null,
-      colorToken: "--theme-decor-1",
-      scope: "theme",
-      theme: "dark",
     },
     "element:xhs3_14:10": {
       id: "element:xhs3_14:10",
@@ -2518,7 +2553,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "<span>负责人</span><strong>ACTION MAP</strong>",
       text: "负责人 ACTION MAP",
       fontSizeToken: null,
-      colorToken: "--theme-decor-1",
     },
     "text:xhs3_15:1": {
       id: "text:xhs3_15:1",
@@ -2764,6 +2798,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "02",
       text: "02",
       fontSizeToken: "--fs-number-lg",
+      colorToken: "--focus-mark",
     },
     "text:xhs3_21:12": {
       id: "text:xhs3_21:12",
@@ -2842,9 +2877,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "WORK",
       text: "WORK",
       fontSizeToken: null,
-      colorToken: "--theme-st2-red",
-      scope: "theme",
-      theme: "light",
+      colorToken: "--accent-on",
     },
     "text:xhs3_23:8": {
       id: "text:xhs3_23:8",
@@ -2865,7 +2898,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "AGENDA",
       text: "AGENDA",
       fontSizeToken: "--fs-h2",
-      colorToken: "--theme-x2-red",
+      colorToken: "--focus-fg",
     },
     "element:xhs3_23:9": {
       id: "element:xhs3_23:9",
@@ -2904,9 +2937,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "EXER",
       text: "EXER",
       fontSizeToken: "--fs-h2",
-      colorToken: "--theme-st2-red",
-      scope: "theme",
-      theme: "light",
+      colorToken: "--focus-fg",
     },
     "text:style1_04:3": {
       id: "text:style1_04:3",
@@ -3215,6 +3246,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "5项<small>REVI</small>",
       text: "5项REVI",
       fontSizeToken: "--fs-display",
+      colorToken: "--report-amber",
     },
     "text:style2_04:14": {
       id: "text:style2_04:14",
@@ -3225,6 +3257,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "4周<small>BOAR</small>",
       text: "4周BOAR",
       fontSizeToken: "--fs-display",
+      colorToken: "--report-accent-red",
     },
     "text:style2_04:4": {
       id: "text:style2_04:4",
@@ -3255,6 +3288,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "Q4<small>ANNU</small>",
       text: "Q4ANNU",
       fontSizeToken: "--fs-display",
+      colorToken: "--accent-bright",
     },
     "text:style2_06:4": {
       id: "text:style2_06:4",
