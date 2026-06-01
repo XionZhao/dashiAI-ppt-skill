@@ -260,8 +260,8 @@ export function Xhs3_14Agent() {
         </div>
         <div className="xhs3-token-box">
           <div className="xhs3-kicker">CASE · 你跟它说"你好"</div>
-          <div><span>你输入</span><strong>1 TOKEN</strong></div>
-          <div><span>实际消耗</span><strong>~16,000 TOKENS</strong></div>
+          <div><span style={{ pointerEvents: 'none' }}>你输入</span><strong>1 TOKEN</strong></div>
+          <div><span style={{ pointerEvents: 'none' }}>实际消耗</span><strong>~16,000 TOKENS</strong></div>
         </div>
       </div>
     </Xhs3Slide>
