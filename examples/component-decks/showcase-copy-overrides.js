@@ -1614,6 +1614,15 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       text: "边界不是上限，能力不是瓶颈",
       fontSizeToken: "--fs-h3",
     },
+    "text:xhs2_34:6": {
+      id: "text:xhs2_34:6",
+      slide: 43,
+      slideId: "xhs2_34-43",
+      slideKey: "xhs2_34",
+      layout: "XHS2-34",
+      html: "受众<br>问题",
+      text: "受众 问题",
+    },
     "text:xhs3_01:8": {
       id: "text:xhs3_01:8",
       slide: 44,
@@ -1633,6 +1642,24 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       text: "0.1",
       fontSizeToken: null,
     },
+    "text:xhs3_04:1": {
+      id: "text:xhs3_04:1",
+      slide: 47,
+      slideId: "xhs3_04-47",
+      slideKey: "xhs3_04",
+      layout: "XHS3-04",
+      html: "REALITY AGENDA",
+      text: "REALITY AGENDA",
+      colorToken: "--theme-panel-bg",
+    },
+    "element:xhs3_04:2": {
+      id: "element:xhs3_04:2",
+      slide: 47,
+      slideId: "xhs3_04-47",
+      slideKey: "xhs3_04",
+      layout: "XHS3-04",
+      colorToken: "--theme-panel-bg",
+    },
     "text:xhs3_04:5": {
       id: "text:xhs3_04:5",
       slide: 47,
@@ -1642,6 +1669,18 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "能力边界页 · 边界<span>边界</span>证据<br>动作由 Owner 跟进<br>能力边界边界",
       text: "能力边界页 · 边界边界证据 动作由 Owner 跟进 能力边界边界",
       fontSizeToken: "--fs-h2",
+      colorToken: "--ink",
+    },
+    "text:xhs3_04:7": {
+      id: "text:xhs3_04:7",
+      slide: 47,
+      slideId: "xhs3_04-47",
+      slideKey: "xhs3_04",
+      layout: "XHS3-04",
+      html: "紧接着指出 AI 不等于可靠判断，所有输出都需",
+      text: "紧接着指出 AI 不等于可靠判断，所有输出都需",
+      backgroundColorToken: "transparent",
+      colorToken: "--focus-bg",
     },
     "text:xhs3_07:7": {
       id: "text:xhs3_07:7",
@@ -1752,7 +1791,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "WORK",
       text: "WORK",
       fontSizeToken: null,
-      colorToken: "--ink",
     },
     "text:xhs3_23:9": {
       id: "text:xhs3_23:9",
@@ -1763,7 +1801,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "AGENDA",
       text: "AGENDA",
       fontSizeToken: "--fs-h2",
-      colorToken: "--ink",
     },
     "text:xhs3_23:11": {
       id: "text:xhs3_23:11",
@@ -1774,7 +1811,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "EXER",
       text: "EXER",
       fontSizeToken: "--fs-h2",
-      colorToken: "--ink",
     },
     "text:xhs3_24:5": {
       id: "text:xhs3_24:5",
