@@ -1349,7 +1349,8 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       slideId: "rp02-14",
       slideKey: "rp02",
       layout: "RP02",
-      backgroundColorToken: "transparent",
+      backgroundColorToken: "--inverse-fg",
+      colorToken: "--text-primary",
     },
     "text:rp02:10": {
       id: "text:rp02:10",
@@ -1466,6 +1467,25 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "2025",
       text: "2025",
       backgroundColorToken: "--border-subtle",
+      colorToken: "--accent-on",
+    },
+    "text:rp14:12": {
+      id: "text:rp14:12",
+      slide: 22,
+      slideId: "rp14-22",
+      slideKey: "rp14",
+      layout: "RP14",
+      html: "讨论结束后，时间点和结论进入待办。",
+      text: "讨论结束后，时间点和结论进入待办。",
+      backgroundColorToken: "--border-subtle",
+      colorToken: "--text-primary",
+    },
+    "element:rp15:12": {
+      id: "element:rp15:12",
+      slide: 23,
+      slideId: "rp15-23",
+      slideKey: "rp15",
+      layout: "RP15",
       colorToken: "--accent-on",
     },
     "text:xhs02:11": {
@@ -1911,6 +1931,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "WORK",
       text: "WORK",
       fontSizeToken: null,
+      colorToken: "--ink",
     },
     "text:xhs3_23:9": {
       id: "text:xhs3_23:9",
@@ -1921,6 +1942,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "AGENDA",
       text: "AGENDA",
       fontSizeToken: "--fs-h2",
+      colorToken: "--ink",
     },
     "text:xhs3_23:11": {
       id: "text:xhs3_23:11",
@@ -1931,6 +1953,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "EXER",
       text: "EXER",
       fontSizeToken: "--fs-h2",
+      colorToken: "--ink",
     },
     "text:style1_04:5": {
       id: "text:style1_04:5",
