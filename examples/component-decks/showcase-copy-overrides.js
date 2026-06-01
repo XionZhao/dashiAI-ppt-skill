@@ -3404,6 +3404,16 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       text: "工具选型页聚焦真实汇报中的动作。",
       colorToken: "--text-on-color",
     },
+    "element:xhs3_24:21": {
+      id: "element:xhs3_24:21",
+      slide: 67,
+      slideId: "xhs3_24-67",
+      slideKey: "xhs3_24",
+      layout: "XHS3-24",
+      colorToken: "--theme-st2-paper",
+      scope: "theme",
+      theme: "light",
+    },
     "text:xhs3_25:4": {
       id: "text:xhs3_25:4",
       slide: 68,
