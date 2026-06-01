@@ -1351,7 +1351,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       slideId: "rp02-14",
       slideKey: "rp02",
       layout: "RP02",
-      backgroundColorToken: "--inverse-fg",
+      backgroundColorToken: "transparent",
       colorToken: "--text-primary",
     },
     "text:rp02:10": {
@@ -2339,6 +2339,16 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       text: "工具调用示例",
       fontSizeToken: "--fs-h2",
     },
+    "text:xhs3_10:10": {
+      id: "text:xhs3_10:10",
+      slide: 53,
+      slideId: "xhs3_10-53",
+      slideKey: "xhs3_10",
+      layout: "XHS3-10",
+      html: "工具调用示例聚焦真实汇报中的动作。",
+      text: "工具调用示例聚焦真实汇报中的动作。",
+      colorToken: "--ink",
+    },
     "text:xhs3_14:6": {
       id: "text:xhs3_14:6",
       slide: 57,
@@ -2690,7 +2700,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "WORK",
       text: "WORK",
       fontSizeToken: null,
-      colorToken: "--accent-on",
+      colorToken: "--ink",
     },
     "text:xhs3_23:8": {
       id: "text:xhs3_23:8",
@@ -2711,7 +2721,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "AGENDA",
       text: "AGENDA",
       fontSizeToken: "--fs-h2",
-      colorToken: "--focus-fg",
+      colorToken: "--ink",
     },
     "text:xhs3_23:10": {
       id: "text:xhs3_23:10",
@@ -2732,7 +2742,7 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "EXER",
       text: "EXER",
       fontSizeToken: "--fs-h2",
-      colorToken: "--focus-fg",
+      colorToken: "--ink",
     },
     "text:style1_04:3": {
       id: "text:style1_04:3",
