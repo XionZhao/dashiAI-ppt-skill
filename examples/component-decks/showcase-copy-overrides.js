@@ -1782,6 +1782,14 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       text: "原创价值",
       fontSizeToken: "--fs-h2",
     },
+    "element:xhs3_08:1": {
+      id: "element:xhs3_08:1",
+      slide: 51,
+      slideId: "xhs3_08-51",
+      slideKey: "xhs3_08",
+      layout: "XHS3-08",
+      backgroundColorToken: "--theme-panel-bg",
+    },
     "text:xhs3_08:5": {
       id: "text:xhs3_08:5",
       slide: 51,
@@ -1903,7 +1911,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "WORK",
       text: "WORK",
       fontSizeToken: null,
-      colorToken: "--ink",
     },
     "text:xhs3_23:9": {
       id: "text:xhs3_23:9",
@@ -1914,7 +1921,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "AGENDA",
       text: "AGENDA",
       fontSizeToken: "--fs-h2",
-      colorToken: "--ink",
     },
     "text:xhs3_23:11": {
       id: "text:xhs3_23:11",
@@ -1925,7 +1931,6 @@ export const SHOWCASE_DEV_ADJUSTMENTS = {
       html: "EXER",
       text: "EXER",
       fontSizeToken: "--fs-h2",
-      colorToken: "--ink",
     },
     "text:style1_04:5": {
       id: "text:style1_04:5",
