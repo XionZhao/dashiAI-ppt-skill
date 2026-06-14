@@ -300,9 +300,9 @@
 <script src="assets/imported-theme-runtime.js"></script>
 <script>
 (function(){
-  window.__pageTransitionMode = 'liquidMorph';
+  window.__pageTransitionMode = 'none';
   window.__setPageTransition = value => { window.__pageTransitionMode = value === 'none' ? 'none' : 'liquidMorph'; };
-  window.__getPageTransition = () => window.__pageTransitionMode || 'liquidMorph';
+  window.__getPageTransition = () => window.__pageTransitionMode || 'none';
   function updateHint(){
     const hint = document.getElementById('hint');
     if(hint) hint.textContent = '';
@@ -1548,7 +1548,7 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
     themePack: initialThemePack,
     pageTransition: transitionModes.includes(saved.pageTransition)
       ? saved.pageTransition
-      : (transitionModes.includes(options.current?.pageTransition) ? options.current.pageTransition : 'liquidMorph'),
+      : (transitionModes.includes(options.current?.pageTransition) ? options.current.pageTransition : 'none'),
   };
   window.__getPreviewState = () => ({...state});
 
@@ -1615,7 +1615,7 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
   }
 
   transitionSelect?.addEventListener('change', () => {
-    state.pageTransition = transitionSelect.value || 'liquidMorph';
+    state.pageTransition = transitionSelect.value || 'none';
     window.__setPageTransition?.(state.pageTransition);
     transitionSelect.blur();
     writeSaved();
@@ -1640,8 +1640,8 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
   }
 
   function syncTransitionControl(){
-    if(transitionSelect) transitionSelect.value = state.pageTransition || 'liquidMorph';
-    window.__setPageTransition?.(state.pageTransition || 'liquidMorph');
+    if(transitionSelect) transitionSelect.value = state.pageTransition || 'none';
+    window.__setPageTransition?.(state.pageTransition || 'none');
   }
 
   function applyStoredSlideControls(){
