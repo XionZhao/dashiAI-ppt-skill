@@ -2107,7 +2107,8 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
       const slides = await materializeExportSlides(exportUi, 'PDF');
       throwIfDeckExportCancelled(exportUi);
       restorePrintState = prepareSlidesForPrint(slides);
-      finishSlidesForExport(slides);
+      await nextFrame();
+      await waitForExportFonts();
       await nextFrame();
       updateDeckExport(exportUi, slides.length, slides.length, '正在打开浏览器打印...');
       await runBrowserPrint(window);
@@ -2236,7 +2237,7 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
       updateDeckExport(exportUi, slides.length, slides.length, '正在生成 HTML...');
       await nextFrame();
       const clone = document.documentElement.cloneNode(true);
-      prepareSimpleHtmlExportClone(clone);
+      await prepareSimpleHtmlExportClone(clone, slides);
       const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], {type: 'text/html;charset=utf-8'});
       throwIfDeckExportCancelled(exportUi);
       updateDeckExport(exportUi, slides.length, slides.length, '正在下载 HTML...');
@@ -2260,14 +2261,9 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
       window.__ensureRuntimeSlideRendered?.(slide);
       if(index % 2 === 1) await nextFrame();
     }
-    finishSlidesForExport(slides);
     updateDeckExport(exportUi, slides.length, slides.length, `${label} 页面已准备完成`);
     await nextFrame();
     return slides;
-  }
-
-  function finishSlidesForExport(slides){
-    slides.forEach(slide => finishSlideCaptureMotion(slide));
   }
 
   function prepareSlidesForPrint(slides){
@@ -2308,7 +2304,9 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
     window.__layoutDeck?.();
   }
 
-  function prepareSimpleHtmlExportClone(clone){
+  async function prepareSimpleHtmlExportClone(clone, visibleSlides){
+    pruneHiddenSlidesForHtmlExport(clone, visibleSlides);
+    await embedUnicornAssetsForExport(clone);
     clone.querySelector('#overview')?.remove();
     clone.querySelector('#image-picker-input')?.remove();
     clone.querySelector('#media-picker-input')?.remove();
@@ -2335,9 +2333,53 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
     }
   }
 
+  function pruneHiddenSlidesForHtmlExport(clone, visibleSlides){
+    const visibleIds = new Set((visibleSlides || []).map((slide, index) => getCloneSlideKey(slide, index)).filter(Boolean));
+    if(!visibleIds.size) return;
+    clone.querySelectorAll('#deck > .slide').forEach((slide, index) => {
+      if(!visibleIds.has(getCloneSlideKey(slide, index))){
+        slide.remove();
+        return;
+      }
+      slide.hidden = false;
+      slide.removeAttribute('hidden');
+      slide.removeAttribute('aria-hidden');
+      slide.removeAttribute('data-slide-skipped');
+    });
+  }
+
+  function getCloneSlideKey(slide, index){
+    return slide?.dataset?.vmSlideId || slide?.dataset?.vmLayout || slide?.dataset?.layout || `slide-${index + 1}`;
+  }
+
+  async function embedUnicornAssetsForExport(clone){
+    const paths = [...new Set(
+      [...clone.querySelectorAll('.bt-unicorn-frame[data-unicorn-json-file-path]')]
+        .map(frame => frame.dataset.unicornJsonFilePath)
+        .filter(Boolean)
+    )];
+    if(!paths.length) return;
+    const assets = {};
+    await Promise.all(paths.map(async path => {
+      try {
+        const response = await fetch(path);
+        if(response.ok) assets[path] = await response.text();
+      } catch {}
+    }));
+    if(!Object.keys(assets).length) return;
+    clone.querySelector('#embedded-unicorn-assets')?.remove();
+    const script = document.createElement('script');
+    script.id = 'embedded-unicorn-assets';
+    script.type = 'application/json';
+    script.textContent = JSON.stringify(assets).replace(/</g, '\\u003c');
+    clone.querySelector('head')?.appendChild(script);
+  }
+
   function staticUnicornRuntime(){
     const DEFAULT_SDK_URL = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.12/dist/unicornStudio.umd.js';
     let sdkPromise = null;
+    let embeddedAssetMap = null;
+    const embeddedAssetUrls = new Map();
 
     window.__initUnicornScenes = initUnicornScenes;
     window.__resetUnicornSceneFrame = resetFrame;
@@ -2415,7 +2457,7 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
         altText: 'Shader scene',
         ariaLabel: 'Shader scene',
       };
-      if(frame.dataset.unicornJsonFilePath) config.filePath = frame.dataset.unicornJsonFilePath;
+      if(frame.dataset.unicornJsonFilePath) config.filePath = resolveUnicornJsonFilePath(frame.dataset.unicornJsonFilePath);
       else config.projectId = frame.dataset.unicornProjectId;
       return window.UnicornStudio.addScene(config).then(sceneInstance => {
         frame.__unicornScene = sceneInstance;
@@ -2443,6 +2485,35 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
         resetFrame(frame);
       });
     }
+
+    function resolveUnicornJsonFilePath(path){
+      const source = getEmbeddedUnicornAssets()[path];
+      if(!source) return path;
+      if(embeddedAssetUrls.has(path)) return embeddedAssetUrls.get(path);
+      const url = URL.createObjectURL(new Blob([source], {type:'application/json'}));
+      embeddedAssetUrls.set(path, url);
+      return url;
+    }
+
+    function getEmbeddedUnicornAssets(){
+      if(embeddedAssetMap) return embeddedAssetMap;
+      const script = document.getElementById('embedded-unicorn-assets');
+      if(!script){
+        embeddedAssetMap = {};
+        return embeddedAssetMap;
+      }
+      try {
+        embeddedAssetMap = JSON.parse(script.textContent || '{}') || {};
+      } catch {
+        embeddedAssetMap = {};
+      }
+      return embeddedAssetMap;
+    }
+
+    addEventListener('pagehide', () => {
+      embeddedAssetUrls.forEach(url => URL.revokeObjectURL(url));
+      embeddedAssetUrls.clear();
+    });
   }
 
 
@@ -2472,6 +2543,14 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
         return true;
       },
     };
+  }
+
+  async function waitForExportFonts(){
+    if(!document.fonts?.ready) return;
+    await Promise.race([
+      document.fonts.ready.catch(() => {}),
+      new Promise(resolve => setTimeout(resolve, 2500)),
+    ]);
   }
 
   async function waitForSlideCaptureReady(slide){
