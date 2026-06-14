@@ -19,7 +19,7 @@ export const meta = { id: 'quoteimage', index: 73, label: '图上金句 / Quote 
 export const defaultProps = {
   accent: C.orange,
   backgroundMode: 'unicorn',
-  unicornScene: 'donut',
+  unicornScene: 'tech',
   tint: 'dark',            // 'dark' | 'accent'
   quotePos: 'bottom',      // 'bottom' | 'center'
   showMark: true,

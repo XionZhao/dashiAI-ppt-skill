@@ -96915,10 +96915,6 @@
             {
               "value": "goey",
               "label": "黏球"
-            },
-            {
-              "value": "donut",
-              "label": "蓝环"
             }
           ],
           "dependsOn": "backgroundMode",
@@ -98358,10 +98354,6 @@
             {
               "value": "goey",
               "label": "黏球"
-            },
-            {
-              "value": "donut",
-              "label": "蓝环"
             }
           ],
           "dependsOn": "backgroundMode",
@@ -98504,10 +98496,6 @@
             {
               "value": "goey",
               "label": "黏球"
-            },
-            {
-              "value": "donut",
-              "label": "蓝环"
             }
           ],
           "dependsOn": "backgroundMode",
@@ -98607,10 +98595,6 @@
             {
               "value": "goey",
               "label": "黏球"
-            },
-            {
-              "value": "donut",
-              "label": "蓝环"
             }
           ],
           "dependsOn": "backgroundMode",
@@ -102629,7 +102613,7 @@
           "key": "unicornScene",
           "label": "动态场景",
           "type": "select",
-          "default": "donut",
+          "default": "tech",
           "options": [
             {
               "value": "tech",
@@ -102646,10 +102630,6 @@
             {
               "value": "goey",
               "label": "黏球"
-            },
-            {
-              "value": "donut",
-              "label": "蓝环"
             }
           ],
           "dependsOn": "backgroundMode",

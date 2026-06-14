@@ -138974,10 +138974,6 @@ export const GENERATED_THEME_PAGES = [
           {
             "value": "goey",
             "label": "黏球"
-          },
-          {
-            "value": "donut",
-            "label": "蓝环"
           }
         ],
         "dependsOn": "backgroundMode",
@@ -141154,10 +141150,6 @@ export const GENERATED_THEME_PAGES = [
           {
             "value": "goey",
             "label": "黏球"
-          },
-          {
-            "value": "donut",
-            "label": "蓝环"
           }
         ],
         "dependsOn": "backgroundMode",
@@ -141340,10 +141332,6 @@ export const GENERATED_THEME_PAGES = [
           {
             "value": "goey",
             "label": "黏球"
-          },
-          {
-            "value": "donut",
-            "label": "蓝环"
           }
         ],
         "dependsOn": "backgroundMode",
@@ -141490,10 +141478,6 @@ export const GENERATED_THEME_PAGES = [
           {
             "value": "goey",
             "label": "黏球"
-          },
-          {
-            "value": "donut",
-            "label": "蓝环"
           }
         ],
         "dependsOn": "backgroundMode",
@@ -148392,8 +148376,8 @@ export const GENERATED_THEME_PAGES = [
         "key": "unicornScene",
         "label": "动态场景",
         "type": "segment",
-        "default": "donut",
-        "def": "donut",
+        "default": "tech",
+        "def": "tech",
         "options": [
           {
             "value": "tech",
@@ -148410,10 +148394,6 @@ export const GENERATED_THEME_PAGES = [
           {
             "value": "goey",
             "label": "黏球"
-          },
-          {
-            "value": "donut",
-            "label": "蓝环"
           }
         ],
         "dependsOn": "backgroundMode",
@@ -148490,7 +148470,7 @@ export const GENERATED_THEME_PAGES = [
     "defaultProps": {
       "accent": "#f15a29",
       "backgroundMode": "unicorn",
-      "unicornScene": "donut",
+      "unicornScene": "tech",
       "tint": "dark",
       "quotePos": "bottom",
       "showMark": true,

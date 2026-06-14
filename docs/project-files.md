@@ -9,7 +9,6 @@
 |-- assets/
 |   |-- unicorn/
 |   |   |-- automations_remix_scene.json - 静态模板或浏览器运行时资源。
-|   |   |-- blue_donut_remix_scene.json - 静态模板或浏览器运行时资源。
 |   |   |-- goey_balls_remix_scene.json - 静态模板或浏览器运行时资源。
 |   |   |-- moving_into_remix_scene.json - 静态模板或浏览器运行时资源。
 |   |   `-- tech_background_remix_scene.json - 静态模板或浏览器运行时资源。

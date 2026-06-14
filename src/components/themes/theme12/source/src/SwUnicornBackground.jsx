@@ -6,7 +6,6 @@ export const SW_UNICORN_SCENES = [
   { value: 'automations', label: '自动化', file: 'assets/unicorn/automations_remix_scene.json' },
   { value: 'moving', label: '流动', file: 'assets/unicorn/moving_into_remix_scene.json' },
   { value: 'goey', label: '黏球', file: 'assets/unicorn/goey_balls_remix_scene.json' },
-  { value: 'donut', label: '蓝环', file: 'assets/unicorn/blue_donut_remix_scene.json' },
 ];
 
 const DEFAULT_UNICORN_SCENE = 'tech';
