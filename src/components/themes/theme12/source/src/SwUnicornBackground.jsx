@@ -40,7 +40,7 @@ function getSwUnicornSceneFile(scene) {
 
 export function SwBackgroundLayer({ mode = 'unicorn', scene = DEFAULT_UNICORN_SCENE, media = [], onMediaChange = () => {}, fit = 'cover', accent, placeholder, tone = 'dark' }) {
   const value = Array.isArray(media) ? media[0] : media;
-  if (!value && mode === 'unicorn') return <SwUnicornBackground accent={accent} scene={scene} />;
+  if (mode === 'unicorn') return <SwUnicornBackground accent={accent} scene={scene} />;
   return (
     <SwImageSlot value={value || null} onChange={(s) => onMediaChange(0, s)}
       fit={fit} accent={accent} radius={0} tone={tone} placeholder={placeholder} />

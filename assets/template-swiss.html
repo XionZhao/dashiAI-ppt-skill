@@ -1966,12 +1966,13 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
     const values = getSlidePropValues(slide);
     values[control.key] = coercePropValue(control, value);
     Object.assign(values, opts.extra || {});
+    const unicornRefresh = control.key === 'backgroundMode' || control.key === 'unicornScene';
     if(slide.dataset.themePack === 'theme03' && control.key === 'accent'){
       applyTheme03GlobalAccent(values[control.key], opts);
       if(opts.render !== false) renderPropControls();
       return;
     }
-    applyPropValues(slide, values);
+    applyPropValues(slide, values, {unicornRefresh});
     if(opts.render !== false) renderPropControls();
   }
 
@@ -2034,9 +2035,13 @@ go(Number.isFinite(initialSlide) ? initialSlide : 0, {animate:false});
     if(!root) return;
     const next = {...parsePropDefaults(root), ...getSlideSourceProps(slide), ...(values || {})};
     if(opts.persist !== false) viewModel?.setProps?.(slide.dataset.vmSlideId, next);
+    if(opts.unicornRefresh){
+      slide.querySelectorAll('.bt-unicorn-frame').forEach(frame => window.__resetUnicornSceneFrame?.(frame));
+    }
     if(window.__renderRuntimeSlide?.(slide, next)){
       window.__initEditableText?.(slide);
       window.__syncActiveEffects?.(slide);
+      requestAnimationFrame(() => window.__initUnicornScenes?.(slide, {force:true}));
     }
   }
 
