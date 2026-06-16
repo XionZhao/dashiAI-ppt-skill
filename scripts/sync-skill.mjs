@@ -31,6 +31,12 @@ function syncProjectFiles() {
   copyPath(path.join(ROOT, 'layout-manifest.json'), path.join(projectRoot, 'layout-manifest.json'));
   copyPath(path.join(ROOT, 'assets/template-swiss.html'), path.join(projectRoot, 'assets/template-swiss.html'));
   copyPath(path.join(ROOT, 'src'), path.join(projectRoot, 'src'));
+  copyPath(path.join(ROOT, 'scripts/skill-workflow-utils.mjs'), path.join(projectRoot, 'scripts/skill-workflow-utils.mjs'));
+  copyPath(path.join(ROOT, 'scripts/layout-query.mjs'), path.join(projectRoot, 'scripts/layout-query.mjs'));
+  copyPath(path.join(ROOT, 'scripts/inspect-layout.mjs'), path.join(projectRoot, 'scripts/inspect-layout.mjs'));
+  copyPath(path.join(ROOT, 'scripts/write-safe-props.mjs'), path.join(projectRoot, 'scripts/write-safe-props.mjs'));
+  copyPath(path.join(ROOT, 'scripts/validate-goal-spec.mjs'), path.join(projectRoot, 'scripts/validate-goal-spec.mjs'));
+  copyPath(path.join(ROOT, 'scripts/validate-skill-workflow-tools.mjs'), path.join(projectRoot, 'scripts/validate-skill-workflow-tools.mjs'));
   copyPath(path.join(ROOT, 'scripts/render-goal-deck.jsx'), path.join(projectRoot, 'scripts/render-goal-deck.jsx'));
   copyPath(path.join(ROOT, 'scripts/serve-preview-https.mjs'), path.join(projectRoot, 'scripts/serve-preview-https.mjs'));
   copyPath(path.join(ROOT, 'scripts/validate-swiss-deck.mjs'), path.join(projectRoot, 'scripts/validate-swiss-deck.mjs'));
@@ -45,6 +51,11 @@ function renderRuntimePackage() {
     private: true,
     type: 'module',
     scripts: {
+      'layout:query': 'node scripts/layout-query.mjs',
+      'inspect:layout': 'node scripts/inspect-layout.mjs',
+      'props:safe': 'node scripts/write-safe-props.mjs',
+      'validate:goal-spec': 'node scripts/validate-goal-spec.mjs',
+      'validate:skill-workflow-tools': 'node scripts/validate-skill-workflow-tools.mjs',
       'render:goal': 'tsx scripts/render-goal-deck.jsx',
       'preview:https': 'node scripts/serve-preview-https.mjs',
       'validate:swiss': 'node scripts/validate-swiss-deck.mjs',
@@ -342,6 +353,7 @@ if [[ ! -d node_modules || package.json -nt node_modules/.package-lock.json || p
   npm install
 fi
 mkdir -p "$(dirname "$OUT_PATH")"
+npm run validate:goal-spec -- "$SPEC_PATH"
 npm run render:goal -- "$SPEC_PATH" "$OUT_PATH"
 npm run validate:swiss -- "$OUT_PATH"
 npm run validate:goal-copy -- "$SPEC_PATH" "$OUT_PATH"

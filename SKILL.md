@@ -45,6 +45,8 @@ node scripts/check_latest_version.mjs
   - `theme11`: 11-高能增长图谱
   - `theme12`: 12-声波霓虹
 - 不使用旧 token、旧主题、旧图片 slot、旧风格分支或旧入场动画控制。
+- 普通生成不要直接打开大型 `layout-manifest.json` 或 `generated-metadata.js` 选页。先用 `npm run layout:query -- --theme <themePack> --role <role> --needs-media --limit 8` 找候选,再用 `npm run inspect:layout -- <layout>` 查看单页可写字段;写复杂数组或图片 props 前用 `npm run props:safe -- <layout> '<props-json>'` 归一化。
+- 图片和视频的真实写入点是页面 `props.images` / `props.media`;不要写顶层 `media` 或 `slides[].media`。
 - 元素出现动画使用 Claude Design 页面组件自带的原生效果。
 - 页面切换动画可以在预览控制面板里调整。
 - 如果当前是在 Codex 环境中执行,且页面有插图/图片槽位或用户主题明显需要插图,必须先询问用户是否同意通过 image-gen 生图并插入 PPT。用户同意后,在对应插图位置/图片槽位写入生成图片;需要多张图时,把每张图拆成独立 subagent 子任务并行生成,完成后再统一写入对应槽位。单个 subagent 失败时只标记对应 slot,不要丢弃其它已生成图片。用户不同意或未回复时,不要生成图片,也不要替换图片槽位。
