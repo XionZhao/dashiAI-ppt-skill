@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import https from 'node:https';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
@@ -49,6 +50,7 @@ const INITIAL_IMAGE_HASH = hashBuffer(INITIAL_IMAGE_BYTES);
 const REPLACEMENT_IMAGE_HASH = hashBuffer(REPLACEMENT_IMAGE_BYTES);
 const INITIAL_IMAGE = `data:image/svg+xml;base64,${INITIAL_IMAGE_BYTES.toString('base64')}`;
 const REPLACEMENT_IMAGE = `data:image/svg+xml;base64,${REPLACEMENT_IMAGE_BYTES.toString('base64')}`;
+const PPTX_SIGNATURE = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
 
 const args = new Set(process.argv.slice(2));
 const legacyRed = args.has('--legacy-red');
@@ -163,6 +165,9 @@ async function runUiExportValidation() {
   let mutation = null;
   let expectedSlides = null;
   let pptxFile = null;
+  let downloadedFile = null;
+  let suggestedFilename = null;
+  let downloadHeaders = null;
   try {
     const context = await browser.newContext({
       acceptDownloads: true,
@@ -177,19 +182,36 @@ async function runUiExportValidation() {
     expectedSlides = await page.evaluate(() => (window.__getVisibleSlides?.() || [...document.querySelectorAll('#deck > .slide:not([hidden])')]).length);
     mutation = await applyUserEdits(page);
     await page.click('#preview-export-main');
+    const downloadPromise = page.waitForEvent('download', { timeout: 240000 })
+      .then(download => ({ download }))
+      .catch(error => ({ error: error.message || String(error) }));
     await page.click('#preview-export-pptx');
     await page.waitForFunction(() => window.__lastPptxExportResult?.filePath, null, { timeout: 180000 });
     const result = await page.evaluate(() => window.__lastPptxExportResult);
     pptxFile = result.filePath;
+    if (result.downloadUrl) {
+      downloadHeaders = await readDownloadHeaders(new URL(result.downloadUrl, url).href);
+    }
+    const downloadResult = await Promise.race([
+      downloadPromise,
+      new Promise(resolve => setTimeout(() => resolve({ error: 'download-event-timeout-after-export' }), 10000)),
+    ]);
+    if (downloadResult.download) {
+      suggestedFilename = downloadResult.download.suggestedFilename();
+      downloadedFile = path.join(OUT_DIR, 'ui-export-download.pptx');
+      await downloadResult.download.saveAs(downloadedFile);
+    }
   } finally {
     await closePage(page);
     await closeBrowser(browser);
   }
 
   if (!pptxFile) throw new Error('UI export did not return a saved PPTX path.');
-  const pptx = inspectPptx(pptxFile);
+  const pptx = inspectPptx(downloadedFile || pptxFile);
   const failures = [
     ...staticFailures,
+    ...(downloadedFile ? validateDownloadedPptx(downloadedFile, suggestedFilename) : ['UI export did not trigger a browser download after the server saved the PPTX.']),
+    ...validateDownloadHeaders(downloadHeaders),
     ...validateEditablePptxInspection(pptx, {
       expectSlides: expectedSlides,
       mutation,
@@ -201,6 +223,9 @@ async function runUiExportValidation() {
     mode: 'ui-export',
     url,
     expectedSlides,
+    suggestedFilename,
+    downloadHeaders,
+    serverFile: pptxFile,
     passed: failures.length === 0,
     pptx: summarizeInspection(pptx),
     failures,
@@ -547,7 +572,53 @@ function inspectUiExportPath() {
   if (!/\/api\/export-editable-pptx/.test(source)) {
     failures.push('UI PPTX export must call the editable server export endpoint.');
   }
+  if (!/downloadUrl/.test(source)) {
+    failures.push('UI PPTX export must trigger a same-origin server download URL after editable export.');
+  }
   return failures;
+}
+
+function validateDownloadedPptx(file, suggestedFilename) {
+  const failures = [];
+  if (!/\.pptx$/i.test(String(suggestedFilename || ''))) {
+    failures.push(`Browser download filename should end with .pptx, got ${suggestedFilename || 'empty'}.`);
+  }
+  const header = readFileSync(file).subarray(0, PPTX_SIGNATURE.length);
+  if (!header.equals(PPTX_SIGNATURE)) {
+    failures.push('Browser download file does not have a PPTX/ZIP signature.');
+  }
+  return failures;
+}
+
+function validateDownloadHeaders(result) {
+  const failures = [];
+  if (!result) {
+    failures.push('UI PPTX export did not expose a server download URL for header validation.');
+    return failures;
+  }
+  if (result.statusCode !== 200) {
+    failures.push(`Server download URL returned ${result.statusCode}, expected 200.`);
+  }
+  const disposition = String(result.headers?.['content-disposition'] || '');
+  if (!/\battachment\b/i.test(disposition)) {
+    failures.push(`Server download URL must use Content-Disposition attachment, got "${disposition || 'empty'}".`);
+  }
+  const type = String(result.headers?.['content-type'] || '');
+  if (!/presentationml\.presentation/i.test(type)) {
+    failures.push(`Server download URL should return PPTX content type, got "${type || 'empty'}".`);
+  }
+  return failures;
+}
+
+function readDownloadHeaders(downloadUrl) {
+  return new Promise(resolve => {
+    const req = https.request(downloadUrl, { method: 'HEAD', rejectUnauthorized: false }, res => {
+      res.resume();
+      resolve({ statusCode: res.statusCode, headers: res.headers });
+    });
+    req.on('error', error => resolve({ statusCode: 0, headers: {}, error: error.message || String(error) }));
+    req.end();
+  });
 }
 
 async function runLegacyRedValidation() {

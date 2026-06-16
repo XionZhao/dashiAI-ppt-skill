@@ -3436,8 +3436,10 @@ refreshRailCatalog();
       if(!result?.filePath) throw new Error('Editable PPTX export did not return a saved file path.');
       window.__lastPptxExportResult = result;
       throwIfDeckExportCancelled(exportUi);
-      updateDeckExport(exportUi, slides.length, slides.length, `PPTX 已保存：${result.relativePath || result.filePath}`);
-      alert(`PPTX 已保存到：\n${result.filePath}`);
+      const downloadStarted = startServerExportDownload(result.downloadUrl, result.downloadName || `${getDeckFileName()}.pptx`);
+      window.__lastPptxExportResult.downloadStarted = downloadStarted;
+      updateDeckExport(exportUi, slides.length, slides.length, downloadStarted ? 'PPTX 已开始下载' : `PPTX 已保存：${result.relativePath || result.filePath}`);
+      if(!downloadStarted) alert(`PPTX 已保存到：\n${result.filePath}`);
     } catch (error) {
       if(isDeckExportCancelledError(error)) return;
       console.error('[export pptx]', error);
@@ -3460,6 +3462,18 @@ refreshRailCatalog();
       state: window.__getDeckViewModelState?.() || {},
       canvasSnapshots: collectEditablePptxCanvasSnapshots(),
     };
+  }
+
+  function startServerExportDownload(downloadUrl, filename){
+    if(!downloadUrl) return false;
+    try {
+      const url = new URL(downloadUrl, location.href);
+      if(url.origin !== location.origin) return false;
+      location.assign(url.href);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function collectEditablePptxCanvasSnapshots(){
