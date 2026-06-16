@@ -167,7 +167,13 @@ async function collectEditableDeck(page, options = {}) {
     await installBrowserCollector(page);
     const slides = [];
     const warnings = [];
-    for (let i = 0; i < count; i += 1) {
+    const slideIndexes = Array.isArray(options.slideIndexes)
+      ? options.slideIndexes
+        .map(index => Number(index))
+        .filter(index => Number.isInteger(index) && index >= 0 && index < count)
+      : null;
+    const indexes = slideIndexes?.length ? slideIndexes : Array.from({ length: count }, (_, index) => index);
+    for (const i of indexes) {
       await page.evaluate(async index => {
         window.go?.(index, { animate: false, force: true });
         const slides = window.__getVisibleSlides?.() || [...document.querySelectorAll('#deck > .slide:not([hidden])')];
@@ -176,8 +182,13 @@ async function collectEditableDeck(page, options = {}) {
         window.__restoreEffectIframes?.(slides[index]);
         window.__layoutDeck?.();
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await new Promise(resolve => setTimeout(resolve, 120));
       }, i);
-      slides.push(await page.evaluate(index => window.__collectEditablePptxSlide(index), i + 1));
+      const slideData = await page.evaluate(index => window.__collectEditablePptxSlide(index), i + 1);
+      await resolveElementScreenshots(page, slideData.root, warnings, {
+        freeze: options.freezeElementScreenshots === true,
+      });
+      slides.push(slideData);
     }
 
     return { slides, warnings };
@@ -196,6 +207,45 @@ async function collectEditableDeck(page, options = {}) {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }).catch(() => {});
   }
+}
+
+async function resolveElementScreenshots(page, root, warnings, options = {}) {
+  const targets = [];
+  walkCapturedNodes(root, node => {
+    if (node.elementScreenshot && node.exportId) targets.push(node);
+  });
+  for (const node of targets) {
+    try {
+      const bytes = await page.locator(`[data-editable-pptx-export-id="${node.exportId}"]`).screenshot({ type: 'png' });
+      node.imageData = `data:image/png;base64,${bytes.toString('base64')}`;
+      if (!options.freeze) continue;
+      await page.evaluate(({ exportId, data }) => {
+        const el = document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
+        if (!el) return;
+        el.replaceChildren();
+        const img = document.createElement('img');
+        img.src = data;
+        img.setAttribute('data-editable-pptx-frozen-layer', '');
+        Object.assign(img.style, {
+          position: 'absolute',
+          inset: '0',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          pointerEvents: 'none',
+        });
+        el.appendChild(img);
+      }, { exportId: node.exportId, data: node.imageData });
+    } catch {
+      warnings.push({ slide: node.slideIndex, type: 'element-screenshot-failed', tag: node.tag, kind: node.imageKind });
+    }
+  }
+}
+
+function walkCapturedNodes(node, visit) {
+  if (!node) return;
+  visit(node);
+  for (const child of node.children || []) walkCapturedNodes(child, visit);
 }
 
 async function installBrowserCollector(page) {
@@ -300,8 +350,9 @@ function renderBox(slide, node, slideRect, warnings, totals) {
   const shadow = parseBoxShadow(style.boxShadow);
   const hasFill = fill && fill.alpha > 0.01;
   const isLargeGradient = fill?.gradient && c.w > PPT_W * 0.72 && c.h > PPT_H * 0.72;
-  const fillAlpha = fill?.gradient && !isLargeGradient ? Math.min(fill.alpha, 0.16) : fill?.alpha;
-  const shapeName = fill?.gradient && !isLargeGradient && radius > Math.min(c.w, c.h) * 0.2
+  const isDecorativeGradient = fill?.gradient && !isLargeGradient && !(node.children || []).length;
+  const fillAlpha = isDecorativeGradient ? Math.min(fill.alpha, 0.08) : fill?.alpha;
+  const shapeName = isDecorativeGradient && radius > Math.min(c.w, c.h) * 0.2
     ? 'ellipse'
     : radius > 0.02 ? 'roundRect' : 'rect';
 
@@ -355,6 +406,7 @@ function renderText(slide, node, slideRect, warnings, totals) {
   const style = node.style || {};
   const color = parseCssColor(style.color) || { color: '111111', alpha: 1 };
   const fontSizePx = Math.max(4, Math.min(140, parseFloat(style.fontSize || '16') || 16));
+  const fontFace = firstFont(style.fontFamily);
   const weight = String(style.fontWeight || '');
   const singleLine = node.singleLine && !/[\r\n]/.test(value);
   const options = {
@@ -365,8 +417,8 @@ function renderText(slide, node, slideRect, warnings, totals) {
     breakLine: false,
     fit: singleLine ? 'resize' : 'shrink',
     wrap: singleLine ? false : !isNoWrap(style.whiteSpace),
-    fontFace: firstFont(style.fontFamily),
-    fontSize: fontSizePx * PX_TO_PT,
+    fontFace,
+    fontSize: pptFontSize(fontSizePx, fontFace),
     color: color.color,
     bold: weight === 'bold' || Number.parseInt(weight, 10) >= 600,
     italic: style.fontStyle === 'italic',
@@ -376,7 +428,7 @@ function renderText(slide, node, slideRect, warnings, totals) {
     valign: normalizeValign(style.verticalAlign),
     rotate: rotateFromTransform(style.transform) || 0,
     transparency: combinedTransparency(color.alpha, style.opacity),
-    charSpace: letterSpacing(style.letterSpacing),
+    charSpacing: letterSpacing(style.letterSpacing),
   };
   if (!singleLine) options.w = Math.max(0.08, c.w + 0.04);
   try {
@@ -459,6 +511,16 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
     children: [],
   };
   if (tag === 'a' && el.href && !String(el.getAttribute('href') || '').startsWith('#')) node.href = el.href;
+
+  if (el.classList?.contains('bt-unicorn-frame')) {
+    const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
+    el.setAttribute('data-editable-pptx-export-id', exportId);
+    node.exportId = exportId;
+    node.elementScreenshot = true;
+    node.imageKind = 'unicorn-background';
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'unicorn-background', count: 1 });
+    return node;
+  }
 
   if (tag === 'img') {
     node.imageData = await elementImageData(el, el.currentSrc || el.src || el.getAttribute('src') || '');
@@ -833,7 +895,23 @@ function letterSpacing(value) {
 }
 
 function firstFont(value) {
-  return String(value || 'Arial').split(',')[0].replace(/^["']|["']$/g, '').trim() || 'Arial';
+  const families = String(value || 'Arial')
+    .split(',')
+    .map(item => item.replace(/^["']|["']$/g, '').trim())
+    .filter(Boolean);
+  for (const family of families) {
+    if (/space mono|monospace/i.test(family)) return 'Menlo';
+    if (/noto sans sc|pingfang|system-ui|-apple-system|blinkmacsystemfont|sans-serif/i.test(family)) return 'PingFang SC';
+    if (/noto serif sc|songti|serif/i.test(family)) return 'Songti SC';
+  }
+  return families[0] || 'Arial';
+}
+
+function pptFontSize(px, fontFace) {
+  const scale = /PingFang SC/i.test(fontFace) ? 0.60
+    : /Menlo/i.test(fontFace) ? 0.66
+      : PX_TO_PT;
+  return px * scale;
 }
 
 function normalizeAlign(value) {

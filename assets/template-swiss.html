@@ -3414,7 +3414,7 @@ refreshRailCatalog();
       window.__syncDeckViewModelFromDom?.();
       throwIfDeckExportCancelled(exportUi);
 
-      const slides = window.__getVisibleSlides?.() || [...document.querySelectorAll('#deck > .slide:not([hidden])')];
+      const slides = await materializeExportSlides(exportUi, 'PPTX');
       updateDeckExport(exportUi, 0, slides.length || 1, '正在生成可编辑 PPTX...');
       const response = await fetch('/api/export-editable-pptx', {
         method: 'POST',

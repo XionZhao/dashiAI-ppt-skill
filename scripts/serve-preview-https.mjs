@@ -180,7 +180,7 @@ async function handleEditablePptxExport(req, res) {
         snapshot: payload.snapshot || null,
       });
     } finally {
-      await browser.close().catch(() => {});
+      await closeBrowser(browser);
     }
 
     res.writeHead(200, {
@@ -252,6 +252,18 @@ function getChromePath() {
   const chrome = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   if (!existsSync(chrome)) throw new Error(`Chrome executable not found: ${chrome}`);
   return chrome;
+}
+
+async function closeBrowser(browser) {
+  if (!browser) return;
+  const close = browser.close().catch(() => {});
+  const result = await Promise.race([
+    close.then(() => 'closed'),
+    new Promise(resolve => setTimeout(() => resolve('timeout'), 5000)),
+  ]);
+  if (result === 'timeout') {
+    try { browser.process?.()?.kill?.('SIGKILL'); } catch {}
+  }
 }
 
 function getLocalHostname() {
