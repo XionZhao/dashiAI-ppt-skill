@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync, createReadStream, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync, createReadStream } from 'node:fs';
 import https from 'node:https';
 import os from 'node:os';
 import path from 'node:path';
@@ -156,16 +155,21 @@ function contentType(file) {
 
 async function handleEditablePptxExport(req, res) {
   try {
+    if (!isAllowedExportRequest(req)) {
+      res.writeHead(403, { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' });
+      res.end(JSON.stringify({ error: 'Forbidden export origin' }));
+      return;
+    }
     const payload = await readJsonBody(req);
     const [{ chromium }, { exportEditablePptxFromUrl }] = await Promise.all([
       import('playwright-core'),
       import('../src/export-pptx/editable.mjs'),
     ]);
     const browser = await chromium.launch({ headless: true, executablePath: getChromePath() });
-    const exportId = createHash('sha1').update(`${Date.now()}:${Math.random()}`).digest('hex').slice(0, 12);
-    const outDir = path.join(ROOT, 'output/editable-pptx-server');
-    const outFile = path.join(outDir, `${exportId}.pptx`);
-    const reportFile = path.join(outDir, `${exportId}.json`);
+    const outDir = path.join(ROOT, 'output/exports');
+    const baseName = `${timestampForFile()}-${safeDownloadName(payload.fileName || 'presentation')}`;
+    const outFile = path.join(outDir, `${baseName}.pptx`);
+    const reportFile = path.join(outDir, `${baseName}.json`);
     try {
       const sourcePath = typeof payload.sourcePath === 'string' && payload.sourcePath.startsWith('/') ? payload.sourcePath : '/';
       const url = `https://localhost:${PORT}${sourcePath}`;
@@ -179,23 +183,33 @@ async function handleEditablePptxExport(req, res) {
       await browser.close().catch(() => {});
     }
 
-    const filename = safeDownloadName(payload.fileName || 'presentation') + '.pptx';
     res.writeHead(200, {
-      'content-type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'content-disposition': `attachment; filename="presentation.pptx"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      'content-type': 'application/json;charset=utf-8',
       'cache-control': 'no-store',
     });
-    createReadStream(outFile)
-      .on('close', () => {
-        rmSync(outFile, { force: true });
-        rmSync(reportFile, { force: true });
-      })
-      .pipe(res);
+    res.end(JSON.stringify({
+      ok: true,
+      filePath: outFile,
+      reportPath: reportFile,
+      relativePath: path.relative(ROOT, outFile),
+    }));
   } catch (error) {
     console.error('[editable pptx export]', error);
     res.writeHead(500, { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' });
     res.end(JSON.stringify({ error: error.message || 'Editable PPTX export failed' }));
   }
+}
+
+function isAllowedExportRequest(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  const allowed = new Set([
+    `https://localhost:${PORT}`,
+    `https://127.0.0.1:${PORT}`,
+    `https://${LOCAL_HOSTNAME}.local:${PORT}`,
+    ...LAN_IPS.map(ip => `https://${ip}:${PORT}`),
+  ]);
+  return allowed.has(origin);
 }
 
 function readJsonBody(req) {
@@ -228,6 +242,10 @@ function safeDownloadName(value) {
     .replace(/\s+/g, '-')
     .trim()
     .slice(0, 80) || 'presentation';
+}
+
+function timestampForFile() {
+  return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, '');
 }
 
 function getChromePath() {

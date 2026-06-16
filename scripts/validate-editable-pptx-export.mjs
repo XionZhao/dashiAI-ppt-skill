@@ -45,10 +45,12 @@ if (legacyRed) {
 async function runUiExportValidation() {
   if (!cliUrl) throw new Error('Usage: node scripts/validate-editable-pptx-export.mjs --ui-export --url <preview-url>');
   const url = cliUrl;
-  const pptxFile = path.join(OUT_DIR, 'ui-button-export.pptx');
+  const staticFailures = inspectUiExportPath();
   const browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
   let page;
   let mutation = null;
+  let expectedSlides = null;
+  let pptxFile = null;
   try {
     const context = await browser.newContext({
       acceptDownloads: true,
@@ -60,27 +62,33 @@ async function runUiExportValidation() {
     page.on('dialog', dialog => dialog.dismiss().catch(() => {}));
     await page.goto(`${url}${url.includes('?') ? '&' : '?'}ui_export=${Date.now()}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    expectedSlides = await page.evaluate(() => (window.__getVisibleSlides?.() || [...document.querySelectorAll('#deck > .slide:not([hidden])')]).length);
     mutation = await applyUserEdits(page);
-    const downloadPromise = page.waitForEvent('download', { timeout: 180000 });
     await page.click('#preview-export-main');
     await page.click('#preview-export-pptx');
-    const download = await downloadPromise;
-    await download.saveAs(pptxFile);
+    await page.waitForFunction(() => window.__lastPptxExportResult?.filePath, null, { timeout: 180000 });
+    const result = await page.evaluate(() => window.__lastPptxExportResult);
+    pptxFile = result.filePath;
   } finally {
     await closePage(page);
     await browser.close().catch(() => {});
   }
 
+  if (!pptxFile) throw new Error('UI export did not return a saved PPTX path.');
   const pptx = inspectPptx(pptxFile);
-  const failures = validateEditablePptxInspection(pptx, {
-    expectSlides: null,
-    mutation,
-    requireEditedText: true,
-    requireReplacementImage: true,
-  });
+  const failures = [
+    ...staticFailures,
+    ...validateEditablePptxInspection(pptx, {
+      expectSlides: expectedSlides,
+      mutation,
+      requireEditedText: true,
+      requireReplacementImage: true,
+    }),
+  ];
   const result = {
     mode: 'ui-export',
     url,
+    expectedSlides,
     passed: failures.length === 0,
     pptx: summarizeInspection(pptx),
     failures,
@@ -90,6 +98,21 @@ async function runUiExportValidation() {
     process.exit(1);
   }
   console.log(JSON.stringify(result, null, 2));
+}
+
+function inspectUiExportPath() {
+  const html = readFileSync(TEMPLATE, 'utf8');
+  const start = html.indexOf('window.__exportDeckPptx = async function');
+  const end = html.indexOf('function buildEditablePptxExportSnapshot', start);
+  const source = start >= 0 && end > start ? html.slice(start, end) : '';
+  const failures = [];
+  if (/response\.blob\s*\(/.test(source) || /downloadBlob\s*\(/.test(source)) {
+    failures.push('UI PPTX export must not use response.blob() + downloadBlob() as the primary path.');
+  }
+  if (!/\/api\/export-editable-pptx/.test(source)) {
+    failures.push('UI PPTX export must call the editable server export endpoint.');
+  }
+  return failures;
 }
 
 async function runLegacyRedValidation() {
@@ -219,8 +242,10 @@ function validateEditablePptxInspection(pptx, { expectSlides, mutation, requireE
   const failures = [];
   if (expectSlides !== null && expectSlides !== undefined && pptx.slideCount !== expectSlides) failures.push(`PPTX has ${pptx.slideCount} slide(s), expected ${expectSlides}.`);
   if (pptx.textCount <= 0) failures.push('PPTX slide XML has no <a:t> editable text nodes.');
+  if (expectSlides && pptx.textCount < expectSlides) failures.push(`PPTX has too few editable text nodes: ${pptx.textCount} for ${expectSlides} slide(s).`);
   if (requireEditedText && !pptx.allText.includes(EDITED_TEXT)) failures.push('User-edited text sentinel is missing from PPTX text nodes.');
   if (pptx.shapeCount <= 0) failures.push('PPTX slide XML has no shape objects.');
+  if (expectSlides && pptx.shapeCount < expectSlides) failures.push(`PPTX has too few shape objects: ${pptx.shapeCount} for ${expectSlides} slide(s).`);
   if (pptx.pictureCount <= 0) failures.push('PPTX slide XML has no image objects.');
   if (requireReplacementImage) {
     if (!pptx.mediaHashes.includes(REPLACEMENT_IMAGE_HASH)) failures.push('Replacement image hash is missing from ppt/media/*.');

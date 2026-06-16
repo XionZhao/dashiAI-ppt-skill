@@ -3432,10 +3432,12 @@ refreshRailCatalog();
         try { detail = (await response.json())?.error || ''; } catch {}
         throw new Error(detail || `Editable PPTX export endpoint failed (${response.status})`);
       }
-      updateDeckExport(exportUi, slides.length, slides.length, '正在下载 PPTX...');
-      const pptxBlob = await response.blob();
+      const result = await response.json();
+      if(!result?.filePath) throw new Error('Editable PPTX export did not return a saved file path.');
+      window.__lastPptxExportResult = result;
       throwIfDeckExportCancelled(exportUi);
-      await downloadBlob(pptxBlob, `${getDeckFileName()}.pptx`);
+      updateDeckExport(exportUi, slides.length, slides.length, `PPTX 已保存：${result.relativePath || result.filePath}`);
+      alert(`PPTX 已保存到：\n${result.filePath}`);
     } catch (error) {
       if(isDeckExportCancelledError(error)) return;
       console.error('[export pptx]', error);
