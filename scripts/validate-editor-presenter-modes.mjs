@@ -49,6 +49,7 @@ try {
   const rail = await runRailValidation(page);
   const railPerformance = await runRailPerformanceValidation(page);
   const railActiveSync = await runRailActiveSyncValidation(page);
+  const pageNavigationLatency = await runPageNavigationLatencyValidation(page);
   const editableTextCaret = await runEditableTextCaretValidation(page);
   const railThumbFit = await runRailThumbFitValidation(page);
   const themeSwitchRail = await runThemeSwitchRailValidation(page);
@@ -66,6 +67,7 @@ try {
     rail,
     railPerformance,
     railActiveSync,
+    pageNavigationLatency,
     editableTextCaret,
     railThumbFit,
     themeSwitchRail,
@@ -346,25 +348,263 @@ async function readRailActiveSyncState(page) {
   });
 }
 
+async function runPageNavigationLatencyValidation(page) {
+  const edit = {};
+  await ensureEditMode(page);
+  await page.evaluate(() => {
+    window.__setActiveThemePack?.('theme01', { navigate: false });
+    window.__setPageTransition?.('liquidMorph');
+    window.go?.(0, { animate: false, force: true });
+  });
+  await settle(page);
+  edit.arrowDown = await runNavigationActionWindow(page, async () => {
+    await page.keyboard.press('ArrowDown');
+  });
+  await page.evaluate(() => {
+    window.__setPageTransition?.('liquidMorph');
+    window.go?.(1, { animate: false, force: true });
+  });
+  await settle(page);
+  edit.arrowUp = await runNavigationActionWindow(page, async () => {
+    await page.keyboard.press('ArrowUp');
+  });
+  await page.evaluate(() => {
+    window.__setPageTransition?.('none');
+    window.go?.(0, { animate: false, force: true });
+  });
+  await settle(page);
+  edit.railClick = await runNavigationActionWindow(page, async () => {
+    const locator = page.locator('[data-rail-card="true"][data-index="3"],[data-slide-rail-card="true"][data-index="3"]').first();
+    await locator.click();
+  });
+
+  const present = {};
+  await enterPresentAtIndex(page, 0);
+  present.arrowRight = await runNavigationActionWindow(page, async () => {
+    await page.keyboard.press('ArrowRight');
+  });
+  await exitPresentForValidation(page);
+  await enterPresentAtIndex(page, 1);
+  present.arrowLeft = await runNavigationActionWindow(page, async () => {
+    await page.keyboard.press('ArrowLeft');
+  });
+  await exitPresentForValidation(page);
+  await enterPresentAtIndex(page, 0);
+  present.backgroundLeft = await runNavigationActionWindow(page, async () => {
+    const point = await getDeckCenterPoint(page);
+    await page.mouse.click(point.x, point.y, { button: 'left' });
+  });
+  await exitPresentForValidation(page);
+  await enterPresentAtIndex(page, 1);
+  present.backgroundRight = await runNavigationActionWindow(page, async () => {
+    const point = await getDeckCenterPoint(page);
+    await page.mouse.click(point.x, point.y, { button: 'right' });
+  });
+  await exitPresentForValidation(page);
+  present.slotInnerLeft = await runPresentTargetNavigationLatency(page, 'slotInner', 'left');
+  present.slotInnerRight = await runPresentTargetNavigationLatency(page, 'slotInner', 'right');
+  present.mediaInnerLeft = await runPresentTargetNavigationLatency(page, 'mediaInner', 'left');
+  present.mediaInnerRight = await runPresentTargetNavigationLatency(page, 'mediaInner', 'right');
+  await exitPresentForValidation(page);
+
+  return { edit, present };
+}
+
+async function enterPresentAtIndex(page, index) {
+  await ensureEditMode(page);
+  await page.evaluate((targetIndex) => {
+    window.__setActiveThemePack?.('theme01', { navigate: false });
+    window.__setPageTransition?.('none');
+    window.go?.(targetIndex, { animate: false, force: true });
+  }, index);
+  await settle(page, 220);
+  const button = page.locator('#preview-present-btn,[data-present-toggle="true"]').first();
+  await button.click();
+  await settle(page, 320);
+}
+
+async function runPresentTargetNavigationLatency(page, kind, button) {
+  await exitPresentForValidation(page);
+  await ensureEditMode(page);
+  await preparePresentClickTarget(page, kind, button === 'right' ? 1 : 0);
+  const presentButton = page.locator('#preview-present-btn,[data-present-toggle="true"]').first();
+  await presentButton.click();
+  await settle(page, 320);
+  const targetBox = await getCurrentPresentTargetBox(page, kind);
+  if (!targetBox?.found) return { found: false, kind, button };
+  const result = await runNavigationActionWindow(page, async () => {
+    await page.mouse.click(targetBox.x, targetBox.y, { button });
+  });
+  await exitPresentForValidation(page);
+  return { ...result, found: true, kind, button, consumedEventsProbe: targetBox.consumedEventsProbe || false };
+}
+
+async function getDeckCenterPoint(page) {
+  return page.evaluate(() => {
+    const rect = document.querySelector('#deck-viewport')?.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  });
+}
+
+async function runNavigationActionWindow(page, action) {
+  const startState = await page.evaluate(() => {
+    window.__resetOverviewPerfMarks?.();
+    window.__navLatencyLongTasks = [];
+    window.__navLatencyFrameGaps = [];
+    window.__navLatencyObserver?.disconnect?.();
+    window.__navLatencyProbeHandler && removeEventListener('swiss-slide-change', window.__navLatencyProbeHandler);
+    const active = document.querySelector('#deck > .slide.active');
+    const startAt = performance.now();
+    const probe = {
+      startAt,
+      startIndex: window.__currentSlideIndex || 0,
+      startActiveId: active?.dataset.vmSlideId || active?.dataset.slideId || '',
+      indexChangedAt: null,
+      activeChangedAt: null,
+      transitionStartedAt: null,
+      transitionMode: '',
+    };
+    window.__navLatencyProbe = probe;
+    window.__navLatencyOriginalTransition = window.__playPageTransition;
+    if(typeof window.__playPageTransition === 'function'){
+      window.__playPageTransition = function patchedPageTransition(mode, currentSlide, nextSlide, direction, commit){
+        if(probe.transitionStartedAt === null){
+          probe.transitionStartedAt = performance.now();
+          probe.transitionMode = mode || '';
+        }
+        return window.__navLatencyOriginalTransition.apply(this, arguments);
+      };
+    }
+    window.__navLatencyProbeHandler = () => {
+      const nextActive = document.querySelector('#deck > .slide.active');
+      if(probe.indexChangedAt === null && (window.__currentSlideIndex || 0) !== probe.startIndex) probe.indexChangedAt = performance.now();
+      if(probe.activeChangedAt === null && (nextActive?.dataset.vmSlideId || nextActive?.dataset.slideId || '') !== probe.startActiveId) probe.activeChangedAt = performance.now();
+    };
+    addEventListener('swiss-slide-change', window.__navLatencyProbeHandler);
+    try {
+      window.__navLatencyObserver = new PerformanceObserver(list => {
+        window.__navLatencyLongTasks.push(...list.getEntries().map(entry => ({
+          startTime: entry.startTime,
+          duration: entry.duration,
+        })));
+      });
+      window.__navLatencyObserver.observe({ entryTypes: ['longtask'] });
+    } catch {}
+    let lastFrame = performance.now();
+    const tick = now => {
+      window.__navLatencyFrameGaps.push(now - lastFrame);
+      lastFrame = now;
+      if(now - startAt < 520) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    return { startAt, startIndex: probe.startIndex };
+  });
+  const actionStart = Date.now();
+  await action();
+  const actionElapsedMs = Date.now() - actionStart;
+  await page.waitForFunction(startIndex => (window.__currentSlideIndex || 0) !== startIndex, startState.startIndex, { timeout: 500 }).catch(() => {});
+  await settle(page, 540);
+  return page.evaluate((actionElapsedMs) => {
+    const probe = window.__navLatencyProbe || {};
+    const start = Number(probe.startAt || 0);
+    const perf = window.__getRailPerfState?.() || window.__getOverviewPerfState?.() || {};
+    const marks = perf.marks || {};
+    const stages = (marks.stages || []).filter(stage => Number(stage.startAt || 0) >= start);
+    const captures = (marks.captures || []).filter(capture => Number(capture.startedAt || 0) >= start);
+    const layoutReads = (marks.layoutReads || []).filter(read => Number(read.at || 0) >= start);
+    const longTasks = (window.__navLatencyLongTasks || []).filter(task => Number(task.startTime || 0) >= start);
+    const frameGaps = (window.__navLatencyFrameGaps || []).filter(gap => Number.isFinite(gap));
+    window.__navLatencyObserver?.disconnect?.();
+    if(window.__navLatencyProbeHandler) removeEventListener('swiss-slide-change', window.__navLatencyProbeHandler);
+    if(window.__navLatencyOriginalTransition){
+      window.__playPageTransition = window.__navLatencyOriginalTransition;
+      window.__navLatencyOriginalTransition = null;
+    }
+    return {
+      actionElapsedMs,
+      startIndex: probe.startIndex,
+      endIndex: window.__currentSlideIndex || 0,
+      indexChangeMs: probe.indexChangedAt === null ? null : Number((probe.indexChangedAt - start).toFixed(1)),
+      activeChangeMs: probe.activeChangedAt === null ? null : Number((probe.activeChangedAt - start).toFixed(1)),
+      transitionStartMs: probe.transitionStartedAt === null ? null : Number((probe.transitionStartedAt - start).toFixed(1)),
+      transitionMode: probe.transitionMode || '',
+      longTasksOver50: longTasks.filter(task => Number(task.duration || 0) > 50).length,
+      maxLongTaskMs: Number(longTasks.reduce((max, task) => Math.max(max, Number(task.duration || 0)), 0).toFixed(1)),
+      maxFrameGapMs: Number(frameGaps.reduce((max, gap) => Math.max(max, Number(gap || 0)), 0).toFixed(1)),
+      captureStarts: captures.length,
+      scheduled: Boolean(perf.scheduled),
+      queueLength: perf.queueLength ?? null,
+      pauseRemainingMs: perf.pauseRemainingMs ?? 0,
+      thumbnailStages: stages
+        .filter(stage => /queue-nearby-overview-thumbs|fit-overview-thumbnails|observe-overview-thumbnails|dom-preview-thumbnail|overview-thumb-task/.test(stage.type || ''))
+        .map(stage => stage.type),
+      layoutReadCount: layoutReads.reduce((sum, read) => sum + Number(read.count || 0), 0),
+    };
+  }, actionElapsedMs);
+}
+
 async function runEditableTextCaretValidation(page) {
   await ensureEditMode(page);
   await page.evaluate(() => {
     window.__setActiveThemePack?.('theme01', { navigate: false });
     window.go?.(0, { animate: false, force: true });
+    window.__queueNearbyOverviewThumbs?.();
+    window.__fitOverviewThumbnails?.();
   });
+  await page.waitForFunction(() => {
+    const active = document.querySelector('#deck > .slide.active');
+    const slideId = active?.dataset.vmSlideId || active?.dataset.slideId || '';
+    const card = [...document.querySelectorAll('[data-rail-card="true"],[data-slide-rail-card="true"]')]
+      .find(item => item.dataset.slideId === slideId || item.dataset.slideKey === slideId);
+    const thumb = card?.querySelector('[data-overview-thumb="true"],[data-rail-thumb="true"]');
+    return thumb?.dataset.overviewRendered === 'true' || thumb?.dataset.railRendered === 'true';
+  }, undefined, { timeout: 9000 }).catch(() => {});
   await settle(page);
   return page.evaluate(async () => {
     const active = document.querySelector('#deck > .slide.active');
     const editable = active?.querySelector('[data-editable-id]');
     if(!editable) return { found: false, reason: 'no editable text on active slide' };
+    const slideId = active?.dataset.vmSlideId || active?.dataset.slideId || '';
+    const findActiveThumb = () => {
+      const card = [...document.querySelectorAll('[data-rail-card="true"],[data-slide-rail-card="true"]')]
+        .find(item => item.dataset.slideId === slideId || item.dataset.slideKey === slideId);
+      const thumb = card?.querySelector('[data-overview-thumb="true"],[data-rail-thumb="true"]');
+      return { card, thumb };
+    };
+    const readThumbState = () => {
+      const { thumb } = findActiveThumb();
+      const perf = window.__getOverviewPerfState?.() || {};
+      return {
+        revision: active?.dataset.overviewThumbRevision || '0',
+        rendered: thumb?.dataset.overviewRendered === 'true' || thumb?.dataset.railRendered === 'true',
+        queued: thumb?.dataset.overviewQueued === 'true' || thumb?.dataset.railQueued === 'true',
+        placeholderCount: thumb?.querySelectorAll?.('[data-overview-placeholder="true"]').length || 0,
+        cacheKeys: (perf.cacheKeys || []).filter(key => key.includes(`|${slideId}|`)),
+        queuedKeys: (perf.queuedKeys || []).filter(key => key === slideId),
+      };
+    };
     editable.dataset.caretProbeId = `editable-caret-${Date.now()}`;
     const beforeNodeId = editable.dataset.caretProbeId;
     const beforeHtml = editable.innerHTML;
     const beforeText = editable.textContent || '';
     const baseText = beforeText.trim().length >= 6 ? beforeText : 'abcdef';
     editable.textContent = baseText;
-    window.__flushEditableTextState?.(active);
     editable.setAttribute('contenteditable', 'true');
+    const dirtyCalls = [];
+    const originalDirty = window.__markOverviewThumbDirty;
+    const originalRailDirty = window.__markRailThumbDirty;
+    if(typeof originalDirty === 'function'){
+      window.__markOverviewThumbDirty = function patchedDirty(slide){
+        dirtyCalls.push({
+          slideId: slide?.dataset.vmSlideId || slide?.dataset.slideId || '',
+          phase: document.activeElement === editable || editable.contains(document.activeElement) ? 'input' : 'other',
+          at: performance.now(),
+        });
+        return originalDirty.apply(this, arguments);
+      };
+      window.__markRailThumbDirty = window.__markOverviewThumbDirty;
+    }
+    const beforeThumb = readThumbState();
     editable.focus();
     const insertAt = Math.max(1, Math.min(3, baseText.length - 1));
     const textNode = editable.firstChild;
@@ -375,39 +615,58 @@ async function runEditableTextCaretValidation(page) {
     selection.removeAllRanges();
     selection.addRange(range);
     const beforeInputElement = document.activeElement;
-    document.execCommand?.('insertText', false, 'Z');
-    if((editable.textContent || '') === baseText){
-      textNode.insertData(insertAt, 'Z');
-      const fallbackRange = document.createRange();
-      fallbackRange.setStart(textNode, insertAt + 1);
-      fallbackRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(fallbackRange);
-      editable.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'Z' }));
-    }
+    const insertText = 'XYZ';
+    [...insertText].forEach((char, offset) => {
+      const before = editable.textContent || '';
+      document.execCommand?.('insertText', false, char);
+      if((editable.textContent || '') === before){
+        editable.firstChild.insertData(insertAt + offset, char);
+        const fallbackRange = document.createRange();
+        fallbackRange.setStart(editable.firstChild, insertAt + offset + 1);
+        fallbackRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(fallbackRange);
+        editable.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: char }));
+      }
+    });
+    const inputDirtyCallCount = dirtyCalls.length;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const inputThumb = readThumbState();
     const current = active.querySelector(`[data-caret-probe-id="${beforeNodeId}"]`);
     const afterInputElement = document.activeElement;
     const afterSelection = getSelection();
     const afterRange = afterSelection?.rangeCount ? afterSelection.getRangeAt(0) : null;
     const afterText = current?.textContent || '';
-    current?.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'Z' }));
-    current?.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
-    window.__flushEditableTextState?.(active);
+    current?.blur();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const afterBlurDirtyCallCount = dirtyCalls.length - inputDirtyCallCount;
+    const afterBlurThumb = readThumbState();
     const textState = window.__deckViewModel?.getState?.().text || {};
     const editableId = current?.dataset.editableId || '';
+    if(typeof originalDirty === 'function'){
+      window.__markOverviewThumbDirty = originalDirty;
+      window.__markRailThumbDirty = originalRailDirty || originalDirty;
+    }
     return {
       found: true,
       editableId,
+      slideId,
       beforeHtml,
       beforeText,
       afterText,
-      expectedCaretOffset: insertAt + 1,
+      insertedText: insertText,
+      expectedCaretOffset: insertAt + insertText.length,
       afterCaretOffset: afterRange && afterRange.startContainer === current?.firstChild ? afterRange.startOffset : null,
       sameElementDuringInput: beforeInputElement === afterInputElement && current?.dataset.caretProbeId === beforeNodeId,
+      activeInsideEditableDuringInput: afterInputElement === current || current?.contains(afterInputElement),
       textStateHasEditableKey: Object.prototype.hasOwnProperty.call(textState, editableId),
       persistedHtml: textState[editableId] || '',
+      dirtyCalls,
+      inputDirtyCallCount,
+      afterBlurDirtyCallCount,
+      beforeThumb,
+      inputThumb,
+      afterBlurThumb,
     };
   });
 }
@@ -675,8 +934,8 @@ async function runPresentClickTargetValidation(page, kind) {
   };
 }
 
-async function preparePresentClickTarget(page, kind) {
-  const descriptor = await page.evaluate((kind) => {
+async function preparePresentClickTarget(page, kind, minIndex = 0) {
+  const descriptor = await page.evaluate(({ kind, minIndex }) => {
     const selectorMap = {
       text: '[data-editable-id]',
       slot: '[data-dashi-host-image-slot],image-slot,.gxn-slot,.pulse-imgframe,.acl-slot,.kx-imgslot,.dslot,.bt-image-slot',
@@ -692,7 +951,7 @@ async function preparePresentClickTarget(page, kind) {
     for(const themePack of themePacks){
       window.__setActiveThemePack?.(themePack, { navigate: false });
       const visibleSlides = window.__getVisibleSlides?.() || [];
-      for(let index = 0; index < visibleSlides.length; index += 1){
+      for(let index = Math.max(0, minIndex || 0); index < visibleSlides.length; index += 1){
         const slide = visibleSlides[index];
         const target = kind === 'background' ? slide : slide.querySelector(selector);
         if(!target) continue;
@@ -707,7 +966,7 @@ async function preparePresentClickTarget(page, kind) {
       }
     }
     return { found: false, kind };
-  }, kind);
+  }, { kind, minIndex });
   await settle(page, 320);
   return descriptor;
 }
@@ -1150,15 +1409,56 @@ function validateResult(result) {
     if ((name === 'afterDirectGo' || name === 'afterDrag') && !state?.activeVisible) failures.push(`Rail active sync ${name} should keep the active card visible.`);
   }
 
+  for (const [name, perf] of Object.entries(result.pageNavigationLatency?.edit || {})) {
+    const shouldAnimate = name === 'arrowDown' || name === 'arrowUp';
+    if (shouldAnimate) {
+      if (perf.transitionStartMs === null || perf.transitionStartMs > 80) failures.push(`Edit navigation ${name} should start page transition within 80ms: ${JSON.stringify(perf)}`);
+      if (perf.transitionMode !== 'liquidMorph') failures.push(`Edit navigation ${name} should use the configured page transition: ${JSON.stringify(perf)}`);
+    } else {
+      if (perf.indexChangeMs === null || perf.indexChangeMs > 80) failures.push(`Edit navigation ${name} changed index too slowly: ${JSON.stringify(perf)}`);
+      if (perf.activeChangeMs === null || perf.activeChangeMs > 80) failures.push(`Edit navigation ${name} changed active slide too slowly: ${JSON.stringify(perf)}`);
+    }
+    if (perf.longTasksOver50 > 0 || perf.maxLongTaskMs > 50) failures.push(`Edit navigation ${name} caused a long task: ${JSON.stringify(perf)}`);
+    if (perf.maxFrameGapMs > 100) failures.push(`Edit navigation ${name} caused a large frame gap: ${JSON.stringify(perf)}`);
+    if (perf.captureStarts > 0 || perf.scheduled || perf.thumbnailStages?.length || perf.queueLength > 0) {
+      failures.push(`Edit navigation ${name} should not trigger thumbnail refresh/prewarm work: ${JSON.stringify(perf)}`);
+    }
+  }
+  for (const [name, perf] of Object.entries(result.pageNavigationLatency?.present || {})) {
+    if (perf?.found === false) failures.push(`Present navigation ${name} did not find its click target.`);
+    if (perf.indexChangeMs === null || perf.indexChangeMs > 120) failures.push(`Present navigation ${name} changed index too slowly: ${JSON.stringify(perf)}`);
+    if (perf.activeChangeMs === null || perf.activeChangeMs > 120) failures.push(`Present navigation ${name} changed active slide too slowly: ${JSON.stringify(perf)}`);
+    if (perf.longTasksOver50 > 0 || perf.maxLongTaskMs > 50) failures.push(`Present navigation ${name} caused a long task: ${JSON.stringify(perf)}`);
+    if (perf.maxFrameGapMs > 120) failures.push(`Present navigation ${name} caused a large frame gap: ${JSON.stringify(perf)}`);
+  }
+
   if (!result.editableTextCaret?.found) {
     failures.push(`Editable text caret validation did not exercise an in-slide text target: ${result.editableTextCaret?.reason || 'unknown'}.`);
   } else {
     if (!result.editableTextCaret.sameElementDuringInput) failures.push('Editable text node was replaced or lost focus during input.');
+    if (!result.editableTextCaret.activeInsideEditableDuringInput) failures.push('Editable text lost active focus during input.');
     if (result.editableTextCaret.afterCaretOffset !== result.editableTextCaret.expectedCaretOffset) {
       failures.push(`Editable text caret moved during input: ${JSON.stringify(result.editableTextCaret)}`);
     }
-    if (!result.editableTextCaret.afterText?.includes('Z')) failures.push('Editable text did not keep the inserted value.');
-    if (!result.editableTextCaret.textStateHasEditableKey || !result.editableTextCaret.persistedHtml?.includes('Z')) {
+    if (!result.editableTextCaret.afterText?.includes(result.editableTextCaret.insertedText || 'XYZ')) failures.push('Editable text did not keep the inserted value.');
+    if (result.editableTextCaret.inputDirtyCallCount !== 0) failures.push(`Editable text input should not dirty thumbnails before blur: ${JSON.stringify(result.editableTextCaret)}`);
+    if (result.editableTextCaret.beforeThumb?.revision !== result.editableTextCaret.inputThumb?.revision) {
+      failures.push(`Editable text input changed thumbnail revision before blur: ${JSON.stringify(result.editableTextCaret)}`);
+    }
+    if (result.editableTextCaret.beforeThumb?.rendered && !result.editableTextCaret.inputThumb?.rendered) {
+      failures.push(`Editable text input replaced the active rail thumbnail with a placeholder: ${JSON.stringify(result.editableTextCaret)}`);
+    }
+    if ((result.editableTextCaret.inputThumb?.placeholderCount || 0) > (result.editableTextCaret.beforeThumb?.placeholderCount || 0)) {
+      failures.push(`Editable text input increased active rail thumbnail placeholders: ${JSON.stringify(result.editableTextCaret)}`);
+    }
+    if (result.editableTextCaret.inputThumb?.queued || (result.editableTextCaret.inputThumb?.queuedKeys || []).length) {
+      failures.push(`Editable text input queued active thumbnail work before blur: ${JSON.stringify(result.editableTextCaret)}`);
+    }
+    if (result.editableTextCaret.afterBlurDirtyCallCount !== 1) failures.push(`Editable text blur should dirty the current slide once: ${JSON.stringify(result.editableTextCaret)}`);
+    if (!result.editableTextCaret.dirtyCalls?.every(call => call.slideId === result.editableTextCaret.slideId)) {
+      failures.push(`Editable text dirty calls should only target the active slide: ${JSON.stringify(result.editableTextCaret)}`);
+    }
+    if (!result.editableTextCaret.textStateHasEditableKey || !result.editableTextCaret.persistedHtml?.includes(result.editableTextCaret.insertedText || 'XYZ')) {
       failures.push(`Editable text change did not persist under its stable text key: ${JSON.stringify(result.editableTextCaret)}`);
     }
   }

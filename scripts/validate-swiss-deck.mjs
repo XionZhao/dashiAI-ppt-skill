@@ -139,7 +139,9 @@ if (transitionCallIndex >= 0 && (prepareCallIndex < 0 || prepareCallIndex > tran
   errors.push('go() must call prepareSlideForTransition(nextSlide) before starting __playPageTransition.');
 }
 
-if (!/preloadAdjacentSlides\(idx\)/.test(commitSlideSource)) {
+const activeRenderIndex = commitSlideSource.indexOf('ensureRuntimeSlideRendered(el)');
+const adjacentPreloadIndex = commitSlideSource.indexOf('preloadAdjacentSlides(idx');
+if (adjacentPreloadIndex < 0 || (activeRenderIndex >= 0 && adjacentPreloadIndex < activeRenderIndex)) {
   errors.push('commitSlideIndex() must preload adjacent slides after the active slide is rendered.');
 }
 

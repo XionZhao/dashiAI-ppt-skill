@@ -765,13 +765,18 @@ function startTransitionSlideEnter(slide){
 }
 window.__startTransitionSlideEnter = startTransitionSlideEnter;
 
-function preloadAdjacentSlides(activeIndex=idx){
+function preloadAdjacentSlides(activeIndex=idx, opts={}){
   const targets = [activeIndex + 1, activeIndex - 1]
     .filter(index => index >= 0 && index < slides.length)
     .map(index => slides[index])
     .filter(Boolean);
   if(!targets.length) return;
   const run = () => targets.forEach(slide => prepareSlideForTransition(slide));
+  const delay = Number(opts.delay || 0);
+  if(delay > 0){
+    setTimeout(() => preloadAdjacentSlides(activeIndex), delay);
+    return;
+  }
   if('requestIdleCallback' in window) requestIdleCallback(run, {timeout: 260});
   else setTimeout(run, 60);
 }
@@ -1147,9 +1152,8 @@ function commitSlideIndex(nextIndex, opts={}){
   dispatchEvent(new CustomEvent('swiss-slide-change', {detail:{index:idx, slide:el}}));
   if(isEditMode() && overviewGrid){
     syncRailActiveState(opts.scrollRail !== false);
-    requestOverviewThumbRefresh(true);
   }
-  preloadAdjacentSlides(idx);
+  preloadAdjacentSlides(idx, isEditMode() ? {delay: 520} : {});
   requestOverviewClosedPrewarm();
   if(window.__playSlide && !transitionEntered) window.__playSlide(idx);
   if(transitionEntered){
@@ -2174,7 +2178,7 @@ function scrollOverviewToCurrent(){
   });
 }
 
-function syncRailActiveState(scroll=false){
+function syncRailActiveState(scroll=false, opts={}){
   if(!overviewGrid) return;
   refreshOverviewCards(overviewGrid);
   if(!scroll) return;
@@ -2185,8 +2189,15 @@ function syncRailActiveState(scroll=false){
     if(!card) return;
     const railRect = ov.getBoundingClientRect();
     const cardRect = card.getBoundingClientRect();
-    if(cardRect.top >= railRect.top + 8 && cardRect.bottom <= railRect.bottom - 8) return;
-    card?.scrollIntoView({block:'center', inline:'nearest'});
+    if(!(cardRect.top >= railRect.top + 8 && cardRect.bottom <= railRect.bottom - 8)){
+      card?.scrollIntoView({block:'center', inline:'nearest'});
+    }
+    if(opts.refreshThumbs !== false){
+      const range = getOverviewThumbRange(overviewGrid, {includeNear:true});
+      fitOverviewThumbnails(range.cards);
+      observeOverviewThumbs(overviewGrid);
+      requestOverviewThumbRefresh(true);
+    }
   });
 }
 window.__syncRailActiveState = syncRailActiveState;
@@ -2536,8 +2547,8 @@ function buildOverview(fromRects=null, fromThumbs=null){
       if(targetIndex < 0) return;
       pauseOverviewThumbs();
       deferOverviewThumbs(650, 'click');
-      go(targetIndex, {animate:false});
-      syncRailActiveState(true);
+      go(targetIndex, {animate:false, scrollRail:false});
+      syncRailActiveState(true, {refreshThumbs:false});
     };
     grid.appendChild(card);
   });
@@ -2616,6 +2627,7 @@ function refreshRailCatalog(){
     updateOverviewProgress();
   }
   scrollOverviewToCurrent();
+  requestOverviewThumbRefresh(true);
   recordOverviewStage('refresh-rail-catalog', startAt, {cardCount:overviewGrid ? getOverviewCards(overviewGrid).length : 0});
 }
 window.__refreshRailCatalog = refreshRailCatalog;
@@ -2661,12 +2673,12 @@ function handleDeckKeyNavigation(e,{allowSpace=true}={}){
   if(isEditMode()){
     if(e.key==='ArrowDown'){
       e.preventDefault();
-      go(idx+1, {animate:false, scrollRail:false});
+      go(idx+1, {scrollRail:false});
       return;
     }
     if(e.key==='ArrowUp'){
       e.preventDefault();
-      go(idx-1, {animate:false, scrollRail:false});
+      go(idx-1, {scrollRail:false});
     }
     return;
   }
@@ -4182,7 +4194,7 @@ refreshRailCatalog();
   function handleInput(e){
     const el = e.target.closest('[data-editable-id]');
     if(!el || !deck.contains(el)) return;
-    saveTextElement(el);
+    saveTextElement(el, {dirty:false});
   }
 
 	  function handleBlur(e){
@@ -4190,10 +4202,11 @@ refreshRailCatalog();
 	    if(!el || !deck.contains(el)) return;
 	    const before = el.dataset.editBefore;
 	    const after = el.innerHTML;
+      const changed = before !== undefined && before !== after;
 	    delete el.dataset.editing;
 	    delete el.dataset.editBefore;
-	    saveTextElement(el);
-	    if(before !== undefined && before !== after && !window.__dashiUndo?.applying){
+	    saveTextElement(el, {dirty:changed});
+	    if(changed && !window.__dashiUndo?.applying){
 	      const key = el.dataset.editableId;
 	      const syncName = el.dataset.syncText || '';
 	      window.__dashiUndo?.push?.({
@@ -4203,13 +4216,13 @@ refreshRailCatalog();
 	    }
 	  }
 
-  function saveTextElement(el){
+  function saveTextElement(el, opts={}){
     if(!canEditDeck()) return;
     const key = el.dataset.editableId;
     if(!key) return;
     textState[key] = el.innerHTML;
     if(el.dataset.syncText) textState[`sync:${el.dataset.syncText}`] = el.innerHTML;
-    window.__markOverviewThumbDirty?.(el.closest('.slide'));
+    if(opts.dirty) window.__markOverviewThumbDirty?.(el.closest('.slide'));
     writeTextState();
   }
 
