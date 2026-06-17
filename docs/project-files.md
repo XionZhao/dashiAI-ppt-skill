@@ -27,6 +27,7 @@
 |       `-- portfolio.json - 按用户目标组合组件的 JSON 计划示例。
 |-- scripts/
 |   |-- check_latest_version.mjs - 本地命令脚本。
+|   |-- control-naming-allowlist.json - 本地命令脚本。
 |   |-- export-editable-pptx.mjs - 本地命令脚本。
 |   |-- import-claude-themes.jsx - 本地命令脚本。
 |   |-- inspect-layout.mjs - 本地命令脚本。
@@ -38,8 +39,10 @@
 |   |-- stage-media.mjs - 本地命令脚本。
 |   |-- start-preview-server.mjs - 本地命令脚本。
 |   |-- sync-skill.mjs - 本地命令脚本。
+|   |-- update-generated-metadata.mjs - 本地命令脚本。
 |   |-- update-layout-manifest.jsx - 本地命令脚本。
 |   |-- update-project-docs.mjs - 本地命令脚本。
+|   |-- validate-control-naming.mjs - 本地命令脚本。
 |   |-- validate-dynamic-page-numbers.mjs - 本地命令脚本。
 |   |-- validate-editable-pptx-export.mjs - 本地命令脚本。
 |   |-- validate-editor-presenter-modes.mjs - 本地命令脚本。
@@ -1188,6 +1191,7 @@
 |   |-- view-model/
 |   |   |-- context.jsx - Deck ViewModel 构建层和 React Context。
 |   |   `-- index.jsx - Deck ViewModel 构建层和 React Context。
+|   |-- control-naming.mjs - 项目源码或配置文件。
 |   |-- deckComposer.jsx - 目标 deck 编排器,把用户目标 JSON 计划映射为当前已验收主题页面。
 |   |-- options.jsx - 布局选项注册表,只登记当前已验收主题页面。
 |   |-- prop-contract-core.mjs - 项目源码或配置文件。

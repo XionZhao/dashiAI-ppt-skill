@@ -20,6 +20,7 @@ const tests = [
   ['skill delivery uses HTTPS preview for export support', testHttpPreviewDelivery],
   ['validate-goal-spec rejects unsafe goal shapes', testValidateGoalSpec],
   ['preview panel handles type: images as an image list control', testImagesControl],
+  ['control naming stays generic across user and agent contracts', testControlNaming],
 ];
 
 const failures = [];
@@ -55,6 +56,10 @@ function testLayoutQuery() {
   assert(JSON.stringify(result).length < 7000, 'layout-query output is too large');
   assert(result.layouts.every(item => item.layout?.startsWith('theme01_')), 'expected theme01 layouts only');
   assert(result.layouts.some(item => item.mediaSlots?.length), 'expected at least one media slot candidate');
+}
+
+function testControlNaming() {
+  execFileSync('node', ['scripts/validate-control-naming.mjs'], { cwd: ROOT, stdio: 'pipe' });
 }
 
 function testInspectLayout() {
