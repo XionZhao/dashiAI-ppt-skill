@@ -35,6 +35,7 @@
 |   |-- render-goal-deck.jsx - 本地命令脚本。
 |   |-- serve-preview-https.mjs - 本地命令脚本。
 |   |-- skill-workflow-utils.mjs - 本地命令脚本。
+|   |-- stage-media.mjs - 本地命令脚本。
 |   |-- start-preview-server.mjs - 本地命令脚本。
 |   |-- sync-skill.mjs - 本地命令脚本。
 |   |-- update-layout-manifest.jsx - 本地命令脚本。
@@ -47,6 +48,7 @@
 |   |-- validate-goal-spec.mjs - 本地命令脚本。
 |   |-- validate-layout-showcase.mjs - 本地命令脚本。
 |   |-- validate-overview-performance.mjs - 本地命令脚本。
+|   |-- validate-skill-media-workflow.mjs - 本地命令脚本。
 |   |-- validate-skill-workflow-tools.mjs - 本地命令脚本。
 |   |-- validate-swiss-deck.mjs - 本地命令脚本。
 |   |-- validate-theme-display-names.mjs - 本地命令脚本。

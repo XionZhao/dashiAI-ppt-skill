@@ -37,6 +37,7 @@ function syncProjectFiles() {
   copyPath(path.join(ROOT, 'scripts/skill-workflow-utils.mjs'), path.join(projectRoot, 'scripts/skill-workflow-utils.mjs'));
   copyPath(path.join(ROOT, 'scripts/layout-query.mjs'), path.join(projectRoot, 'scripts/layout-query.mjs'));
   copyPath(path.join(ROOT, 'scripts/inspect-layout.mjs'), path.join(projectRoot, 'scripts/inspect-layout.mjs'));
+  copyPath(path.join(ROOT, 'scripts/stage-media.mjs'), path.join(projectRoot, 'scripts/stage-media.mjs'));
   copyPath(path.join(ROOT, 'scripts/write-safe-props.mjs'), path.join(projectRoot, 'scripts/write-safe-props.mjs'));
   copyPath(path.join(ROOT, 'scripts/validate-goal-spec.mjs'), path.join(projectRoot, 'scripts/validate-goal-spec.mjs'));
   copyPath(path.join(ROOT, 'scripts/validate-skill-workflow-tools.mjs'), path.join(projectRoot, 'scripts/validate-skill-workflow-tools.mjs'));
@@ -57,6 +58,7 @@ function renderRuntimePackage() {
     scripts: {
       'layout:query': 'node scripts/layout-query.mjs',
       'inspect:layout': 'node scripts/inspect-layout.mjs',
+      'media:stage': 'node scripts/stage-media.mjs',
       'props:safe': 'node scripts/write-safe-props.mjs',
       'validate:goal-spec': 'node scripts/validate-goal-spec.mjs',
       'validate:skill-workflow-tools': 'node scripts/validate-skill-workflow-tools.mjs',

@@ -9,13 +9,17 @@ import {
 const args = parseArgs(process.argv.slice(2));
 const mediaIntent = getMediaIntent(args);
 const mediaCount = getMediaCount(args);
+const mediaKind = getMediaKind(args);
+const requireInitialMedia = args['require-initial-media'] === true || args.requireInitialMedia === true || Boolean(args['provided-images'] || args['provided-media']);
 const result = {
   theme: args.theme || null,
   role: args.role || args.use || null,
   keyword: args.keyword || args.q || null,
-  needsMedia: args['needs-media'] === true || args.media === true || Boolean(mediaIntent) || Boolean(mediaCount),
+  needsMedia: args['needs-media'] === true || args.media === true || Boolean(mediaIntent) || Boolean(mediaCount) || Boolean(mediaKind) || requireInitialMedia,
   mediaIntent,
   mediaCount,
+  mediaKind,
+  requireInitialMedia,
   limit: Number(args.limit || 12),
 };
 const themeMetadata = result.theme ? getThemePackMetadata(result.theme) : null;
@@ -30,6 +34,8 @@ const layouts = listLayouts({
   imageGen: args['image-gen'] === true || args.imageGen === true,
   needsVisual: args['needs-visual'] === true || args.needsVisual === true,
   mediaCount: result.mediaCount,
+  mediaKind: result.mediaKind,
+  requireInitialMedia: result.requireInitialMedia,
   limit: result.limit,
 });
 
@@ -48,16 +54,24 @@ function themeDisplayName(theme, fallback) {
 
 function getMediaIntent(args) {
   if (args['provided-images']) return 'provided-images';
+  if (args['provided-media']) return 'provided-media';
   if (args['planned-images']) return 'planned-images';
   if (args['image-gen'] === true || args.imageGen === true) return 'image-gen';
   if (args['needs-visual'] === true || args.needsVisual === true) return 'needs-visual';
   return null;
 }
 
+function getMediaKind(args) {
+  const value = args['media-kind'] || args.mediaKind || null;
+  if (value) return String(value);
+  if (args['provided-media']) return 'mixed';
+  return null;
+}
+
 function getMediaCount(args) {
   const explicit = Number(args['media-count'] || args.mediaCount);
   if (Number.isFinite(explicit) && explicit > 0) return Math.round(explicit);
-  for (const key of ['provided-images', 'planned-images']) {
+  for (const key of ['provided-images', 'provided-media', 'planned-images']) {
     const count = Number(args[key]);
     if (Number.isFinite(count) && count > 0) return Math.round(count);
   }

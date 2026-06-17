@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -98,18 +99,48 @@ function injectDeckViewModel(html, viewModel) {
 function copyRuntimeAssets(outDir) {
   const assetsDir = path.join(outDir, 'assets');
   const imagesDir = path.join(outDir, 'images');
-  [assetsDir, imagesDir, path.join(outDir, 'uploads'), path.join(outDir, 'screens'), path.join(outDir, 'screenshots')].forEach(dir => {
-    fs.rmSync(dir, { recursive: true, force: true });
+  const preservedUserMedia = preserveUserMediaDirs(outDir);
+  try {
+    [assetsDir, imagesDir, path.join(outDir, 'uploads'), path.join(outDir, 'screens'), path.join(outDir, 'screenshots')].forEach(dir => {
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+    fs.mkdirSync(assetsDir, { recursive: true });
+    copyFileIfExists(path.join(ROOT, 'node_modules/gsap/dist/gsap.min.js'), path.join(assetsDir, 'vendor/gsap.min.js'));
+    copyFileIfExists(path.join(ROOT, 'node_modules/pptxgenjs/dist/pptxgen.bundle.js'), path.join(assetsDir, 'vendor/pptxgen.bundle.js'));
+    copyFileIfExists(path.join(ROOT, 'node_modules/html-to-image/dist/html-to-image.js'), path.join(assetsDir, 'vendor/html-to-image.js'));
+    copyDirectoryIfExists(path.join(ROOT, 'assets/unicorn'), path.join(assetsDir, 'unicorn'));
+    copyImportedThemeAssets(outDir);
+    buildImportedThemeRuntime(path.join(assetsDir, 'imported-theme-runtime.js'));
+    restoreUserMediaDirs(preservedUserMedia, outDir);
+    const imageSlotStateFile = path.join(outDir, '.image-slots.state.json');
+    if (!fs.existsSync(imageSlotStateFile)) fs.writeFileSync(imageSlotStateFile, '{}\n');
+  } finally {
+    cleanupPreservedUserMedia(preservedUserMedia);
+  }
+}
+
+function preserveUserMediaDirs(outDir) {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'dashi-user-media-'));
+  const entries = [
+    ['assets/user-media', path.join(outDir, 'assets/user-media')],
+    ['images/user-media', path.join(outDir, 'images/user-media')],
+  ].filter(([, source]) => fs.existsSync(source));
+
+  entries.forEach(([relative, source]) => {
+    copyDirectoryIfExists(source, path.join(tempRoot, relative));
   });
-  fs.mkdirSync(assetsDir, { recursive: true });
-  copyFileIfExists(path.join(ROOT, 'node_modules/gsap/dist/gsap.min.js'), path.join(assetsDir, 'vendor/gsap.min.js'));
-  copyFileIfExists(path.join(ROOT, 'node_modules/pptxgenjs/dist/pptxgen.bundle.js'), path.join(assetsDir, 'vendor/pptxgen.bundle.js'));
-  copyFileIfExists(path.join(ROOT, 'node_modules/html-to-image/dist/html-to-image.js'), path.join(assetsDir, 'vendor/html-to-image.js'));
-  copyDirectoryIfExists(path.join(ROOT, 'assets/unicorn'), path.join(assetsDir, 'unicorn'));
-  copyImportedThemeAssets(outDir);
-  buildImportedThemeRuntime(path.join(assetsDir, 'imported-theme-runtime.js'));
-  const imageSlotStateFile = path.join(outDir, '.image-slots.state.json');
-  if (!fs.existsSync(imageSlotStateFile)) fs.writeFileSync(imageSlotStateFile, '{}\n');
+
+  return { tempRoot, entries: entries.map(([relative]) => relative) };
+}
+
+function restoreUserMediaDirs(preserved, outDir) {
+  for (const relative of preserved.entries) {
+    copyDirectoryIfExists(path.join(preserved.tempRoot, relative), path.join(outDir, relative));
+  }
+}
+
+function cleanupPreservedUserMedia(preserved) {
+  fs.rmSync(preserved.tempRoot, { recursive: true, force: true });
 }
 
 function buildImportedThemeRuntime(outFile) {
