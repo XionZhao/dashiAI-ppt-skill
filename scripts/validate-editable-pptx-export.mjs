@@ -131,10 +131,10 @@ async function runTheme10UserRegressionValidation() {
       slide: 79,
       layout: 'SlidePoster',
       failureType: 'unicorn foreground overlay rasterization',
-      currentExporterGap: 'Narrow CSS linear-gradient foreground rules are exported as small PNG media instead of native PPT shape/line objects.',
-      suggestedFix: 'Render narrow non-text linear-gradient foreground elements as native shapes with representative fill; keep unicorn/shader as a separate local background image.',
-      sharedMechanism: true,
-      status: 'targeted-validation',
+    currentExporterGap: 'Narrow CSS linear-gradient foreground rules are exported as small PNG media instead of native PPT shape/line objects.',
+    suggestedFix: 'Render narrow non-text linear-gradient foreground elements as native shapes with representative fill; keep unicorn/shader as a separate local background image.',
+    sharedMechanism: true,
+    status: 'fixed',
     },
     {
       screenshot: 2,
@@ -151,10 +151,10 @@ async function runTheme10UserRegressionValidation() {
       slide: 82,
       layout: 'SlidePyramid',
       failureType: 'clip-path polygon lost',
-      currentExporterGap: 'CSS polygon trapezoids are rendered as rectangular PPT shapes.',
-      suggestedFix: 'Map supported CSS polygon shapes to PPT freeform/native geometry or bounded local fallback with text extracted.',
-      sharedMechanism: true,
-      status: 'diagnostic-only',
+    currentExporterGap: 'CSS polygon trapezoids are rendered as rectangular PPT shapes.',
+    suggestedFix: 'Map supported CSS polygon shapes to PPT freeform/native geometry or bounded local fallback with text extracted.',
+    sharedMechanism: true,
+    status: 'fixed',
     },
     {
       screenshot: 4,
@@ -170,21 +170,21 @@ async function runTheme10UserRegressionValidation() {
       screenshot: 5,
       slide: 87,
       layout: 'SlideBalance',
-      failureType: 'rotated gradient line and pseudo geometry mismatch',
-      currentExporterGap: 'The tilted gradient beam, pseudo pivot, triangle support, and card shadows combine transform, gradient and border-triangle CSS not fully mapped to PPT.',
-      suggestedFix: 'First fix narrow gradient line native-shape export, then map CSS border triangles/rotated groups if still visibly off.',
-      sharedMechanism: true,
-      status: 'diagnostic-only',
+    failureType: 'rotated gradient line and pseudo geometry mismatch',
+    currentExporterGap: 'The tilted gradient beam and triangle support required cumulative transform and border-triangle mapping; card shadows may still differ from browser rendering.',
+    suggestedFix: 'Render the beam as a rotated native narrow gradient shape and the pivot as a custom triangle; keep card shadow drift as a separate visual polish item if still visible.',
+    sharedMechanism: true,
+    status: 'partially-fixed',
     },
     {
       screenshot: 6,
       slide: 91,
       layout: 'SlideHive',
       failureType: 'clip-path polygon lost',
-      currentExporterGap: 'CSS hexagons are exported as rectangles; pseudo outline is not preserving hex geometry.',
-      suggestedFix: 'Share the polygon mapping/fallback strategy with SlidePyramid.',
-      sharedMechanism: true,
-      status: 'diagnostic-only',
+    currentExporterGap: 'CSS hexagons are exported as rectangles; pseudo outline is not preserving hex geometry.',
+    suggestedFix: 'Share the polygon mapping/fallback strategy with SlidePyramid.',
+    sharedMechanism: true,
+    status: 'fixed',
     },
   ];
   writeFileSync(path.join(outDir, 'root-cause-matrix.json'), JSON.stringify(rootCauseMatrix, null, 2) + '\n');
@@ -194,6 +194,8 @@ async function runTheme10UserRegressionValidation() {
   let posterInfo = null;
   let pptx = null;
   let media = [];
+  const polygonChecks = [];
+  const balanceChecks = [];
   const failures = [];
   try {
     const context = await browser.newContext({
@@ -299,6 +301,88 @@ async function runTheme10UserRegressionValidation() {
           if (!allText.includes(normalizeSearchText(probe))) failures.push(`theme10 poster PPTX is missing editable text: ${probe}`);
         }
       }
+      if (sample.slide === 82 || sample.slide === 91) {
+        const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+        const pptxFile = path.join(sampleDir, `${sample.label}.pptx`);
+        const reportFile = path.join(sampleDir, `${sample.label}-report.json`);
+        await mod.exportEditablePptxFromPage(page, {
+          outFile: pptxFile,
+          reportFile,
+          title: `JAD-64 theme10 ${sample.label} regression`,
+          slideIndexes: [sample.slide - 1],
+        });
+        const samplePptx = inspectPptx(pptxFile);
+        const geoms = samplePptx.slides[0]?.shapeGeoms || [];
+        const polygonGeomCount = geoms.filter(geom => ['custGeom', 'hexagon', 'trapezoid', 'nonIsoscelesTrapezoid'].includes(geom)).length;
+        const expected = sample.slide === 82 ? 4 : 6;
+        const passed = polygonGeomCount >= expected;
+        polygonChecks.push({
+          slide: sample.slide,
+          key: sample.key,
+          label: sample.label,
+          pptxFile,
+          reportFile,
+          expectedPolygonShapes: expected,
+          polygonGeomCount,
+          shapeGeoms: geoms,
+          passed,
+        });
+        if (!passed) {
+          failures.push(`${sample.label} exported ${polygonGeomCount}/${expected} polygon shape geometries; clip-path polygons are still being flattened to rectangles.`);
+        }
+      }
+      if (sample.slide === 87) {
+        const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+        const pptxFile = path.join(sampleDir, `${sample.label}.pptx`);
+        const reportFile = path.join(sampleDir, `${sample.label}-report.json`);
+        const dom = await page.evaluate(() => {
+          const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+          const slideRect = slide?.getBoundingClientRect();
+          const beam = slide?.querySelector('.bal-beam-bar');
+          const pivot = slide?.querySelector('.bal-pivot');
+          const local = el => {
+            const rect = el?.getBoundingClientRect();
+            if (!rect || !slideRect) return null;
+            return {
+              x: rect.left - slideRect.left,
+              y: rect.top - slideRect.top,
+              w: rect.width,
+              h: rect.height,
+              transform: getComputedStyle(el).transform,
+              parentTransform: el.parentElement ? getComputedStyle(el.parentElement).transform : '',
+            };
+          };
+          return { beam: local(beam), pivot: local(pivot) };
+        });
+        writeFileSync(path.join(sampleDir, 'balance-dom.json'), JSON.stringify(dom, null, 2) + '\n');
+        await mod.exportEditablePptxFromPage(page, {
+          outFile: pptxFile,
+          reportFile,
+          title: 'JAD-64 theme10 balance regression',
+          slideIndexes: [sample.slide - 1],
+        });
+        const samplePptx = inspectPptx(pptxFile);
+        const details = samplePptx.slides[0]?.shapeDetails || [];
+        const rotatedBeam = details.find(shape => {
+          const narrow = Math.min(shape.w || 0, shape.h || 0) <= 0.16 && Math.max(shape.w || 0, shape.h || 0) >= 4.5;
+          return narrow && Math.abs(shape.rotate || 0) >= 4;
+        });
+        const trianglePivot = details.find(shape => shape.geom === 'custGeom' || shape.geom === 'triangle' || shape.geom === 'rtTriangle');
+        const passed = Boolean(rotatedBeam) && Boolean(trianglePivot);
+        balanceChecks.push({
+          slide: sample.slide,
+          key: sample.key,
+          label: sample.label,
+          pptxFile,
+          reportFile,
+          dom,
+          rotatedBeam: rotatedBeam || null,
+          trianglePivot: trianglePivot || null,
+          passed,
+        });
+        if (!rotatedBeam) failures.push(`${sample.label} did not export the tilted balance beam as a rotated narrow PPT shape.`);
+        if (!trianglePivot) failures.push(`${sample.label} did not export the balance pivot as a triangle/custom PPT shape.`);
+      }
     }
   } finally {
     await closePage(page);
@@ -315,6 +399,8 @@ async function runTheme10UserRegressionValidation() {
       pptx: pptx ? summarizeInspection(pptx) : null,
       media,
     },
+    polygonChecks,
+    balanceChecks,
     samples,
     failures,
   };
@@ -2998,6 +3084,23 @@ function inspectSlideXml(xml, index, relsXml, mediaByEntry) {
     .filter(Boolean);
   const shapeCount = (xml.match(/<p:sp\b/g) || []).length;
   const autoFitTextCount = (xml.match(/<a:spAutoFit\/>/g) || []).length;
+  const shapeDetails = [...xml.matchAll(/<p:sp\b[\s\S]*?<\/p:sp>/g)].map(match => {
+    const shapeXml = match[0];
+    const geom = shapeXml.includes('<a:custGeom>')
+      ? 'custGeom'
+      : shapeXml.match(/<a:prstGeom\b[^>]*\bprst="([^"]+)"/)?.[1] || '';
+    const xfrm = shapeXml.match(/<a:xfrm\b([^>]*)>[\s\S]*?<a:off x="(\d+)" y="(\d+)"[\s\S]*?<a:ext cx="(\d+)" cy="(\d+)"/);
+    const rotateRaw = xfrm?.[1]?.match(/\brot="(-?\d+)"/)?.[1];
+    return {
+      geom,
+      rotate: rotateRaw == null ? 0 : Number(rotateRaw) / 60000,
+      x: Number(xfrm?.[2] || 0) / EMU_PER_IN,
+      y: Number(xfrm?.[3] || 0) / EMU_PER_IN,
+      w: Number(xfrm?.[4] || 0) / EMU_PER_IN,
+      h: Number(xfrm?.[5] || 0) / EMU_PER_IN,
+    };
+  }).filter(item => item.geom);
+  const shapeGeoms = shapeDetails.map(item => item.geom);
   const pictureCount = (xml.match(/<p:pic\b/g) || []).length;
   const pictures = [...xml.matchAll(/<p:pic\b[\s\S]*?<\/p:pic>/g)].map(match => {
     const ext = match[0].match(/<a:ext[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/);
@@ -3016,6 +3119,8 @@ function inspectSlideXml(xml, index, relsXml, mediaByEntry) {
     index,
     text,
     textBoxes,
+    shapeGeoms,
+    shapeDetails,
     autoFitTextCount,
     shapeCount,
     pictureCount,

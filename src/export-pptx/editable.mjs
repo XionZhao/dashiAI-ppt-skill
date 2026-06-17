@@ -471,6 +471,8 @@ async function installBrowserCollector(page) {
         ${collectActiveSlide.toString()}
         ${captureElement.toString()}
         ${capturePseudoElement.toString()}
+        ${styleWithCumulativeRotation.toString()}
+        ${cumulativeRotation.toString()}
         ${pseudoRect.toString()}
         ${captureWholeTextElement.toString()}
         ${isInlineTextChild.toString()}
@@ -560,10 +562,12 @@ function renderBox(slide, node, slideRect, warnings, totals) {
   const c = coords(node, slideRect);
   if (c.w < 0.003 || c.h < 0.003) return;
   const style = node.style || {};
+  const borderTriangle = cssBorderTriangle(style, c);
   const hasLocalBackgroundImage = node.backgroundImageData || node.patternImageData;
-  const fill = isTextClippedBackground(style)
+  const polygonPoints = borderTriangle?.points || cssClipPolygonPoints(style.clipPath, c);
+  const fill = borderTriangle?.fill || (isTextClippedBackground(style)
     ? parseCssColor(style.backgroundColor)
-    : parseCssColor(style.backgroundColor) || (hasLocalBackgroundImage ? null : colorFromBackgroundImage(style.backgroundImage));
+    : parseCssColor(style.backgroundColor) || (hasLocalBackgroundImage ? null : colorFromBackgroundImage(style.backgroundImage)));
   const radius = Math.min(maxRadiusPx(style), 48) / slideRect.w * PPT_W;
   const borders = readBorders(style);
   const hasBorder = borders.some(border => border.width > 0 && border.color);
@@ -578,15 +582,18 @@ function renderBox(slide, node, slideRect, warnings, totals) {
   const isNarrowGradientLine = fill?.gradient && Math.min(c.w, c.h) <= 0.12 && Math.max(c.w, c.h) >= 0.35;
   const isDecorativeGradient = fill?.gradient && !isLargeGradient && !isNarrowGradientLine && !(node.children || []).length;
   const fillAlpha = isDecorativeGradient ? Math.min(fill.alpha, 0.08) : fill?.alpha;
-  const shapeName = isDecorativeGradient && radius > Math.min(c.w, c.h) * 0.2
+  const shapeName = polygonPoints ? 'custGeom'
+    : isDecorativeGradient && radius > Math.min(c.w, c.h) * 0.2
     ? 'ellipse'
     : radius > 0.02 ? 'roundRect' : 'rect';
   const firstBorder = borders.find(border => border.color);
-  const line = hasBorder && rotate
+  const line = borderTriangle
+    ? { color: fill?.color || 'FFFFFF', transparency: 100 }
+    : hasBorder && rotate
     ? { color: firstBorder?.color || fill?.color || 'FFFFFF', transparency: combinedTransparency(firstBorder?.alpha || 1, style.opacity), width: Math.max(...borders.map(border => border.width || 0)) * PX_TO_PT }
     : { color: hasBorder ? firstBorder?.color || fill?.color || 'FFFFFF' : 'FFFFFF', transparency: 100 };
 
-  if (hasFill || hasBorder) {
+  if (hasFill || hasBorder || borderTriangle) {
     try {
       slide.addShape(shapeName, {
         ...c,
@@ -595,6 +602,7 @@ function renderBox(slide, node, slideRect, warnings, totals) {
           : { color: 'FFFFFF', transparency: 100 },
         line,
         rectRadius: shapeName === 'roundRect' ? radius || undefined : undefined,
+        points: polygonPoints || undefined,
         shadow: hasFill && shadow ? shadow : undefined,
         rotate: rotate || undefined,
       });
@@ -604,7 +612,7 @@ function renderBox(slide, node, slideRect, warnings, totals) {
     }
   }
 
-  if (hasBorder && !rotate) renderBorders(slide, c, borders, slideRect, style.opacity, totals);
+  if (hasBorder && !rotate && !borderTriangle) renderBorders(slide, c, borders, slideRect, style.opacity, totals);
 }
 
 function isTinyRotatedBorderOnlyPseudo(node, c, hasFill, hasBorder, rotate) {
@@ -835,7 +843,7 @@ async function collectActiveSlide(slideNumber) {
 
 async function captureElement(el, slideRect, warnings, depth, slideIndex) {
   if (!(el instanceof Element) || isMediaChrome(el)) return null;
-  const style = readStyle(el);
+  const style = styleWithCumulativeRotation(readStyle(el), el);
   if (!isVisibleElement(el, slideRect, style)) return null;
   const clipped = clippedRect(el.getBoundingClientRect(), slideRect);
   if (!clipped) return null;
@@ -921,7 +929,7 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
   } else if (String(style.backgroundImage || '').includes('repeating-linear-gradient')) {
     node.patternImageData = patternBackgroundImageData(style.backgroundImage, clipped.width, clipped.height, maxCssRadius(style, clipped.width, clipped.height));
     if (node.patternImageData) warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'css-pattern-background', count: 1 });
-  } else if (!isTextClippedBackground(style) && String(style.backgroundImage || '').includes('gradient') && !shouldUseNativeGradientShape(style, clipped.width, clipped.height)) {
+  } else if (!isTextClippedBackground(style) && String(style.backgroundImage || '').includes('gradient') && !shouldUseNativeGradientShape(style, clipped.width, clipped.height) && !shouldUseNativeGradientShape(style, (el.offsetWidth || clipped.width) * (slideRect.w || 1920) / 1920, (el.offsetHeight || clipped.height) * (slideRect.h || 1080) / 1080) && !String(style.clipPath || '').includes('polygon(')) {
     node.backgroundImageData = gradientBackgroundImageData(style.backgroundImage, clipped.width, clipped.height, maxCssRadius(style, clipped.width, clipped.height));
     if (node.backgroundImageData) warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'css-gradient-background', count: 1 });
   }
@@ -1129,6 +1137,24 @@ function readStyle(el, pseudo = null) {
     style[key] = cs[key] || cs.getPropertyValue(cssKey) || '';
   }
   return style;
+}
+
+function styleWithCumulativeRotation(style, el) {
+  const rotation = cumulativeRotation(el);
+  if (!rotation) return style;
+  const ownRotation = rotateFromTransform(style.transform);
+  if (Math.abs(rotation - ownRotation) < 0.1) return style;
+  return { ...style, transform: `rotate(${rotation}deg)` };
+}
+
+function cumulativeRotation(el) {
+  const slide = el?.closest?.('#deck > .slide');
+  let rotation = 0;
+  for (let node = el; node instanceof Element && node !== slide?.parentElement; node = node.parentElement) {
+    rotation += rotateFromTransform(getComputedStyle(node).transform);
+    if (node === slide) break;
+  }
+  return Math.abs(rotation) < 0.1 ? 0 : rotation;
 }
 
 function summarizeCapturedTree(root) {
@@ -1901,6 +1927,49 @@ function shouldUseNativeGradientShape(style = {}, width = 0, height = 0) {
   return minSide > 0 && minSide <= 16 && maxSide >= 24;
 }
 
+function cssBorderTriangle(style = {}, c) {
+  const left = parseFloat(style.borderLeftWidth || '0') || 0;
+  const right = parseFloat(style.borderRightWidth || '0') || 0;
+  const bottom = parseFloat(style.borderBottomWidth || '0') || 0;
+  const top = parseFloat(style.borderTopWidth || '0') || 0;
+  const bottomColor = parseCssColor(style.borderBottomColor);
+  const leftColor = parseCssColor(style.borderLeftColor);
+  const rightColor = parseCssColor(style.borderRightColor);
+  if (bottom <= 0 || left <= 0 || right <= 0 || top > 0 || !bottomColor || leftColor || rightColor) return null;
+  return {
+    fill: bottomColor,
+    points: [
+      { x: round(c.w / 2), y: 0, moveTo: true },
+      { x: round(c.w), y: round(c.h) },
+      { x: 0, y: round(c.h) },
+      { close: true },
+    ],
+  };
+}
+
+function cssClipPolygonPoints(clipPath, c) {
+  const raw = String(clipPath || '').trim();
+  const match = raw.match(/^polygon\((.*)\)$/i);
+  if (!match) return null;
+  const points = splitCssArgs(match[1]).map(part => {
+    const coords = String(part).trim().split(/\s+/).filter(Boolean);
+    if (coords.length < 2) return null;
+    const x = cssClipCoord(coords[0], c.w);
+    const y = cssClipCoord(coords[1], c.h);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    return { x: round(x), y: round(y) };
+  });
+  if (points.length < 3 || points.some(point => !point)) return null;
+  return points.map((point, index) => index === 0 ? { ...point, moveTo: true } : point).concat({ close: true });
+}
+
+function cssClipCoord(value, size) {
+  const raw = String(value || '').trim();
+  if (raw.endsWith('%')) return Number.parseFloat(raw) / 100 * size;
+  const n = Number.parseFloat(raw);
+  return Number.isFinite(n) ? n / 96 : NaN;
+}
+
 function textColorForStyle(style, node = {}) {
   const fill = parseCssColor(style?.webkitTextFillColor);
   if (fill) return fill;
@@ -2038,6 +2107,8 @@ function elementTransparency(opacity) {
 function rotateFromTransform(value) {
   const raw = String(value || '');
   if (!raw || raw === 'none') return 0;
+  const rotate = raw.match(/rotate\(\s*([-\d.]+)deg\s*\)/i);
+  if (rotate) return Number(rotate[1]) || 0;
   const matrix = raw.match(/matrix\(([^)]+)\)/);
   if (!matrix) return 0;
   const [a, b] = matrix[1].split(',').map(Number);
