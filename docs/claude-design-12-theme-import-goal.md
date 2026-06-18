@@ -266,7 +266,7 @@ output/theme-preview/ppt/index.html
 更新并同步:
 
 ```text
-~/.agents/skills/dashi-ppt-skill
+~/.agents/skills/dashiai-ppt
 ```
 
 要求:
@@ -350,7 +350,7 @@ npm run themes:import -- theme-import-goal.json
 9. 生成 `layout-manifest.json`。
 10. 刷新内部调试 demo。
 11. 更新 Skill。
-12. 同步到 `~/.agents/skills/dashi-ppt-skill`。
+12. 同步到 `~/.agents/skills/dashiai-ppt`。
 13. 输出 `output/theme-import-summary.md`。
 
 ## 验收标准
@@ -530,5 +530,5 @@ npm run skill:sync
 已同步到:
 
 ```text
-~/.agents/skills/dashi-ppt-skill
+~/.agents/skills/dashiai-ppt
 ```
