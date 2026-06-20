@@ -426,7 +426,7 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
 }
 
 function shouldUseAlphaMatteScreenshot(node) {
-  return ['material-background', 'unicorn-background', 'effect-background', 'masked-element'].includes(node.imageKind);
+  return isBrowserVisualImageKind(node?.imageKind);
 }
 
 function shouldApplyNodeRadiusAlphaMask(node) {
@@ -768,6 +768,11 @@ async function installBrowserCollector(page) {
         ${visualScreenshotRect.toString()}
         ${hasCssMask.toString()}
         ${visibleElementChildren.toString()}
+        ${shouldScreenshotBlendGroup.toString()}
+        ${shouldScreenshotRoundedVisual.toString()}
+        ${cornerRadiiPx.toString()}
+        ${hasNonUniformCssRadius.toString()}
+        ${hasRoundedClipStyle.toString()}
         ${shouldScreenshotGradientEffect.toString()}
         ${shouldUseLocalMaterialFallback.toString()}
         ${isEditableTextContainer.toString()}
@@ -830,7 +835,10 @@ async function installBrowserCollector(page) {
         ${blobToDataUrl.toString()}
         ${isVisibleElement.toString()}
         ${isMediaChrome.toString()}
-        ${isEmptyHostImageSlot.toString()}
+        ${shouldScreenshotImageSlot.toString()}
+        ${isImageSlotElement.toString()}
+        ${hasTransformedAncestor.toString()}
+        ${isRotatedOrSkewedTransform.toString()}
         ${clippedRect.toString()}
         ${rectObject.toString()}
         ${normalizeText.toString()}
@@ -861,7 +869,21 @@ function renderCapturedNode(slide, node, slideRect, warnings, totals) {
   if (node.tag === 'pseudo' && node.text) renderText(slide, { ...node, tag: '#text', singleLine: true }, slideRect, warnings, totals);
 
   if (node.tag === 'img' || node.tag === 'canvas') return;
-  for (const child of node.children || []) renderCapturedNode(slide, child, slideRect, warnings, totals);
+  for (const child of sortedChildrenForRendering(node.children || [])) renderCapturedNode(slide, child, slideRect, warnings, totals);
+}
+
+function sortedChildrenForRendering(children) {
+  return children
+    .map((child, index) => ({ child, index }))
+    .sort((a, b) => stackingOrder(a.child) - stackingOrder(b.child) || a.index - b.index)
+    .map(item => item.child);
+}
+
+function stackingOrder(node) {
+  const z = String(node?.style?.zIndex || '').trim();
+  if (!z || z === 'auto') return 0;
+  const value = Number.parseFloat(z);
+  return Number.isFinite(value) ? value : 0;
 }
 
 function renderBox(slide, node, slideRect, warnings, totals) {
@@ -1043,7 +1065,7 @@ function renderText(slide, node, slideRect, warnings, totals) {
     transparency: combinedTransparency(color.alpha, style.opacity),
     charSpacing: letterSpacing(style.letterSpacing),
   };
-  const yOffset = pptTextYOffset(c, fontSizePx, fontFace, style, value);
+  const yOffset = pptTextYOffset(c, fontSizePx, fontFace, style, value, node);
   if (yOffset) options.y += yOffset;
   const lineSpacing = pptLineSpacing(style.lineHeight, fontSizePx, fontFace, style, value);
   if (lineSpacing) {
@@ -1232,11 +1254,11 @@ function normalizeTransparentPngDataUrl(dataUrl, options = {}) {
 }
 
 function isBrowserVisualImageKind(kind) {
-  return ['material-background', 'unicorn-background', 'effect-background', 'masked-element'].includes(kind);
+  return ['material-background', 'unicorn-background', 'effect-background', 'masked-element', 'blend-group'].includes(kind);
 }
 
 function shouldPreserveTransparentEdges(node, kind) {
-  return node?.elementScreenshot && ['material-background', 'unicorn-background', 'effect-background', 'masked-element'].includes(kind);
+  return node?.elementScreenshot && isBrowserVisualImageKind(kind);
 }
 
 function localBackgroundShadow(style, kind) {
@@ -1362,7 +1384,7 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex, clipRe
     return node;
   }
 
-  if (isEmptyHostImageSlot(el)) {
+  if (shouldScreenshotImageSlot(el)) {
     const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
     const screenshotRect = visualScreenshotRect(rawRect, style, slideRect);
     el.setAttribute('data-editable-pptx-export-id', exportId);
@@ -1372,7 +1394,7 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex, clipRe
     node.rect = rectObject(screenshotRect);
     node.screenshotRect = rectObject(screenshotRect);
     node.screenshotMode = 'screenshot-rect';
-    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'empty-media-slot', count: 1, source: 'browser-host-image-slot' });
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'image-slot', count: 1, source: 'browser-image-slot' });
     return node;
   }
 
@@ -1868,6 +1890,8 @@ function visualScreenshotFallbackKind(el, style, clipped, rawRect, slideRect) {
   const background = String(style.backgroundImage || '');
   const hasVisualBackground = (background && background !== 'none') || hasPaint(style.backgroundColor) || hasAnyBorder(style) || (style.boxShadow && style.boxShadow !== 'none');
   if ((masked || clippedByPath) && hasVisualBackground) return 'masked-element';
+  if (shouldScreenshotBlendGroup(el, style, clipped, rawRect, slideRect)) return 'blend-group';
+  if (shouldScreenshotRoundedVisual(el, style, clipped, rawRect, slideRect)) return 'masked-element';
   if (shouldScreenshotGradientEffect(el, style, clipped, rawRect, slideRect)) return 'effect-background';
   return null;
 }
@@ -1895,6 +1919,59 @@ function visibleElementChildren(el, slideRect) {
       && rect.bottom >= slideRect.y
       && rect.top <= slideRect.y + slideRect.h;
   });
+}
+
+function shouldScreenshotBlendGroup(el, style, clipped, rawRect, slideRect) {
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.0005 || areaRatio > 0.55) return false;
+  let blendVisualCount = 0;
+  for (const child of visibleElementChildren(el, slideRect)) {
+    const childStyle = getComputedStyle(child);
+    const blend = String(childStyle.mixBlendMode || '');
+    if (!blend || blend === 'normal') continue;
+    const background = String(childStyle.backgroundImage || '');
+    if (background.includes('gradient') || hasCssMask(childStyle) || (childStyle.filter && childStyle.filter !== 'none')) {
+      blendVisualCount += 1;
+    }
+  }
+  return blendVisualCount >= 2;
+}
+
+function shouldScreenshotRoundedVisual(el, style, clipped, rawRect, slideRect) {
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.0002 || areaRatio > 0.22) return false;
+  if (hasTransformedAncestor(el)) return false;
+  const background = String(style.backgroundImage || '');
+  const hasVisualBackground = (background && background !== 'none') || hasPaint(style.backgroundColor) || hasAnyBorder(style) || (style.boxShadow && style.boxShadow !== 'none');
+  if (!hasVisualBackground) return false;
+  if (hasNonUniformCssRadius(style, clipped.width, clipped.height)) return true;
+  if (!hasRoundedClipStyle(style, clipped.width, clipped.height)) return false;
+  const children = visibleElementChildren(el, slideRect);
+  if (!children.length || hasOnlyInlineTextChildren(el)) return false;
+  return Boolean(el.querySelector?.('image-slot,[data-dashi-host-image-slot="true"],svg,canvas,img,video'))
+    || background.includes('gradient')
+    || (style.boxShadow && style.boxShadow !== 'none');
+}
+
+function cornerRadiiPx(style, width = 0, height = 0) {
+  return [
+    cssRadiusPx(style.borderTopLeftRadius, width, height),
+    cssRadiusPx(style.borderTopRightRadius, width, height),
+    cssRadiusPx(style.borderBottomRightRadius, width, height),
+    cssRadiusPx(style.borderBottomLeftRadius, width, height),
+  ];
+}
+
+function hasNonUniformCssRadius(style, width = 0, height = 0) {
+  const radii = cornerRadiiPx(style, width, height);
+  const max = Math.max(...radii);
+  if (max < 1) return false;
+  return radii.some(radius => Math.abs(radius - max) > 0.75);
+}
+
+function hasRoundedClipStyle(style, width = 0, height = 0) {
+  if (maxCssRadius(style, width, height) < 2) return false;
+  return /\b(hidden|clip)\b/i.test(`${style.overflow || ''} ${style.overflowX || ''} ${style.overflowY || ''}`);
 }
 
 function shouldScreenshotGradientEffect(el, style, clipped, rawRect, slideRect) {
@@ -2796,9 +2873,37 @@ function isMediaChrome(el) {
   return !!el.closest('script,style,noscript,template,#nav,#preview-panel,#slide-rail,.theme03-theme-toggle,.ctl,.spill,input');
 }
 
-function isEmptyHostImageSlot(el) {
-  return !!el.matches?.('[data-dashi-host-image-slot="true"]')
-    && !el.querySelector?.('img,video,canvas,svg');
+function shouldScreenshotImageSlot(el) {
+  return isImageSlotElement(el) && !hasTransformedAncestor(el);
+}
+
+function isImageSlotElement(el) {
+  return !!el.matches?.('image-slot,[data-dashi-host-image-slot="true"]');
+}
+
+function hasTransformedAncestor(el) {
+  const slide = el.closest?.('#deck > .slide');
+  for (let parent = el.parentElement; parent && parent !== slide; parent = parent.parentElement) {
+    const transform = String(getComputedStyle(parent).transform || '');
+    if (isRotatedOrSkewedTransform(transform)) return true;
+  }
+  return false;
+}
+
+function isRotatedOrSkewedTransform(transform) {
+  const raw = String(transform || '').trim();
+  if (!raw || raw === 'none') return false;
+  const matrix = raw.match(/^matrix\(([^)]+)\)$/);
+  if (matrix) {
+    const [a, b, c, d] = matrix[1].split(',').map(value => Number.parseFloat(value.trim()) || 0);
+    return Math.abs(b) > 0.001 || Math.abs(c) > 0.001 || Math.abs(a - d) > 0.001;
+  }
+  const matrix3d = raw.match(/^matrix3d\(([^)]+)\)$/);
+  if (matrix3d) {
+    const values = matrix3d[1].split(',').map(value => Number.parseFloat(value.trim()) || 0);
+    return Math.abs(values[1]) > 0.001 || Math.abs(values[4]) > 0.001 || Math.abs(values[0] - values[5]) > 0.001;
+  }
+  return /rotate|skew/i.test(raw);
 }
 
 function clippedRect(rect, slideRect) {
@@ -3245,15 +3350,26 @@ function pptLineSpacing(value, fontSizePx, fontFace, style = {}, text = '') {
   return pptFontSize(lineHeightPx, fontFace, style, text);
 }
 
-function pptTextYOffset(box, fontSizePx, fontFace, style = {}, text = '') {
+function pptTextYOffset(box, fontSizePx, fontFace, style = {}, text = '', node = null) {
   const stack = fontStack(style, fontFace);
   if (fontSizePx < 28) return 0;
+  const parentTag = String(node?.parentTag || '');
+  const cjkStack = /Noto Sans SC|PingFang SC|Songti SC|Microsoft YaHei|Source Han|思源|黑体|宋体|sans-serif|system-ui|-apple-system/i.test(stack);
+  const numericText = /^[\s¥$€£+\-−–—.,:%/0-9A-Za-z]+$/.test(String(text || ''));
+  if (numericText && cjkStack) {
+    if (fontSizePx >= 220) return box.h * 0.12;
+    if (fontSizePx >= 160) return box.h * 0.10;
+    if (fontSizePx >= 96) return box.h * 0.07;
+    if (fontSizePx >= 60) return box.h * 0.045;
+  }
+  const compactCjkUnit = parentTag === 'span' && /^[\s¥$€£+\-−–—.,:%/0-9万亿兆]+$/.test(String(text || ''));
+  if (compactCjkUnit && cjkStack && fontSizePx >= 72) return -box.h * 0.035;
   if (hasCjkText(text)) {
-    if (fontSizePx >= 180) return box.h * 0.16;
-    if (fontSizePx >= 120) return box.h * 0.12;
-    if (fontSizePx >= 96) return box.h * 0.085;
-    if (fontSizePx >= 48) return box.h * 0.06;
-    return box.h * 0.025;
+    if (fontSizePx >= 180) return box.h * 0.08;
+    if (fontSizePx >= 120) return box.h * 0.065;
+    if (fontSizePx >= 96) return box.h * 0.05;
+    if (fontSizePx >= 48) return box.h * 0.035;
+    return box.h * 0.015;
   }
   if (/Anton/i.test(stack) && fontSizePx >= 80) return box.h * 0.09;
   if (/Space Grotesk|Archivo|Arimo|IBM Plex Sans|Newsreader|Caveat/i.test(stack) && fontSizePx >= 48) return box.h * 0.045;
