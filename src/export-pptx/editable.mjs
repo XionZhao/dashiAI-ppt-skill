@@ -830,6 +830,7 @@ async function installBrowserCollector(page) {
         ${blobToDataUrl.toString()}
         ${isVisibleElement.toString()}
         ${isMediaChrome.toString()}
+        ${isEmptyHostImageSlot.toString()}
         ${clippedRect.toString()}
         ${rectObject.toString()}
         ${normalizeText.toString()}
@@ -1361,6 +1362,20 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex, clipRe
     return node;
   }
 
+  if (isEmptyHostImageSlot(el)) {
+    const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
+    const screenshotRect = visualScreenshotRect(rawRect, style, slideRect);
+    el.setAttribute('data-editable-pptx-export-id', exportId);
+    node.exportId = exportId;
+    node.elementScreenshot = true;
+    node.imageKind = 'masked-element';
+    node.rect = rectObject(screenshotRect);
+    node.screenshotRect = rectObject(screenshotRect);
+    node.screenshotMode = 'screenshot-rect';
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'empty-media-slot', count: 1, source: 'browser-host-image-slot' });
+    return node;
+  }
+
   const visualFallback = visualScreenshotFallbackKind(el, style, clipped, rawRect, slideRect);
   if (visualFallback) {
     const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
@@ -1888,12 +1903,13 @@ function shouldScreenshotGradientEffect(el, style, clipped, rawRect, slideRect) 
   if ((el.innerText || el.textContent || '').trim()) return false;
   if (visibleElementChildren(el, slideRect).length) return false;
   const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  const hasBlendMode = style.mixBlendMode && style.mixBlendMode !== 'normal';
   const hasFilterEffect = style.filter && style.filter !== 'none';
   const isTransparentRadial = /radial-gradient/i.test(background)
     && backgroundHasTransparentStop(background)
     && transparentCssPaint(style.backgroundColor);
   const isComplexGradient = /color-mix\(|color\(|closest-side|closest-corner|farthest-side|farthest-corner/i.test(background);
-  if (hasFilterEffect || hasCssMask(style)) return true;
+  if (hasBlendMode || hasFilterEffect || hasCssMask(style)) return true;
   return isTransparentRadial && (isComplexGradient || areaRatio > 0.005 || !sameClientRect(rawRect, clipped));
 }
 
@@ -2780,6 +2796,11 @@ function isMediaChrome(el) {
   return !!el.closest('script,style,noscript,template,#nav,#preview-panel,#slide-rail,.theme03-theme-toggle,.ctl,.spill,input');
 }
 
+function isEmptyHostImageSlot(el) {
+  return !!el.matches?.('[data-dashi-host-image-slot="true"]')
+    && !el.querySelector?.('img,video,canvas,svg');
+}
+
 function clippedRect(rect, slideRect) {
   const left = Math.max(rect.left, slideRect.x);
   const top = Math.max(rect.top, slideRect.y);
@@ -3228,6 +3249,8 @@ function pptTextYOffset(box, fontSizePx, fontFace, style = {}, text = '') {
   const stack = fontStack(style, fontFace);
   if (fontSizePx < 28) return 0;
   if (hasCjkText(text)) {
+    if (fontSizePx >= 180) return box.h * 0.16;
+    if (fontSizePx >= 120) return box.h * 0.12;
     if (fontSizePx >= 96) return box.h * 0.085;
     if (fontSizePx >= 48) return box.h * 0.06;
     return box.h * 0.025;
