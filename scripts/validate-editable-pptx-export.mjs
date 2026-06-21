@@ -83,8 +83,13 @@ const fallbackTextRiskMatrix = args.has('--fallback-text-risk-matrix');
 const theme10UserRegressions = args.has('--theme10-user-regressions');
 const jad64FollowupRegressions = args.has('--jad64-followup-regressions');
 const jad64AcceptanceRegressions = args.has('--jad64-acceptance-regressions');
+const jad64RootCauseRegressions = args.has('--jad64-root-cause-regressions');
+const jad64Random30Regressions = args.has('--jad64-random30-regressions');
+const jad64CutoutRegressions = args.has('--jad64-cutout-regressions');
+const jad64MaterialLayerRegressions = args.has('--jad64-material-layer-regressions');
 const cliUrl = getArg('--url');
 const cliThemePack = getArg('--theme-pack');
+const cliSelectionSummary = getArg('--selection-summary') || '/Users/jadon7/Downloads/theme-30-random-pptx-export-20260618T033406/selection-summary.json';
 const cliSamplesPerTheme = Math.max(DEFAULT_VISUAL_SAMPLE_COUNT, Number(getArg('--samples-per-theme') || DEFAULT_VISUAL_SAMPLE_COUNT));
 
 if (!existsSync(CHROME_PATH)) {
@@ -114,10 +119,714 @@ if (legacyRed) {
   await runJad64FollowupRegressionValidation();
 } else if (jad64AcceptanceRegressions) {
   await runJad64AcceptanceRegressionValidation();
+} else if (jad64RootCauseRegressions) {
+  await runJad64RootCauseRegressionValidation();
+} else if (jad64Random30Regressions) {
+  await runJad64Random30RegressionValidation();
+} else if (jad64CutoutRegressions) {
+  await runJad64CutoutRegressionValidation();
+} else if (jad64MaterialLayerRegressions) {
+  await runJad64MaterialLayerRegressionValidation();
 } else if (theme10UserRegressions) {
   await runTheme10UserRegressionValidation();
 } else {
   await runEditableExportValidation();
+}
+
+async function runJad64MaterialLayerRegressionValidation() {
+  if (!cliUrl) throw new Error('Usage: node scripts/validate-editable-pptx-export.mjs --jad64-material-layer-regressions --url <preview-url>');
+  const outDir = path.join(OUT_DIR, 'jad64-material-layer-regressions');
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  const samples = [
+    {
+      id: 'theme02-orbit-material-text-double-draw',
+      themePack: 'theme02',
+      key: 'theme02_page065',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_WnTYsvm57P/CleanShot 2026-06-18 at 14.24.34@2x.png',
+      textProbe: 'AI 资本图景',
+      minTextCount: 6,
+      maxHiddenMaterialRmse: 0.10,
+    },
+    {
+      id: 'theme09-cover-glass-alpha',
+      themePack: 'theme09',
+      key: 'theme09_page001',
+      minTextCount: 12,
+      minTransparentMediaCount: 2,
+    },
+    {
+      id: 'theme07-data-year-lens-alpha',
+      themePack: 'theme07',
+      key: 'theme07_page005',
+      minTextCount: 18,
+      minTransparentMediaCount: 4,
+    },
+    {
+      id: 'theme07-method-decorative-wash-hard-edge',
+      themePack: 'theme07',
+      key: 'theme07_page008',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_20dyhbuwD4/CleanShot 2026-06-18 at 14.26.08@2x.png',
+      maxLargeDecorativeGradientShapes: 0,
+      minTextCount: 24,
+    },
+    {
+      id: 'theme07-case-decorative-wash-hard-edge',
+      themePack: 'theme07',
+      key: 'theme07_page009',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_kFUDwWaOPU/CleanShot 2026-06-18 at 14.26.29@2x.png',
+      maxLargeDecorativeGradientShapes: 0,
+      minTextCount: 30,
+    },
+    {
+      id: 'theme01-cover-material-layer-control',
+      themePack: 'theme01',
+      key: 'theme01_page004',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_YN7SZF3Wmz/CleanShot 2026-06-18 at 14.24.48@2x.png',
+      minTextCount: 8,
+    },
+  ];
+  const browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  let context;
+  let page;
+  const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+  const results = [];
+  const failures = [];
+  try {
+    context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true });
+    page = await context.newPage();
+    page.setDefaultTimeout(180000);
+    await page.goto(`${cliUrl}${cliUrl.includes('?') ? '&' : '?'}jad64_material_layer=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    await installValidationHelpers(page);
+    for (const sample of samples) {
+      const sampleDir = path.join(outDir, sample.id);
+      mkdirSync(sampleDir, { recursive: true });
+      const nav = await navigateValidationSample(page, sample);
+      if (!nav.found) {
+        const message = `${sample.id} could not find ${sample.key} in ${sample.themePack}; available keys: ${nav.availableKeys.slice(0, 10).join(', ')}`;
+        failures.push(message);
+        results.push({ ...sample, found: false, failures: [message] });
+        continue;
+      }
+      const activeSlide = await page.$('#deck > .slide.active, #deck > .slide[data-deck-active]');
+      const htmlScreenshot = path.join(sampleDir, 'html-slide.png');
+      if (activeSlide) await activeSlide.screenshot({ path: htmlScreenshot });
+      const dom = await collectMaterialLayerDomProbe(page, sample);
+      writeFileSync(path.join(sampleDir, 'dom-probe.json'), JSON.stringify(dom, null, 2) + '\n');
+      const hiddenMaterial = sample.textProbe && dom.materialTextRegion
+        ? await captureHiddenMaterialTextReference(page, dom.materialTextRegion, sampleDir)
+        : null;
+      const pptxFile = path.join(sampleDir, `${sample.id}.pptx`);
+      const reportFile = path.join(sampleDir, `${sample.id}-report.json`);
+      const exportResult = await mod.exportEditablePptxFromPage(page, {
+        outFile: pptxFile,
+        reportFile,
+        title: `JAD-64 material layer regression ${sample.id}`,
+        slideIndexes: [nav.index],
+      });
+      const pptx = inspectPptx(pptxFile);
+      const mediaDir = path.join(sampleDir, 'media');
+      mkdirSync(mediaDir, { recursive: true });
+      spawnSync('unzip', ['-q', '-o', pptxFile, 'ppt/media/*', '-d', mediaDir], { encoding: 'utf8' });
+      const media = inspectExtractedMedia(mediaDir);
+      const visual = runQuickLookVisualComparison(pptxFile, htmlScreenshot, sampleDir);
+      const pairImage = createSamplePairImage(sample, visual, sampleDir);
+      const materialText = hiddenMaterial
+        ? analyzeMaterialTextInRaster(sample, { pptx, media, dom, hiddenMaterial, sampleDir })
+        : null;
+      const checks = validateMaterialLayerSample(sample, { pptx, dom, media, materialText });
+      failures.push(...checks.failures);
+      if (sample.screenshot && existsSync(sample.screenshot) && pairImage && commandAvailable('magick')) {
+        spawnSync('magick', [
+          sample.screenshot,
+          '-resize',
+          '640x360>',
+          pairImage,
+          '-resize',
+          '960x540!',
+          '-append',
+          path.join(sampleDir, 'user-failure-vs-current-render.png'),
+        ], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      }
+      results.push({
+        ...sample,
+        found: true,
+        index: nav.index,
+        htmlScreenshot,
+        pptxFile,
+        reportFile,
+        pairImage,
+        dom,
+        hiddenMaterial,
+        materialText,
+        pptx: summarizeInspection(pptx),
+        quickLook: visual,
+        exportSummary: {
+          slideCount: exportResult.slideCount,
+          textObjects: exportResult.textObjects,
+          shapeObjects: exportResult.shapeObjects,
+          imageObjects: exportResult.imageObjects,
+          warningCount: exportResult.warnings?.length || 0,
+          fallbackWarnings: (exportResult.warnings || []).filter(warning => warning.type === 'node-image-fallback'),
+        },
+        checks,
+      });
+    }
+  } finally {
+    await page?.close().catch(() => {});
+    await context?.close().catch(() => {});
+    await browser.close().catch(() => {});
+  }
+  const contactSheet = createSampleContactSheet(results, outDir);
+  const result = {
+    mode: 'jad64-material-layer-regressions',
+    url: cliUrl,
+    outDir,
+    contactSheet,
+    passed: failures.length === 0,
+    samples: results,
+    failures,
+  };
+  writeFileSync(path.join(outDir, 'jad64-material-layer-regressions.json'), JSON.stringify(result, null, 2) + '\n');
+  console.log(JSON.stringify(result, null, 2));
+  if (failures.length) process.exitCode = 1;
+}
+
+async function runJad64CutoutRegressionValidation() {
+  if (!cliUrl) throw new Error('Usage: node scripts/validate-editable-pptx-export.mjs --jad64-cutout-regressions --url <preview-url>');
+  const outDir = path.join(OUT_DIR, 'jad64-cutout-regressions');
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  const samples = [
+    {
+      id: 'theme09-risk-top-right-cutout',
+      themePack: 'theme09',
+      key: 'theme09_page027',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_9OgGc08oRa/CleanShot 2026-06-18 at 13.25.02@2x.png',
+      checkTopBlack: true,
+      minTextCount: 24,
+    },
+    {
+      id: 'theme09-cover-top-right-cutout',
+      themePack: 'theme09',
+      key: 'theme09_page002',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_dt5xTXb4kk/CleanShot 2026-06-18 at 13.25.22@2x.png',
+      checkTopBlack: true,
+      minTextCount: 8,
+    },
+    {
+      id: 'theme09-appendix-left-sidebar',
+      themePack: 'theme09',
+      key: 'theme09_page030',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_QowZ3ZBR0l/CleanShot 2026-06-18 at 13.25.45@2x.png',
+      checkLeftSidebar: true,
+      minTextCount: 8,
+    },
+    {
+      id: 'theme09-rank-left-sidebar',
+      themePack: 'theme09',
+      key: 'theme09_page036',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_EgiNcmafBv/CleanShot 2026-06-18 at 13.26.11@2x.png',
+      checkLeftSidebar: true,
+      minTextCount: 40,
+    },
+    {
+      id: 'theme09-contact-left-sidebar',
+      themePack: 'theme09',
+      key: 'theme09_page039',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_vimeyv9Qur/CleanShot 2026-06-18 at 13.26.33@2x.png',
+      checkLeftSidebar: true,
+      minTextCount: 16,
+    },
+    {
+      id: 'theme02-orbit-center-text',
+      themePack: 'theme02',
+      key: 'theme02_page065',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_Do9pzPYSI8/CleanShot 2026-06-18 at 13.29.14@2x.png',
+      minTextCount: 6,
+    },
+    {
+      id: 'theme01-cover-material-overlap',
+      themePack: 'theme01',
+      key: 'theme01_page004',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_s1ERJPUjGZ/CleanShot 2026-06-18 at 13.30.04@2x.png',
+      minTextCount: 8,
+    },
+  ];
+  const browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  let context;
+  let page;
+  const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+  const results = [];
+  const failures = [];
+  try {
+    context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true });
+    page = await context.newPage();
+    page.setDefaultTimeout(180000);
+    await page.goto(`${cliUrl}${cliUrl.includes('?') ? '&' : '?'}jad64_cutout=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    await installValidationHelpers(page);
+    for (const sample of samples) {
+      const sampleDir = path.join(outDir, sample.id);
+      mkdirSync(sampleDir, { recursive: true });
+      const nav = await navigateValidationSample(page, sample);
+      if (!nav.found) {
+        const message = `${sample.id} could not find ${sample.key} in ${sample.themePack}; available keys: ${nav.availableKeys.slice(0, 10).join(', ')}`;
+        failures.push(message);
+        results.push({ ...sample, found: false, failures: [message] });
+        continue;
+      }
+      const activeSlide = await page.$('#deck > .slide.active, #deck > .slide[data-deck-active]');
+      const htmlScreenshot = path.join(sampleDir, 'html-slide.png');
+      if (activeSlide) await activeSlide.screenshot({ path: htmlScreenshot });
+      const dom = await collectCutoutDomProbe(page);
+      writeFileSync(path.join(sampleDir, 'dom-probe.json'), JSON.stringify(dom, null, 2) + '\n');
+      const pptxFile = path.join(sampleDir, `${sample.id}.pptx`);
+      const reportFile = path.join(sampleDir, `${sample.id}-report.json`);
+      const exportResult = await mod.exportEditablePptxFromPage(page, {
+        outFile: pptxFile,
+        reportFile,
+        title: `JAD-64 cutout regression ${sample.id}`,
+        slideIndexes: [nav.index],
+      });
+      const pptx = inspectPptx(pptxFile);
+      const mediaDir = path.join(sampleDir, 'media');
+      mkdirSync(mediaDir, { recursive: true });
+      spawnSync('unzip', ['-q', '-o', pptxFile, 'ppt/media/*', '-d', mediaDir], { encoding: 'utf8' });
+      const media = inspectExtractedMedia(mediaDir);
+      const mediaStats = analyzeSampleRasterFallbacks(pptx, media);
+      const contamination = analyzeCutoutMediaContamination(sample, pptx, media, sampleDir);
+      const visual = runQuickLookVisualComparison(pptxFile, htmlScreenshot, sampleDir);
+      const pairImage = createSamplePairImage(sample, visual, sampleDir);
+      const checks = validateCutoutSample(sample, { pptx, contamination, exportResult });
+      failures.push(...checks.failures);
+      if (sample.screenshot && existsSync(sample.screenshot) && pairImage && commandAvailable('magick')) {
+        spawnSync('magick', [
+          sample.screenshot,
+          '-resize',
+          '640x360>',
+          pairImage,
+          '-resize',
+          '960x540!',
+          '-append',
+          path.join(sampleDir, 'user-failure-vs-current-render.png'),
+        ], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      }
+      results.push({
+        ...sample,
+        found: true,
+        index: nav.index,
+        htmlScreenshot,
+        pptxFile,
+        reportFile,
+        pairImage,
+        dom,
+        pptx: summarizeInspection(pptx),
+        quickLook: visual,
+        mediaStats,
+        contamination,
+        exportSummary: {
+          slideCount: exportResult.slideCount,
+          textObjects: exportResult.textObjects,
+          shapeObjects: exportResult.shapeObjects,
+          imageObjects: exportResult.imageObjects,
+          warningCount: exportResult.warnings?.length || 0,
+          fallbackWarnings: (exportResult.warnings || []).filter(warning => warning.type === 'node-image-fallback'),
+        },
+        checks,
+      });
+    }
+  } finally {
+    await page?.close().catch(() => {});
+    await context?.close().catch(() => {});
+    await browser.close().catch(() => {});
+  }
+  const contactSheet = createSampleContactSheet(results, outDir);
+  const result = {
+    mode: 'jad64-cutout-regressions',
+    url: cliUrl,
+    outDir,
+    contactSheet,
+    passed: failures.length === 0,
+    samples: results,
+    failures,
+  };
+  writeFileSync(path.join(outDir, 'jad64-cutout-regressions.json'), JSON.stringify(result, null, 2) + '\n');
+  console.log(JSON.stringify(result, null, 2));
+  if (failures.length) process.exitCode = 1;
+}
+
+async function runJad64Random30RegressionValidation() {
+  if (!cliUrl) throw new Error('Usage: node scripts/validate-editable-pptx-export.mjs --jad64-random30-regressions --url <preview-url> [--selection-summary <path>]');
+  if (!existsSync(cliSelectionSummary)) throw new Error(`Missing selection summary: ${cliSelectionSummary}`);
+  const outDir = path.join(OUT_DIR, 'jad64-random30-regressions');
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  const selection = JSON.parse(readFileSync(cliSelectionSummary, 'utf8'));
+  const sampleSpecs = [
+    {
+      id: 'theme11-cover-ui-clip',
+      themePack: 'theme11',
+      key: 'theme11_page001',
+      coverage: 'fallback screenshots must not capture slide thumbnails or UI-like panels into the slide',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_RwKcG7MQdg/CleanShot 2026-06-18 at 11.46.27@2x.png',
+      maxRmse: 0.22,
+      maxDiffRatio: 0.24,
+      maxLeftStripDiffRatio: 0.18,
+      maxLargeRasterArea: 0.42,
+    },
+    {
+      id: 'theme11-stacked-chart-layering',
+      themePack: 'theme11',
+      key: 'theme11_page039',
+      coverage: 'chart/local fallback layers must not duplicate or overpaint stacked chart content',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_MWenjWMDd1/CleanShot 2026-06-18 at 11.47.33@2x.png',
+      maxRmse: 0.23,
+      maxDiffRatio: 0.22,
+      maxLargeRasterArea: 0.50,
+    },
+    {
+      id: 'theme11-halfscreen-overlay',
+      themePack: 'theme11',
+      key: 'theme11_page075',
+      coverage: 'large translucent fallback overlays must not cover half the slide',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_S8dOy496Gl/CleanShot 2026-06-18 at 11.48.23@2x.png',
+      maxRmse: 0.22,
+      maxDiffRatio: 0.24,
+      maxLeftStripDiffRatio: 0.18,
+      maxLargeRasterArea: 0.42,
+    },
+    {
+      id: 'theme10-risk-profile-loss',
+      themePack: 'theme10',
+      key: 'theme10_page008',
+      coverage: 'previously-good theme10 geometry/text must not lose visible elements',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_pyKRjzo48O/CleanShot 2026-06-18 at 11.48.44@2x.png',
+      maxRmse: 0.20,
+      maxDiffRatio: 0.18,
+      minTextCount: 8,
+    },
+    {
+      id: 'theme09-cover-text-baked-into-background',
+      themePack: 'theme09',
+      key: 'theme09_page002',
+      coverage: 'background/material fallback must not bake editable title text into a raster image',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_8WLR5lIE0X/CleanShot 2026-06-18 at 11.49.47@2x.png',
+      maxRmse: 0.22,
+      maxDiffRatio: 0.32,
+      maxLargeRasterArea: 0.55,
+      minTextCount: 8,
+      textProbes: ['美国大额融资', 'AI 公司', '调研报告'],
+    },
+    {
+      id: 'theme09-chart-black-block',
+      themePack: 'theme09',
+      key: 'theme09_page017',
+      coverage: 'chart fallback must not create black blocks or misplaced local raster layers',
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_N3kjh8z7g7/CleanShot 2026-06-18 at 11.50.36@2x.png',
+      maxRmse: 0.22,
+      maxDiffRatio: 0.20,
+      maxLargeRasterArea: 0.45,
+    },
+  ];
+  const samples = resolveRandom30Samples(selection, sampleSpecs);
+  writeFileSync(path.join(outDir, 'sample-selection.json'), JSON.stringify({ selectionSummary: cliSelectionSummary, samples }, null, 2) + '\n');
+
+  const browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  let context;
+  let page;
+  const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+  const results = [];
+  const failures = [];
+  try {
+    context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true });
+    page = await context.newPage();
+    page.setDefaultTimeout(180000);
+    await page.goto(`${cliUrl}${cliUrl.includes('?') ? '&' : '?'}jad64_random30=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    await installValidationHelpers(page);
+    for (const sample of samples) {
+      const sampleDir = path.join(outDir, sample.id);
+      mkdirSync(sampleDir, { recursive: true });
+      const nav = await navigateValidationSample(page, sample);
+      if (!nav.found) {
+        const message = `${sample.id} could not find ${sample.key} in ${sample.themePack}; available keys: ${nav.availableKeys.slice(0, 10).join(', ')}`;
+        failures.push(message);
+        results.push({ ...sample, found: false, failures: [message] });
+        continue;
+      }
+      const activeSlide = await page.$('#deck > .slide.active, #deck > .slide[data-deck-active]');
+      const htmlScreenshot = path.join(sampleDir, 'html-slide.png');
+      if (activeSlide) await activeSlide.screenshot({ path: htmlScreenshot });
+      const dom = await collectRandom30DomProbe(page, sample);
+      writeFileSync(path.join(sampleDir, 'dom-probe.json'), JSON.stringify(dom, null, 2) + '\n');
+      const pptxFile = path.join(sampleDir, `${sample.id}.pptx`);
+      const reportFile = path.join(sampleDir, `${sample.id}-report.json`);
+      const exportResult = await mod.exportEditablePptxFromPage(page, {
+        outFile: pptxFile,
+        reportFile,
+        title: `JAD-64 random30 regression ${sample.id}`,
+        slideIndexes: [nav.index],
+      });
+      const pptx = inspectPptx(pptxFile);
+      const mediaDir = path.join(sampleDir, 'media');
+      mkdirSync(mediaDir, { recursive: true });
+      spawnSync('unzip', ['-q', '-o', pptxFile, 'ppt/media/*', '-d', mediaDir], { encoding: 'utf8' });
+      const media = inspectExtractedMedia(mediaDir);
+      const visual = runQuickLookVisualComparison(pptxFile, htmlScreenshot, sampleDir);
+      const pairImage = createSamplePairImage(sample, visual, sampleDir);
+      const diffStats = analyzeRenderedDiff(visual, sampleDir);
+      const mediaStats = analyzeSampleRasterFallbacks(pptx, media);
+      const checks = validateRandom30Sample(sample, { dom, pptx, visual, diffStats, mediaStats, exportResult });
+      failures.push(...checks.failures);
+      if (sample.screenshot && existsSync(sample.screenshot) && pairImage && commandAvailable('magick')) {
+        spawnSync('magick', [
+          sample.screenshot,
+          '-resize',
+          '640x360>',
+          pairImage,
+          '-resize',
+          '960x540!',
+          '-append',
+          path.join(sampleDir, 'user-failure-vs-current-render.png'),
+        ], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      }
+      results.push({
+        ...sample,
+        found: true,
+        index: nav.index,
+        htmlScreenshot,
+        pptxFile,
+        reportFile,
+        pairImage,
+        userFailureVsCurrentRender: sample.screenshot ? path.join(sampleDir, 'user-failure-vs-current-render.png') : null,
+        dom,
+        pptx: summarizeInspection(pptx),
+        quickLook: visual,
+        diffStats,
+        mediaStats,
+        exportSummary: {
+          slideCount: exportResult.slideCount,
+          textObjects: exportResult.textObjects,
+          shapeObjects: exportResult.shapeObjects,
+          imageObjects: exportResult.imageObjects,
+          warningCount: exportResult.warnings?.length || 0,
+          fallbackWarnings: (exportResult.warnings || []).filter(warning => warning.type === 'node-image-fallback'),
+        },
+        checks,
+      });
+    }
+  } finally {
+    await page?.close().catch(() => {});
+    await context?.close().catch(() => {});
+    await browser.close().catch(() => {});
+  }
+  const contactSheet = createSampleContactSheet(results, outDir);
+  const result = {
+    mode: 'jad64-random30-regressions',
+    url: cliUrl,
+    selectionSummary: cliSelectionSummary,
+    outDir,
+    contactSheet,
+    passed: failures.length === 0,
+    samples: results,
+    failures,
+  };
+  writeFileSync(path.join(outDir, 'jad64-random30-regressions.json'), JSON.stringify(result, null, 2) + '\n');
+  console.log(JSON.stringify(result, null, 2));
+  if (failures.length) process.exitCode = 1;
+}
+
+async function runJad64RootCauseRegressionValidation() {
+  if (!cliUrl) throw new Error('Usage: node scripts/validate-editable-pptx-export.mjs --jad64-root-cause-regressions --url <preview-url>');
+  const outDir = path.join(OUT_DIR, 'jad64-root-cause-regressions');
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  const samples = [
+    {
+      label: 'theme04-cover-neon-material',
+      themePack: 'theme04',
+      key: 'theme04_page001',
+      coverage: 'PowerPoint-visible glass/neon material fidelity for rounded local highlight surfaces',
+      probes: ['material-region'],
+      textProbes: ['重新分配'],
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_6wZe8ktxF9/CleanShot 2026-06-18 at 10.41.22@2x.png',
+    },
+    {
+      label: 'theme07-waterfall-svg-crop',
+      themePack: 'theme07',
+      key: 'theme07_page023',
+      coverage: 'SVG/chart fallback crop must include the full browser-rendered visual bbox',
+      probes: ['svg-crop'],
+      textProbes: ['+50', '其他'],
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_CARCyRC48K/CleanShot 2026-06-18 at 10.25.28@2x.png',
+    },
+    {
+      label: 'theme02-radar-svg-aspect',
+      themePack: 'theme02',
+      key: 'theme02_page016',
+      coverage: 'SVG/chart fallback aspect must match the rendered HTML chart region',
+      probes: ['svg-aspect'],
+      textProbes: ['模型能力', '商业化', '算力储备'],
+      screenshot: '/Users/jadon7/Library/Application Support/CleanShot/media/media_JSQQ3rlqc9/CleanShot 2026-06-18 at 10.26.43@2x.png',
+    },
+    {
+      label: 'theme09-rounded-material-cross-theme',
+      themePack: 'theme09',
+      key: 'theme09_page010',
+      coverage: 'cross-theme rounded/glass material region uses the same local fallback geometry',
+      probes: ['material-region'],
+    },
+    {
+      label: 'theme04-radar-svg-aspect-cross-page',
+      themePack: 'theme04',
+      key: 'theme04_page030',
+      coverage: 'cross-page radar SVG aspect uses the same fallback sizing logic',
+      probes: ['svg-aspect'],
+      textProbes: ['模型能力', '资本储备'],
+    },
+    {
+      label: 'theme04-waterfall-svg-crop-cross-page',
+      themePack: 'theme04',
+      key: 'theme04_page047',
+      coverage: 'cross-page waterfall SVG crop uses the same fallback visual bbox logic',
+      probes: ['svg-crop'],
+      textProbes: ['其他赛道', 'OTHERS'],
+    },
+  ];
+  const rootCauseMatrix = [
+    {
+      cluster: 'local material fallback bbox',
+      samples: ['theme04-cover-neon-material', 'theme09-rounded-material-cross-theme'],
+      sharedMechanism: 'CSS gradient/shadow/glow/glass regions are browser-rendered visual surfaces; PPT native approximations need a bounded local image fallback at the element visual bbox while preserving text as editable objects.',
+    },
+    {
+      cluster: 'SVG fallback aspect and crop',
+      samples: ['theme07-waterfall-svg-crop', 'theme02-radar-svg-aspect', 'theme04-radar-svg-aspect-cross-page', 'theme04-waterfall-svg-crop-cross-page'],
+      sharedMechanism: 'SVG/chart fallback images must use the browser-rendered visual bbox and rendered aspect instead of the raw element CSS box when exported to PowerPoint.',
+    },
+  ];
+  const renderPath = {
+    primary: 'Quick Look qlmanage thumbnail rendered from the exported PPTX, normalized to 960x540 for deterministic local crop comparison.',
+    candidates: [
+      {
+        renderer: 'Microsoft PowerPoint AppleScript save as PNG/PDF',
+        status: 'rejected',
+        reason: 'PowerPoint is installed and scriptable, but save-as PNG/PDF AppleScript calls returned success without creating files in this environment.',
+      },
+      {
+        renderer: 'Microsoft PowerPoint slide show + screencapture',
+        status: 'rejected',
+        reason: 'A slide show window can be created, but macOS screencapture captured the foreground desktop/app stack instead of the slide show surface, so it would create false evidence.',
+      },
+      {
+        renderer: 'LibreOffice',
+        status: 'unavailable',
+        reason: 'LibreOffice/soffice is not installed on this machine.',
+      },
+    ],
+    limitation: 'Quick Look is not identical to an interactive PowerPoint edit window, but it renders the actual exported PPTX through the macOS presentation preview stack and is repeatable for automated red/green visual evidence.',
+  };
+  writeFileSync(path.join(outDir, 'root-cause-matrix.json'), JSON.stringify(rootCauseMatrix, null, 2) + '\n');
+  writeFileSync(path.join(outDir, 'render-path.json'), JSON.stringify(renderPath, null, 2) + '\n');
+
+  const browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  let context;
+  let page;
+  const mod = await import(pathToFileURL(path.join(ROOT, 'src/export-pptx/editable.mjs')));
+  const results = [];
+  const failures = [];
+  try {
+    context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true });
+    page = await context.newPage();
+    page.setDefaultTimeout(180000);
+    await page.goto(`${cliUrl}${cliUrl.includes('?') ? '&' : '?'}jad64_root_cause=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    await installValidationHelpers(page);
+
+    for (const sample of samples) {
+      const sampleDir = path.join(outDir, sample.label);
+      mkdirSync(sampleDir, { recursive: true });
+      const nav = await navigateValidationSample(page, sample);
+      if (!nav.found) {
+        failures.push(`${sample.label} could not find ${sample.key} in ${sample.themePack}; available keys: ${nav.availableKeys.slice(0, 10).join(', ')}`);
+        results.push({ ...sample, found: false, availableKeys: nav.availableKeys });
+        continue;
+      }
+      const activeSlide = await page.$('#deck > .slide.active, #deck > .slide[data-deck-active]');
+      const htmlScreenshot = path.join(sampleDir, 'html-slide.png');
+      if (activeSlide) await activeSlide.screenshot({ path: htmlScreenshot });
+      const dom = await collectJad64RootCauseDomProbe(page, sample);
+      writeFileSync(path.join(sampleDir, 'dom-probe.json'), JSON.stringify(dom, null, 2) + '\n');
+
+      const pptxFile = path.join(sampleDir, `${sample.label}.pptx`);
+      const reportFile = path.join(sampleDir, `${sample.label}-report.json`);
+      await mod.exportEditablePptxFromPage(page, {
+        outFile: pptxFile,
+        reportFile,
+        title: `JAD-64 root cause ${sample.label}`,
+        slideIndexes: [nav.index],
+      });
+      const pptx = inspectPptx(pptxFile);
+      const visual = runQuickLookVisualComparison(pptxFile, htmlScreenshot, sampleDir);
+      const pairImage = createSamplePairImage(sample, visual, sampleDir);
+      const regionChecks = analyzeJad64RootCauseRegions(sample, dom, visual, sampleDir);
+      const checks = validateJad64RootCauseSample(sample, dom, pptx, visual, regionChecks);
+      failures.push(...checks.failures);
+      if (!visual?.available || !pairImage) failures.push(`${sample.label} did not produce rendered PPTX visual evidence (${visual?.reason || 'missing-pair'}).`);
+      if (sample.screenshot && existsSync(sample.screenshot) && pairImage && commandAvailable('magick')) {
+        spawnSync('magick', [
+          sample.screenshot,
+          '-resize',
+          '640x360>',
+          pairImage,
+          '-resize',
+          '960x540!',
+          '-append',
+          path.join(sampleDir, 'user-failure-vs-current-render.png'),
+        ], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      }
+      results.push({
+        ...sample,
+        found: true,
+        index: nav.index,
+        htmlScreenshot,
+        pptxFile,
+        reportFile,
+        pairImage,
+        userFailureVsCurrentRender: sample.screenshot ? path.join(sampleDir, 'user-failure-vs-current-render.png') : null,
+        quickLook: visual,
+        dom,
+        pptx: summarizeInspection(pptx),
+        regionChecks,
+        checks,
+      });
+    }
+  } finally {
+    await closePage(page);
+    await context?.close().catch(() => {});
+    await closeBrowser(browser);
+  }
+  const contactSheet = createSampleContactSheet(results, outDir);
+  const result = {
+    mode: 'jad64-root-cause-regressions',
+    url: cliUrl,
+    outDir,
+    rootCauseMatrix: path.join(outDir, 'root-cause-matrix.json'),
+    renderPath: path.join(outDir, 'render-path.json'),
+    contactSheet,
+    passed: failures.length === 0,
+    samples: results,
+    failures,
+  };
+  writeFileSync(path.join(outDir, 'jad64-root-cause-regressions.json'), JSON.stringify(result, null, 2) + '\n');
+  if (failures.length) {
+    console.error(JSON.stringify(result, null, 2));
+    process.exit(1);
+  }
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(0);
 }
 
 async function runJad64AcceptanceRegressionValidation() {
@@ -1878,6 +2587,165 @@ async function navigateValidationSample(page, sample) {
   }, sample);
 }
 
+async function collectJad64RootCauseDomProbe(page, sample) {
+  return await page.evaluate(({ textProbes }) => {
+    const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    if (!slide) return { key: '', slide: null, materialRegions: [], svgRegions: [], textAnchors: [], text: '' };
+    const slideRect = slide.getBoundingClientRect();
+    const localRect = rect => ({
+      x: Math.max(0, rect.left - slideRect.left),
+      y: Math.max(0, rect.top - slideRect.top),
+      w: Math.max(1, Math.min(rect.right, slideRect.right) - Math.max(rect.left, slideRect.left)),
+      h: Math.max(1, Math.min(rect.bottom, slideRect.bottom) - Math.max(rect.top, slideRect.top)),
+    });
+    const normalize = value => String(value || '').replace(/[^\p{L}\p{N}%+]+/gu, '').toLowerCase();
+    const isVisible = (el, style = getComputedStyle(el)) => {
+      if (!el || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) <= 0.01) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 2 && rect.height > 2
+        && rect.right >= slideRect.left && rect.left <= slideRect.right
+        && rect.bottom >= slideRect.top && rect.top <= slideRect.bottom;
+    };
+    const colorVisible = value => {
+      const raw = String(value || '').trim();
+      return raw && raw !== 'transparent' && !/^rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/i.test(raw);
+    };
+    const radiusPx = style => Math.max(
+      parseFloat(style.borderTopLeftRadius || '0') || 0,
+      parseFloat(style.borderTopRightRadius || '0') || 0,
+      parseFloat(style.borderBottomRightRadius || '0') || 0,
+      parseFloat(style.borderBottomLeftRadius || '0') || 0,
+    );
+    const borderVisible = style => ['Top', 'Right', 'Bottom', 'Left'].some(side => {
+      const width = parseFloat(style[`border${side}Width`] || '0') || 0;
+      return width > 0 && colorVisible(style[`border${side}Color`]);
+    });
+    const hasMaterialPaint = style => {
+      const bg = String(style.backgroundImage || '');
+      return bg.includes('gradient')
+        || bg.includes('url(')
+        || (style.boxShadow && style.boxShadow !== 'none')
+        || (style.filter && style.filter !== 'none')
+        || (style.mixBlendMode && style.mixBlendMode !== 'normal')
+        || (radiusPx(style) >= 10 && (colorVisible(style.backgroundColor) || borderVisible(style)));
+    };
+    const textAnchors = (textProbes || []).map(probe => {
+      const target = normalize(probe);
+      const matches = [];
+      const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!target || !normalize(node.textContent).includes(target)) continue;
+        const parent = node.parentElement;
+        if (!isVisible(parent)) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const rect = range.getBoundingClientRect();
+        range.detach?.();
+        if (rect.width > 1 && rect.height > 1) matches.push({ text: node.textContent || '', rect: localRect(rect) });
+      }
+      return { probe, found: matches.length > 0, matches: matches.slice(0, 8) };
+    });
+    const probeSet = new Set((textProbes || []).map(normalize).filter(Boolean));
+    const materialRegions = [...slide.querySelectorAll('*')]
+      .map(el => {
+        const style = getComputedStyle(el);
+        if (!isVisible(el, style) || !hasMaterialPaint(style)) return null;
+        const rect = el.getBoundingClientRect();
+        const areaRatio = (rect.width * rect.height) / Math.max(1, slideRect.width * slideRect.height);
+        if (areaRatio > 0.68 || areaRatio < 0.0002) return null;
+        const text = (el.innerText || el.textContent || '').trim().replace(/\s+/g, ' ');
+        const normalizedText = normalize(text);
+        const probeHit = [...probeSet].some(probe => normalizedText.includes(probe));
+        const bg = String(style.backgroundImage || '');
+        const score = (probeHit ? 10000 : 0)
+          + (bg.includes('gradient') ? 360 : 0)
+          + ((style.boxShadow && style.boxShadow !== 'none') ? 420 : 0)
+          + ((style.filter && style.filter !== 'none') ? 320 : 0)
+          + (radiusPx(style) >= 10 ? 260 : 0)
+          + Math.min(260, Math.sqrt(rect.width * rect.height) / 2)
+          - (areaRatio > 0.35 ? 2500 : 0);
+        return {
+          tag: el.tagName.toLowerCase(),
+          className: String(el.className || '').slice(0, 160),
+          text: text.slice(0, 160),
+          rect: localRect(rect),
+          score,
+          probeHit,
+          style: {
+            backgroundColor: style.backgroundColor,
+            backgroundImage: bg.slice(0, 220),
+            boxShadow: String(style.boxShadow || '').slice(0, 220),
+            filter: String(style.filter || '').slice(0, 120),
+            mixBlendMode: style.mixBlendMode,
+            borderRadius: [
+              style.borderTopLeftRadius,
+              style.borderTopRightRadius,
+              style.borderBottomRightRadius,
+              style.borderBottomLeftRadius,
+            ],
+          },
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 24);
+    const svgRegions = [...slide.querySelectorAll('svg')]
+      .map(el => {
+        if (!isVisible(el)) return null;
+        const rect = el.getBoundingClientRect();
+        const union = { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+        const text = (el.textContent || '').trim().replace(/\s+/g, ' ');
+        for (const child of el.querySelectorAll('*')) {
+          const childStyle = getComputedStyle(child);
+          if (childStyle.display === 'none' || childStyle.visibility === 'hidden' || Number(childStyle.opacity || 1) <= 0.01) continue;
+          const childRect = child.getBoundingClientRect();
+          if (childRect.width <= 0.5 || childRect.height <= 0.5) continue;
+          union.left = Math.min(union.left, childRect.left);
+          union.top = Math.min(union.top, childRect.top);
+          union.right = Math.max(union.right, childRect.right);
+          union.bottom = Math.max(union.bottom, childRect.bottom);
+        }
+        const visualRect = localRect({
+          left: Math.max(slideRect.left, union.left),
+          top: Math.max(slideRect.top, union.top),
+          right: Math.min(slideRect.right, union.right),
+          bottom: Math.min(slideRect.bottom, union.bottom),
+        });
+        const box = localRect(rect);
+        const normalizedText = normalize(text);
+        const probeHit = [...probeSet].some(probe => normalizedText.includes(probe));
+        const overflow = {
+          left: Math.max(0, rect.left - union.left),
+          top: Math.max(0, rect.top - union.top),
+          right: Math.max(0, union.right - rect.right),
+          bottom: Math.max(0, union.bottom - rect.bottom),
+        };
+        return {
+          tag: 'svg',
+          className: String(el.className?.baseVal || el.getAttribute('class') || '').slice(0, 160),
+          text: text.slice(0, 240),
+          rect: box,
+          visualRect,
+          overflow,
+          probeHit,
+          viewBox: el.getAttribute('viewBox') || '',
+          preserveAspectRatio: el.getAttribute('preserveAspectRatio') || '',
+          score: (probeHit ? 10000 : 0) + box.w * box.h / 1000 + text.length,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+    return {
+      key: slide.dataset.vmSlideId || slide.dataset.layoutKey || slide.id || '',
+      slide: { w: slideRect.width, h: slideRect.height },
+      text: (slide.innerText || '').trim().replace(/\s+/g, ' ').slice(0, 1200),
+      textAnchors,
+      materialRegions,
+      svgRegions,
+    };
+  }, sample);
+}
+
 async function collectJad64FollowupDomProbe(page) {
   return await page.evaluate(() => {
     const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
@@ -2315,7 +3183,7 @@ function validateJad64FollowupSample(sample, dom, pptx) {
   });
   const roundedGeomCount = details.filter(shape => ['roundRect', 'ellipse'].includes(shape.geom)).length;
   const triangleGeomCount = details.filter(shape => ['custGeom', 'triangle', 'rtTriangle'].includes(shape.geom)).length;
-  const symbolTextBoxes = textBoxes.filter(box => /[→↔⇒➜➤▶►◆◇⬩✦✧★☆]/.test(box.text || ''));
+  const symbolTextBoxes = textBoxes.filter(box => /[→↔⇒➜➤▶►➡↗↘↑↓←↖↙↕▲▼◆◇⬩✦✧★☆]/.test(box.text || ''));
   const highlightTexts = (dom.inlineHighlights || [])
     .map(item => normalizeSearchText(item.text))
     .filter(text => text.length >= 2);
@@ -2931,6 +3799,723 @@ function createSamplePairImage(sample, visual, sampleDir) {
   return row.status === 0 ? out : null;
 }
 
+function resolveRandom30Samples(selection, sampleSpecs) {
+  const themes = new Map((selection.themes || []).map(theme => [theme.key, theme]));
+  return sampleSpecs.map(spec => {
+    const theme = themes.get(spec.themePack);
+    const selected = theme?.selectedPages || [];
+    const selectedIndex = selected.findIndex(page => page.key === spec.key);
+    return {
+      ...spec,
+      sourcePackage: selection.outDir || path.dirname(cliSelectionSummary),
+      selectedIndex: selectedIndex >= 0 ? selectedIndex : null,
+      selectedSlideNumber: selectedIndex >= 0 ? selectedIndex + 1 : null,
+      selectedPage: selectedIndex >= 0 ? selected[selectedIndex] : null,
+      selectionMatched: selectedIndex >= 0,
+    };
+  });
+}
+
+async function collectRandom30DomProbe(page, sample) {
+  return await page.evaluate(({ textProbes }) => {
+    const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    if (!slide) return { key: '', slide: null, text: '', textAnchors: [], materialCandidates: [], svgCount: 0 };
+    const slideRect = slide.getBoundingClientRect();
+    const normalize = value => String(value || '').replace(/[^\p{L}\p{N}%+]+/gu, '').toLowerCase();
+    const isVisible = el => {
+      if (!el) return false;
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || 1) > 0.01
+        && rect.width > 2
+        && rect.height > 2
+        && rect.right > slideRect.left
+        && rect.left < slideRect.right
+        && rect.bottom > slideRect.top
+        && rect.top < slideRect.bottom;
+    };
+    const localRect = rect => ({
+      x: Math.max(0, rect.left - slideRect.left),
+      y: Math.max(0, rect.top - slideRect.top),
+      w: Math.max(1, Math.min(rect.right, slideRect.right) - Math.max(rect.left, slideRect.left)),
+      h: Math.max(1, Math.min(rect.bottom, slideRect.bottom) - Math.max(rect.top, slideRect.top)),
+    });
+    const text = (slide.innerText || '').replace(/\s+/g, ' ').trim();
+    const textAnchors = (textProbes || []).map(probe => {
+      const wanted = normalize(probe);
+      const matches = [];
+      const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const value = (walker.currentNode.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!value || !normalize(value).includes(wanted)) continue;
+        const range = document.createRange();
+        range.selectNodeContents(walker.currentNode);
+        const rect = range.getBoundingClientRect();
+        range.detach?.();
+        if (rect.width > 1 && rect.height > 1) matches.push({ text: value, rect: localRect(rect) });
+      }
+      return { probe, found: matches.length > 0, matches };
+    });
+    const materialCandidates = [...slide.querySelectorAll('*')]
+      .filter(isVisible)
+      .map(el => {
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        const bg = String(style.backgroundImage || '');
+        const hasMaterial = bg.includes('gradient')
+          || (style.boxShadow && style.boxShadow !== 'none')
+          || (style.filter && style.filter !== 'none')
+          || (style.mixBlendMode && style.mixBlendMode !== 'normal');
+        if (!hasMaterial) return null;
+        const r = localRect(rect);
+        return {
+          tag: el.tagName.toLowerCase(),
+          className: String(el.className || ''),
+          text: (el.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+          rect: r,
+          areaRatio: r.w * r.h / Math.max(1, slideRect.width * slideRect.height),
+          backgroundImage: bg.slice(0, 160),
+          boxShadow: String(style.boxShadow || '').slice(0, 160),
+          filter: String(style.filter || ''),
+          childElementCount: el.querySelectorAll('*').length,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.areaRatio - a.areaRatio)
+      .slice(0, 16);
+    return {
+      key: slide.dataset.vmSlideId || slide.dataset.layoutKey || slide.id || '',
+      slide: { w: slideRect.width, h: slideRect.height },
+      text,
+      textAnchors,
+      materialCandidates,
+      svgCount: slide.querySelectorAll('svg').length,
+      imageCount: slide.querySelectorAll('img, canvas, video').length,
+    };
+  }, sample);
+}
+
+async function collectCutoutDomProbe(page) {
+  return await page.evaluate(() => {
+    const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    if (!slide) return { key: '', slide: null, offSlideMaterialCandidates: [] };
+    const slideRect = slide.getBoundingClientRect();
+    const isVisible = el => {
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || 1) > 0.01
+        && rect.width > 2
+        && rect.height > 2
+        && rect.right > slideRect.left
+        && rect.left < slideRect.right
+        && rect.bottom > slideRect.top
+        && rect.top < slideRect.bottom;
+    };
+    const localRect = rect => ({
+      x: Math.max(0, rect.left - slideRect.left),
+      y: Math.max(0, rect.top - slideRect.top),
+      w: Math.max(1, Math.min(rect.right, slideRect.right) - Math.max(rect.left, slideRect.left)),
+      h: Math.max(1, Math.min(rect.bottom, slideRect.bottom) - Math.max(rect.top, slideRect.top)),
+    });
+    const offSlideMaterialCandidates = [...slide.querySelectorAll('*')]
+      .filter(isVisible)
+      .map(el => {
+        const style = getComputedStyle(el);
+        const bg = String(style.backgroundImage || '');
+        const hasMaterial = bg.includes('gradient')
+          || (style.boxShadow && style.boxShadow !== 'none')
+          || (style.filter && style.filter !== 'none')
+          || (style.mixBlendMode && style.mixBlendMode !== 'normal');
+        if (!hasMaterial) return null;
+        const rect = el.getBoundingClientRect();
+        const offSlide = rect.left < slideRect.left - 1
+          || rect.top < slideRect.top - 1
+          || rect.right > slideRect.right + 1
+          || rect.bottom > slideRect.bottom + 1;
+        if (!offSlide) return null;
+        const clipped = localRect(rect);
+        return {
+          tag: el.tagName.toLowerCase(),
+          className: String(el.className || ''),
+          text: (el.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+          rect: { x: rect.x, y: rect.y, w: rect.width, h: rect.height },
+          clipped,
+          clippedAreaRatio: clipped.w * clipped.h / Math.max(1, slideRect.width * slideRect.height),
+          backgroundImage: bg.slice(0, 180),
+          filter: String(style.filter || ''),
+          boxShadow: String(style.boxShadow || '').slice(0, 180),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.clippedAreaRatio - a.clippedAreaRatio)
+      .slice(0, 16);
+    return {
+      key: slide.dataset.vmSlideId || slide.dataset.layoutKey || slide.id || '',
+      slide: { w: slideRect.width, h: slideRect.height },
+      offSlideMaterialCandidates,
+    };
+  });
+}
+
+async function collectMaterialLayerDomProbe(page, sample) {
+  return await page.evaluate(({ textProbe }) => {
+    const slide = document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+    if (!slide) return { key: '', slide: null, materialTextRegion: null, decorativeGradientRegions: [] };
+    const slideRect = slide.getBoundingClientRect();
+    const normalizedProbe = String(textProbe || '').replace(/\s+/g, '');
+    const localRect = rect => {
+      const left = Math.max(rect.left, slideRect.left);
+      const top = Math.max(rect.top, slideRect.top);
+      const right = Math.min(rect.right, slideRect.right);
+      const bottom = Math.min(rect.bottom, slideRect.bottom);
+      return {
+        x: left - slideRect.left,
+        y: top - slideRect.top,
+        w: Math.max(0, right - left),
+        h: Math.max(0, bottom - top),
+      };
+    };
+    const pptRect = rect => ({
+      x: rect.x / slideRect.width * 16,
+      y: rect.y / slideRect.height * 9,
+      w: rect.w / slideRect.width * 16,
+      h: rect.h / slideRect.height * 9,
+    });
+    const isVisible = el => {
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || 1) > 0.01
+        && rect.width > 2
+        && rect.height > 2
+        && rect.right > slideRect.left
+        && rect.left < slideRect.right
+        && rect.bottom > slideRect.top
+        && rect.top < slideRect.bottom;
+    };
+    const visibleChildren = el => [...(el.children || [])].filter(isVisible);
+    const textOf = el => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+    const elements = [...slide.querySelectorAll('*')].filter(isVisible);
+    let materialTextRegion = null;
+    if (normalizedProbe) {
+      const candidates = elements
+        .map(el => {
+          const style = getComputedStyle(el);
+          const text = textOf(el);
+          const rect = localRect(el.getBoundingClientRect());
+          const background = String(style.backgroundImage || '');
+          const hasMaterial = background.includes('gradient')
+            || (style.boxShadow && style.boxShadow !== 'none')
+            || (style.filter && style.filter !== 'none')
+            || Math.max(parseFloat(style.borderTopLeftRadius || '0') || 0, parseFloat(style.borderTopRightRadius || '0') || 0) >= 10;
+          if (!hasMaterial || !text.replace(/\s+/g, '').includes(normalizedProbe) || rect.w <= 4 || rect.h <= 4) return null;
+          return {
+            el,
+            text,
+            rect,
+            pptRect: pptRect(rect),
+            areaRatio: rect.w * rect.h / Math.max(1, slideRect.width * slideRect.height),
+            backgroundImage: background.slice(0, 180),
+            boxShadow: String(style.boxShadow || '').slice(0, 180),
+            filter: String(style.filter || ''),
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.areaRatio - b.areaRatio);
+      if (candidates[0]) {
+        const token = `jad64-material-text-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        candidates[0].el.setAttribute('data-jad64-material-text-probe', token);
+        materialTextRegion = { ...candidates[0], el: undefined, token };
+      }
+    }
+    const decorativeGradientRegions = elements
+      .map(el => {
+        const style = getComputedStyle(el);
+        const background = String(style.backgroundImage || '');
+        const rect = localRect(el.getBoundingClientRect());
+        if (!background.includes('radial-gradient') || rect.w <= 4 || rect.h <= 4) return null;
+        if (textOf(el)) return null;
+        if (visibleChildren(el).length) return null;
+        const bg = String(style.backgroundColor || '').trim().toLowerCase();
+        const transparentBg = !bg || bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)';
+        if (!transparentBg) return null;
+        const areaRatio = rect.w * rect.h / Math.max(1, slideRect.width * slideRect.height);
+        if (areaRatio < 0.12) return null;
+        return {
+          tag: el.tagName.toLowerCase(),
+          className: String(el.className || ''),
+          rect,
+          pptRect: pptRect(rect),
+          areaRatio,
+          backgroundImage: background.slice(0, 180),
+          opacity: style.opacity,
+          filter: String(style.filter || ''),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.areaRatio - a.areaRatio)
+      .slice(0, 8);
+    return {
+      key: slide.dataset.vmSlideId || slide.dataset.layoutKey || slide.id || '',
+      slide: { w: slideRect.width, h: slideRect.height },
+      materialTextRegion,
+      decorativeGradientRegions,
+    };
+  }, sample);
+}
+
+async function captureHiddenMaterialTextReference(page, materialTextRegion, sampleDir) {
+  if (!materialTextRegion?.token) return null;
+  const visibleFile = path.join(sampleDir, 'material-visible.png');
+  const hiddenFile = path.join(sampleDir, 'material-hidden-text.png');
+  const info = await page.evaluate(async token => {
+    const el = document.querySelector(`[data-jad64-material-text-probe="${token}"]`);
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const entries = [];
+    const remember = item => {
+      if (!item || entries.some(entry => entry.el === item)) return;
+      entries.push({ el: item, style: item.getAttribute('style') });
+    };
+    const hide = item => {
+      if (!item) return;
+      remember(item);
+      item.style.setProperty('color', 'transparent', 'important');
+      item.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+      item.style.setProperty('-webkit-text-stroke-color', 'transparent', 'important');
+      item.style.setProperty('text-shadow', 'none', 'important');
+      item.style.setProperty('text-decoration-color', 'transparent', 'important');
+      item.style.setProperty('fill', 'transparent', 'important');
+      item.style.setProperty('stroke', 'transparent', 'important');
+      item.style.setProperty('caret-color', 'transparent', 'important');
+    };
+    window.__jad64MaterialHiddenTextEntries = entries;
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  }, materialTextRegion.token);
+  if (!info) return null;
+  await page.screenshot({ path: visibleFile, clip: screenshotClip(info) });
+  await page.evaluate(token => {
+    const el = document.querySelector(`[data-jad64-material-text-probe="${token}"]`);
+    if (!el) return;
+    const hide = item => {
+      if (!item) return;
+      const entries = window.__jad64MaterialHiddenTextEntries || [];
+      if (!entries.some(entry => entry.el === item)) entries.push({ el: item, style: item.getAttribute('style') });
+      window.__jad64MaterialHiddenTextEntries = entries;
+      item.style.setProperty('color', 'transparent', 'important');
+      item.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+      item.style.setProperty('-webkit-text-stroke-color', 'transparent', 'important');
+      item.style.setProperty('text-shadow', 'none', 'important');
+      item.style.setProperty('text-decoration-color', 'transparent', 'important');
+      item.style.setProperty('fill', 'transparent', 'important');
+      item.style.setProperty('stroke', 'transparent', 'important');
+      item.style.setProperty('caret-color', 'transparent', 'important');
+    };
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      if ((walker.currentNode.textContent || '').trim()) hide(walker.currentNode.parentElement);
+    }
+    el.querySelectorAll('*').forEach(child => {
+      if ((child.textContent || '').trim()) hide(child);
+    });
+  }, materialTextRegion.token);
+  await page.waitForTimeout(80);
+  await page.screenshot({ path: hiddenFile, clip: screenshotClip(info) });
+  await page.evaluate(() => {
+    const entries = window.__jad64MaterialHiddenTextEntries || [];
+    for (const entry of entries) {
+      if (entry.style == null) entry.el.removeAttribute('style');
+      else entry.el.setAttribute('style', entry.style);
+    }
+    delete window.__jad64MaterialHiddenTextEntries;
+  }).catch(() => {});
+  return { visibleFile, hiddenFile, rect: info };
+}
+
+function screenshotClip(rect) {
+  return {
+    x: Math.max(0, Math.floor(rect.x)),
+    y: Math.max(0, Math.floor(rect.y)),
+    width: Math.max(1, Math.ceil(rect.width)),
+    height: Math.max(1, Math.ceil(rect.height)),
+  };
+}
+
+function analyzeMaterialTextInRaster(sample, { pptx, media, dom, hiddenMaterial, sampleDir }) {
+  const region = dom.materialTextRegion;
+  if (!region || !hiddenMaterial?.hiddenFile || !commandAvailable('magick')) {
+    return { checked: false, passed: true, reason: 'missing-material-region' };
+  }
+  const mediaByHash = new Map((media || []).map(item => [item.hash, item]));
+  const rows = (pptx.slides?.[0]?.pictures || [])
+    .map((picture, index) => {
+      if (picture.nearFullSlide) return null;
+      const overlap = rectOverlapRatio(picture, region.pptRect);
+      if (overlap < 0.45) return null;
+      const pictureArea = Math.max(0.0001, (picture.w || 0) * (picture.h || 0));
+      const regionArea = Math.max(0.0001, (region.pptRect.w || 0) * (region.pptRect.h || 0));
+      const sizeSimilarity = Math.min(pictureArea, regionArea) / Math.max(pictureArea, regionArea);
+      if (sizeSimilarity < 0.25) return null;
+      const hash = pptx.slides?.[0]?.pictureMediaHashes?.[index] || '';
+      const mediaItem = mediaByHash.get(hash);
+      if (!mediaItem?.file) return null;
+      const normalizedMedia = path.join(sampleDir, `material-picture-${String(index + 1).padStart(2, '0')}.png`);
+      const normalizedVisible = path.join(sampleDir, `material-visible-${String(index + 1).padStart(2, '0')}.png`);
+      const normalizedHidden = path.join(sampleDir, `material-hidden-${String(index + 1).padStart(2, '0')}.png`);
+      spawnSync('magick', [mediaItem.file, '-resize', '256x256!', normalizedMedia], { encoding: 'utf8' });
+      spawnSync('magick', [hiddenMaterial.visibleFile, '-resize', '256x256!', normalizedVisible], { encoding: 'utf8' });
+      spawnSync('magick', [hiddenMaterial.hiddenFile, '-resize', '256x256!', normalizedHidden], { encoding: 'utf8' });
+      const rmseToVisible = compareImageMetric('RMSE', normalizedMedia, normalizedVisible);
+      const rmseToHidden = compareImageMetric('RMSE', normalizedMedia, normalizedHidden);
+      const closerToVisible = Number.isFinite(rmseToVisible)
+        && Number.isFinite(rmseToHidden)
+        && rmseToVisible < rmseToHidden * 0.75;
+      return {
+        pictureIndex: index + 1,
+        overlap,
+        sizeSimilarity,
+        x: picture.x,
+        y: picture.y,
+        w: picture.w,
+        h: picture.h,
+        mediaFile: mediaItem.file,
+        normalizedMedia,
+        normalizedVisible,
+        normalizedHidden,
+        rmseToVisible,
+        rmseToHidden,
+        failed: closerToVisible && rmseToHidden > sample.maxHiddenMaterialRmse,
+      };
+    })
+    .filter(Boolean);
+  return {
+    checked: true,
+    passed: rows.every(row => !row.failed),
+    maxRmse: rows.reduce((max, row) => Math.max(max, Number.isFinite(row.rmseToHidden) ? row.rmseToHidden : 0), 0),
+    rows,
+  };
+}
+
+function validateMaterialLayerSample(sample, { pptx, dom, media, materialText }) {
+  const failures = [];
+  if (pptx.fullSlideImageOnlySlides.length) failures.push(`${sample.id} became full-slide-image-only: ${pptx.fullSlideImageOnlySlides.join(', ')}.`);
+  if (Number.isFinite(sample.minTextCount) && pptx.textCount < sample.minTextCount) {
+    failures.push(`${sample.id} exported only ${pptx.textCount} text object(s), expected at least ${sample.minTextCount}.`);
+  }
+  const largeDecorativeGradientShapes = countDecorativeGradientShapes(pptx, dom);
+  if (Number.isFinite(sample.maxLargeDecorativeGradientShapes) && largeDecorativeGradientShapes.length > sample.maxLargeDecorativeGradientShapes) {
+    failures.push(`${sample.id} exported ${largeDecorativeGradientShapes.length} large decorative radial gradient region(s) as hard-edged native shape(s).`);
+  }
+  const transparentMedia = countTransparentMedia(media);
+  if (Number.isFinite(sample.minTransparentMediaCount) && transparentMedia.length < sample.minTransparentMediaCount) {
+    failures.push(`${sample.id} exported only ${transparentMedia.length} transparent PNG media item(s), expected at least ${sample.minTransparentMediaCount}.`);
+  }
+  const materialTextFailures = materialText?.rows?.filter(row => row.failed) || [];
+  if (materialTextFailures.length) {
+    failures.push(`${sample.id} has ${materialTextFailures.length} material raster fallback(s) that still include editable text.`);
+  }
+  return {
+    passed: failures.length === 0,
+    failures,
+    largeDecorativeGradientShapes,
+    transparentMedia,
+    materialText,
+  };
+}
+
+function countTransparentMedia(media = []) {
+  return media.filter(item => {
+    const channels = String(item.channels || '').toLowerCase();
+    const hasAlpha = channels.includes('a');
+    const opaque = item.opaque === true || /^true$/i.test(String(item.opaque || ''));
+    const minAlpha = Number(item.minAlpha);
+    const maxAlpha = Number(item.maxAlpha);
+    return hasAlpha && !opaque && Number.isFinite(minAlpha) && Number.isFinite(maxAlpha) && minAlpha < maxAlpha;
+  });
+}
+
+function countDecorativeGradientShapes(pptx, dom) {
+  const shapes = pptx.slides?.[0]?.shapeDetails || [];
+  const regions = dom.decorativeGradientRegions || [];
+  return regions
+    .map(region => {
+      const match = shapes.find(shape => rectSimilarity(shape, region.pptRect) > 0.78);
+      return match ? { region, shape: match, similarity: rectSimilarity(match, region.pptRect) } : null;
+    })
+    .filter(Boolean);
+}
+
+function rectSimilarity(a, b) {
+  if (!a || !b) return 0;
+  const ax1 = Number(a.x || 0);
+  const ay1 = Number(a.y || 0);
+  const ax2 = ax1 + Number(a.w || 0);
+  const ay2 = ay1 + Number(a.h || 0);
+  const bx1 = Number(b.x || 0);
+  const by1 = Number(b.y || 0);
+  const bx2 = bx1 + Number(b.w || 0);
+  const by2 = by1 + Number(b.h || 0);
+  const overlap = Math.max(0, Math.min(ax2, bx2) - Math.max(ax1, bx1)) * Math.max(0, Math.min(ay2, by2) - Math.max(ay1, by1));
+  const union = Math.max(0, ax2 - ax1) * Math.max(0, ay2 - ay1) + Math.max(0, bx2 - bx1) * Math.max(0, by2 - by1) - overlap;
+  return union > 0 ? overlap / union : 0;
+}
+
+function analyzeRenderedDiff(visual, sampleDir) {
+  if (!visual?.available || !existsSync(visual.htmlImage) || !existsSync(visual.pptxImage) || !commandAvailable('magick')) return null;
+  const diffImage = path.join(sampleDir, 'compare', 'diff.png');
+  spawnSync('magick', [visual.htmlImage, visual.pptxImage, '-compose', 'difference', '-composite', diffImage], { encoding: 'utf8' });
+  const left = readNormalizedRgbImage(visual.htmlImage);
+  const right = readNormalizedRgbImage(visual.pptxImage);
+  if (!left || !right || left.width !== right.width || left.height !== right.height) return null;
+  const pixels = Math.min(left.pixels, right.pixels);
+  const width = left.width;
+  const height = left.height;
+  const strips = {
+    left: { changed: 0, total: 0 },
+    right: { changed: 0, total: 0 },
+    center: { changed: 0, total: 0 },
+  };
+  let changed = 0;
+  let strongChanged = 0;
+  let totalDiff = 0;
+  for (let index = 0; index < pixels; index += 1) {
+    const offset = index * 3;
+    const diff = Math.abs(left.buffer[offset] - right.buffer[offset])
+      + Math.abs(left.buffer[offset + 1] - right.buffer[offset + 1])
+      + Math.abs(left.buffer[offset + 2] - right.buffer[offset + 2]);
+    totalDiff += diff / 765;
+    const isChanged = diff > 96;
+    const isStrong = diff > 180;
+    if (isChanged) changed += 1;
+    if (isStrong) strongChanged += 1;
+    const x = index % width;
+    const bucket = x < width * 0.18 ? strips.left : (x > width * 0.82 ? strips.right : strips.center);
+    bucket.total += 1;
+    if (isChanged) bucket.changed += 1;
+  }
+  const ratio = item => item.total ? item.changed / item.total : 0;
+  return {
+    width,
+    height,
+    diffImage: existsSync(diffImage) ? diffImage : null,
+    diffRatio: pixels ? changed / pixels : 0,
+    strongDiffRatio: pixels ? strongChanged / pixels : 0,
+    meanDiff: pixels ? totalDiff / pixels : 0,
+    leftStripDiffRatio: ratio(strips.left),
+    rightStripDiffRatio: ratio(strips.right),
+    centerDiffRatio: ratio(strips.center),
+  };
+}
+
+function readNormalizedRgbImage(file) {
+  if (!file || !existsSync(file) || !commandAvailable('magick')) return null;
+  const identified = spawnSync('magick', ['identify', '-format', '%w %h', file], { encoding: 'utf8' });
+  const [width, height] = String(identified.stdout || '').trim().split(/\s+/).map(Number);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  const raw = spawnSync('magick', [file, '-resize', `${width}x${height}!`, '-depth', '8', 'rgb:-'], { encoding: null, maxBuffer: 128 * 1024 * 1024 });
+  if (raw.status !== 0 || !raw.stdout?.length) return null;
+  return { width, height, buffer: raw.stdout, pixels: Math.min(width * height, Math.floor(raw.stdout.length / 3)) };
+}
+
+function analyzeSampleRasterFallbacks(pptx, media) {
+  const mediaByHash = new Map((media || []).map(item => [item.hash, item]));
+  const pictureRows = (pptx.slides?.[0]?.pictures || []).map((picture, index) => {
+    const hash = pptx.slides?.[0]?.pictureMediaHashes?.[index] || '';
+    const mediaItem = mediaByHash.get(hash);
+    const areaRatio = picture.w * picture.h / (PPT_W * PPT_H);
+    return {
+      index: index + 1,
+      x: picture.x,
+      y: picture.y,
+      w: picture.w,
+      h: picture.h,
+      areaRatio,
+      nearFullSlide: picture.nearFullSlide,
+      hash,
+      mediaWidth: mediaItem?.width || 0,
+      mediaHeight: mediaItem?.height || 0,
+      mediaSize: mediaItem?.size || 0,
+      mediaFile: mediaItem?.file || '',
+    };
+  }).sort((a, b) => b.areaRatio - a.areaRatio);
+  const nonBackgroundPictures = pictureRows.filter(item => !item.nearFullSlide);
+  return {
+    pictureCount: pictureRows.length,
+    largestRasterAreaRatio: pictureRows[0]?.areaRatio || 0,
+    largestNonBackgroundRasterAreaRatio: nonBackgroundPictures[0]?.areaRatio || 0,
+    largeRasterPictures: pictureRows.filter(item => item.areaRatio > 0.18),
+    largeNonBackgroundRasterPictures: nonBackgroundPictures.filter(item => item.areaRatio > 0.18),
+    pictures: pictureRows,
+  };
+}
+
+function validateRandom30Sample(sample, { dom, pptx, visual, diffStats, mediaStats }) {
+  const failures = [];
+  const warnings = [];
+  if (!sample.selectionMatched) failures.push(`${sample.id} is not present in the reviewed random-30 selection summary.`);
+  if (!visual?.available) failures.push(`${sample.id} rendered PPTX comparison unavailable: ${visual?.reason || 'unknown'}.`);
+  if (pptx.fullSlideImageOnlySlides.length) failures.push(`${sample.id} became full-slide-image-only: ${pptx.fullSlideImageOnlySlides.join(', ')}.`);
+  if (Number.isFinite(sample.minTextCount) && pptx.textCount < sample.minTextCount) {
+    failures.push(`${sample.id} exported only ${pptx.textCount} text object(s), expected at least ${sample.minTextCount}.`);
+  }
+  if (visual?.available && Number.isFinite(sample.maxRmse) && visual.normalizedRmse > sample.maxRmse) {
+    failures.push(`${sample.id} Quick Look RMSE ${visual.normalizedRmse.toFixed(4)} exceeds ${sample.maxRmse.toFixed(4)}.`);
+  }
+  if (diffStats && Number.isFinite(sample.maxDiffRatio) && diffStats.diffRatio > sample.maxDiffRatio) {
+    failures.push(`${sample.id} rendered diff coverage ${(diffStats.diffRatio * 100).toFixed(1)}% exceeds ${(sample.maxDiffRatio * 100).toFixed(1)}%.`);
+  }
+  if (diffStats && Number.isFinite(sample.maxLeftStripDiffRatio) && diffStats.leftStripDiffRatio > sample.maxLeftStripDiffRatio) {
+    failures.push(`${sample.id} left-strip diff ${(diffStats.leftStripDiffRatio * 100).toFixed(1)}% exceeds ${(sample.maxLeftStripDiffRatio * 100).toFixed(1)}%, consistent with UI/sidebar capture.`);
+  }
+  if (mediaStats && Number.isFinite(sample.maxLargeRasterArea) && mediaStats.largestNonBackgroundRasterAreaRatio > sample.maxLargeRasterArea) {
+    failures.push(`${sample.id} largest non-background raster fallback covers ${(mediaStats.largestNonBackgroundRasterAreaRatio * 100).toFixed(1)}% of slide, exceeds ${(sample.maxLargeRasterArea * 100).toFixed(1)}%.`);
+  }
+  for (const anchor of dom.textAnchors || []) {
+    if (!anchor.found) warnings.push(`${sample.id} could not find optional DOM text probe "${anchor.probe}".`);
+  }
+  return { passed: failures.length === 0, failures, warnings };
+}
+
+function analyzeCutoutMediaContamination(sample, pptx, media, sampleDir) {
+  const mediaByHash = new Map((media || []).map(item => [item.hash, item]));
+  const copiedDir = path.join(sampleDir, 'contaminated-media');
+  const rows = (pptx.slides?.[0]?.pictures || []).map((picture, index) => {
+    const hash = pptx.slides?.[0]?.pictureMediaHashes?.[index] || '';
+    const mediaItem = mediaByHash.get(hash);
+    if (!mediaItem?.file || picture.nearFullSlide) return null;
+    const metrics = cutoutMediaMetrics(mediaItem.file);
+    const matchesLeftSidebar = sample.checkLeftSidebar && metrics?.leftSidebar;
+    const matchesTopBlackBar = sample.checkTopBlack && metrics?.topBlackBar;
+    if (!matchesLeftSidebar && !matchesTopBlackBar) return null;
+    mkdirSync(copiedDir, { recursive: true });
+    const evidenceFile = path.join(copiedDir, `${String(index + 1).padStart(2, '0')}-${path.basename(mediaItem.file)}`);
+    copyFileSync(mediaItem.file, evidenceFile);
+    return {
+      pictureIndex: index + 1,
+      x: picture.x,
+      y: picture.y,
+      w: picture.w,
+      h: picture.h,
+      areaRatio: picture.w * picture.h / (PPT_W * PPT_H),
+      mediaFile: mediaItem.file,
+      evidenceFile,
+      mediaWidth: mediaItem.width,
+      mediaHeight: mediaItem.height,
+      metrics,
+    };
+  }).filter(Boolean);
+  return {
+    contaminatedCount: rows.length,
+    leftSidebarCount: rows.filter(row => row.metrics.leftSidebar).length,
+    topBlackBarCount: rows.filter(row => row.metrics.topBlackBar).length,
+    rows,
+  };
+}
+
+function cutoutMediaMetrics(file) {
+  const image = readSampledRgbaImage(file, 160, 160);
+  if (!image) return null;
+  const fraction = (x0, y0, x1, y1, predicate) => {
+    let matched = 0;
+    let total = 0;
+    const startX = Math.max(0, Math.floor(x0 * image.width));
+    const endX = Math.min(image.width, Math.ceil(x1 * image.width));
+    const startY = Math.max(0, Math.floor(y0 * image.height));
+    const endY = Math.min(image.height, Math.ceil(y1 * image.height));
+    for (let y = startY; y < endY; y += 1) {
+      for (let x = startX; x < endX; x += 1) {
+        const offset = (y * image.width + x) * 4;
+        const r = image.buffer[offset];
+        const g = image.buffer[offset + 1];
+        const b = image.buffer[offset + 2];
+        const a = image.buffer[offset + 3];
+        total += 1;
+        if (predicate(r, g, b, a)) matched += 1;
+      }
+    }
+    return total ? matched / total : 0;
+  };
+  const visible = (_r, _g, _b, a) => a > 32;
+  const white = (r, g, b, a) => visible(r, g, b, a) && r > 225 && g > 225 && b > 225;
+  const dark = (r, g, b, a) => visible(r, g, b, a) && r < 50 && g < 65 && b < 95;
+  const black = (r, g, b, a) => visible(r, g, b, a) && r < 15 && g < 15 && b < 20;
+  const nearBlack = (r, g, b, a) => visible(r, g, b, a) && r < 30 && g < 30 && b < 40;
+  const blue = (r, g, b, a) => visible(r, g, b, a) && b > 110 && b > r + 15 && b > g - 15;
+  const leftWhite = fraction(0, 0, 0.24, 1, white);
+  const rightBlue = fraction(0.24, 0, 1, 1, blue);
+  const rightDark = fraction(0.24, 0, 1, 1, dark);
+  const overallWhite = fraction(0, 0, 1, 1, white);
+  const overallBlue = fraction(0, 0, 1, 1, blue);
+  const overallDark = fraction(0, 0, 1, 1, dark);
+  const topBlack = fraction(0, 0, 1, 0.16, black);
+  const topNearBlack = fraction(0, 0, 1, 0.16, nearBlack);
+  const belowNearBlack = fraction(0, 0.16, 1, 1, nearBlack);
+  return {
+    width: image.sourceWidth,
+    height: image.sourceHeight,
+    leftWhite,
+    rightBlue,
+    rightDark,
+    overallWhite,
+    overallBlue,
+    overallDark,
+    topBlack,
+    topNearBlack,
+    belowNearBlack,
+    leftSidebar: image.sourceWidth >= 160
+      && image.sourceHeight >= 120
+      && leftWhite > 0.22
+      && overallWhite < 0.72
+      && (rightBlue > 0.18 || rightDark > 0.18 || overallBlue > 0.18),
+    topBlackBar: image.sourceWidth >= 160
+      && image.sourceHeight >= 100
+      && ((topBlack > 0.5 && overallDark < 0.88) || (topNearBlack > 0.82 && belowNearBlack < 0.68))
+      && overallWhite < 0.85,
+  };
+}
+
+function readSampledRgbImage(file, width, height) {
+  if (!file || !existsSync(file) || !commandAvailable('magick')) return null;
+  const identified = spawnSync('magick', ['identify', '-format', '%w %h', file], { encoding: 'utf8' });
+  const [sourceWidth, sourceHeight] = String(identified.stdout || '').trim().split(/\s+/).map(Number);
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) return null;
+  const raw = spawnSync('magick', [file, '-resize', `${width}x${height}!`, '-depth', '8', 'rgb:-'], { encoding: null, maxBuffer: width * height * 3 + 1024 });
+  if (raw.status !== 0 || !raw.stdout?.length) return null;
+  return { sourceWidth, sourceHeight, width, height, buffer: raw.stdout };
+}
+
+function readSampledRgbaImage(file, width, height) {
+  if (!file || !existsSync(file) || !commandAvailable('magick')) return null;
+  const identified = spawnSync('magick', ['identify', '-format', '%w %h', file], { encoding: 'utf8' });
+  const [sourceWidth, sourceHeight] = String(identified.stdout || '').trim().split(/\s+/).map(Number);
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) return null;
+  const raw = spawnSync('magick', [file, '-resize', `${width}x${height}!`, '-depth', '8', 'rgba:-'], { encoding: null, maxBuffer: width * height * 4 + 1024 });
+  if (raw.status !== 0 || !raw.stdout?.length) return null;
+  return { sourceWidth, sourceHeight, width, height, buffer: raw.stdout };
+}
+
+function validateCutoutSample(sample, { pptx, contamination, exportResult }) {
+  const failures = [];
+  const warnings = [];
+  if (pptx.fullSlideImageOnlySlides.length) failures.push(`${sample.id} became full-slide-image-only: ${pptx.fullSlideImageOnlySlides.join(', ')}.`);
+  if (Number.isFinite(sample.minTextCount) && pptx.textCount < sample.minTextCount) {
+    failures.push(`${sample.id} exported only ${pptx.textCount} text object(s), expected at least ${sample.minTextCount}.`);
+  }
+  if (sample.checkLeftSidebar && contamination.leftSidebarCount > 0) {
+    failures.push(`${sample.id} exported ${contamination.leftSidebarCount} raster image(s) containing a preview/sidebar strip.`);
+  }
+  if (sample.checkTopBlack && contamination.topBlackBarCount > 0) {
+    failures.push(`${sample.id} exported ${contamination.topBlackBarCount} raster image(s) containing an off-slide black top bar.`);
+  }
+  const fallbackWarnings = (exportResult.warnings || []).filter(warning => warning.type === 'node-image-fallback');
+  return { passed: failures.length === 0, failures, warnings, fallbackWarnings };
+}
+
 function createSampleContactSheet(samples, visualDir) {
   const rows = samples.map(sample => sample.pairImage).filter(Boolean);
   if (!rows.length || !commandAvailable('magick')) return null;
@@ -2941,6 +4526,199 @@ function createSampleContactSheet(samples, visualDir) {
     out,
   ], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   return sheet.status === 0 ? out : null;
+}
+
+function analyzeJad64RootCauseRegions(sample, dom, visual, sampleDir) {
+  return (sample.probes || []).map(probe => {
+    const region = selectJad64RootCauseRegion(probe, dom);
+    if (!region) return { probe, available: false, reason: 'region-not-found' };
+    const metrics = analyzeRenderedRegionPair({
+      probe,
+      region,
+      slide: dom.slide,
+      visual,
+      sampleDir,
+      padPx: probe === 'material-region' ? 18 : 24,
+    });
+    return {
+      probe,
+      available: Boolean(metrics),
+      reason: metrics ? undefined : 'rendered-region-analysis-failed',
+      region,
+      metrics,
+    };
+  });
+}
+
+function selectJad64RootCauseRegion(probe, dom = {}) {
+  if (probe === 'material-region') return dom.materialRegions?.[0] || null;
+  if (probe === 'svg-aspect' || probe === 'svg-crop') return dom.svgRegions?.[0] || null;
+  return null;
+}
+
+function analyzeRenderedRegionPair({ probe, region, slide, visual, sampleDir, padPx }) {
+  if (!visual?.available || !existsSync(visual.htmlImage) || !existsSync(visual.pptxImage) || !commandAvailable('magick')) return null;
+  const rect = probe === 'material-region' ? region.rect : (region.visualRect || region.rect);
+  if (!rect || !slide?.w || !slide?.h) return null;
+  const crop = renderedCropSpec(rect, slide, padPx);
+  const compareDir = path.join(sampleDir, 'region-compare');
+  mkdirSync(compareDir, { recursive: true });
+  const safeProbe = safePathSegment(probe);
+  const htmlCrop = path.join(compareDir, `${safeProbe}-html.png`);
+  const pptxCrop = path.join(compareDir, `${safeProbe}-pptx.png`);
+  const htmlEdge = path.join(compareDir, `${safeProbe}-html-edge.png`);
+  const pptxEdge = path.join(compareDir, `${safeProbe}-pptx-edge.png`);
+  const cropHtml = spawnSync('magick', [visual.htmlImage, '-crop', crop.spec, htmlCrop], { encoding: 'utf8' });
+  const cropPptx = spawnSync('magick', [visual.pptxImage, '-crop', crop.spec, pptxCrop], { encoding: 'utf8' });
+  if (cropHtml.status !== 0 || cropPptx.status !== 0) return null;
+  const edgeHtml = spawnSync('magick', [htmlCrop, '-colorspace', 'Gray', '-edge', '1', htmlEdge], { encoding: 'utf8' });
+  const edgePptx = spawnSync('magick', [pptxCrop, '-colorspace', 'Gray', '-edge', '1', pptxEdge], { encoding: 'utf8' });
+  const edgeRmse = edgeHtml.status === 0 && edgePptx.status === 0 ? compareImageMetric('RMSE', htmlEdge, pptxEdge) : Number.NaN;
+  const htmlStats = summarizeRenderedRegionPixels(htmlCrop);
+  const pptxStats = summarizeRenderedRegionPixels(pptxCrop);
+  return {
+    crop,
+    htmlCrop,
+    pptxCrop,
+    htmlEdge: edgeHtml.status === 0 ? htmlEdge : null,
+    pptxEdge: edgePptx.status === 0 ? pptxEdge : null,
+    rmse: compareImageMetric('RMSE', htmlCrop, pptxCrop),
+    mae: compareImageMetric('MAE', htmlCrop, pptxCrop),
+    edgeRmse,
+    htmlStats,
+    pptxStats,
+    contentAspectDelta: contentAspectDelta(htmlStats, pptxStats),
+    contentWidthRatio: contentRatio(htmlStats?.contentBounds?.w, pptxStats?.contentBounds?.w),
+    contentHeightRatio: contentRatio(htmlStats?.contentBounds?.h, pptxStats?.contentBounds?.h),
+  };
+}
+
+function renderedCropSpec(rect, slide, padPx = 0) {
+  const scaleX = 960 / Number(slide.w || 1920);
+  const scaleY = 540 / Number(slide.h || 1080);
+  const x = Math.max(0, Math.floor(Number(rect.x || 0) * scaleX - padPx));
+  const y = Math.max(0, Math.floor(Number(rect.y || 0) * scaleY - padPx));
+  const right = Math.min(960, Math.ceil((Number(rect.x || 0) + Number(rect.w || 0)) * scaleX + padPx));
+  const bottom = Math.min(540, Math.ceil((Number(rect.y || 0) + Number(rect.h || 0)) * scaleY + padPx));
+  const w = Math.max(1, right - x);
+  const h = Math.max(1, bottom - y);
+  return { x, y, w, h, spec: `${w}x${h}+${x}+${y}` };
+}
+
+function summarizeRenderedRegionPixels(file) {
+  if (!file || !existsSync(file) || !commandAvailable('magick')) return null;
+  const identified = spawnSync('magick', ['identify', '-format', '%w %h', file], { encoding: 'utf8' });
+  const [width, height] = String(identified.stdout || '').trim().split(/\s+/).map(Number);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  const raw = spawnSync('magick', [file, '-depth', '8', 'rgb:-'], { encoding: null, maxBuffer: 64 * 1024 * 1024 });
+  if (raw.status !== 0 || !raw.stdout?.length) return null;
+  const buffer = raw.stdout;
+  const pixels = Math.min(width * height, Math.floor(buffer.length / 3));
+  const cornerSamples = [
+    0,
+    Math.max(0, width - 1),
+    Math.max(0, (height - 1) * width),
+    Math.max(0, height * width - 1),
+  ].filter(index => index >= 0 && index < pixels);
+  const corner = cornerSamples.reduce((acc, index) => {
+    acc.r += buffer[index * 3];
+    acc.g += buffer[index * 3 + 1];
+    acc.b += buffer[index * 3 + 2];
+    return acc;
+  }, { r: 0, g: 0, b: 0 });
+  const divisor = Math.max(1, cornerSamples.length);
+  const bg = { r: corner.r / divisor, g: corner.g / divisor, b: corner.b / divisor };
+  let greenPixels = 0;
+  let brightPixels = 0;
+  let nearBlackPixels = 0;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let i = 0; i < pixels; i += 1) {
+    const r = buffer[i * 3];
+    const g = buffer[i * 3 + 1];
+    const b = buffer[i * 3 + 2];
+    const max = Math.max(r, g, b);
+    if (max > 110) brightPixels += 1;
+    if (max < 38) nearBlackPixels += 1;
+    if (g >= 96 && g >= r + 22 && g >= b + 10) greenPixels += 1;
+    const bgDistance = Math.abs(r - bg.r) + Math.abs(g - bg.g) + Math.abs(b - bg.b);
+    if (bgDistance > 38 && max > 24) {
+      const x = i % width;
+      const y = Math.floor(i / width);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  const contentBounds = maxX >= minX && maxY >= minY
+    ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1, aspect: (maxX - minX + 1) / Math.max(1, maxY - minY + 1) }
+    : null;
+  return {
+    width,
+    height,
+    pixels,
+    greenRatio: pixels ? greenPixels / pixels : 0,
+    brightRatio: pixels ? brightPixels / pixels : 0,
+    nearBlackRatio: pixels ? nearBlackPixels / pixels : 0,
+    contentBounds,
+  };
+}
+
+function contentAspectDelta(htmlStats, pptxStats) {
+  const left = htmlStats?.contentBounds?.aspect;
+  const right = pptxStats?.contentBounds?.aspect;
+  if (!Number.isFinite(left) || !Number.isFinite(right)) return null;
+  return Math.abs(left - right) / Math.max(0.001, left);
+}
+
+function contentRatio(htmlValue, pptxValue) {
+  if (!Number.isFinite(htmlValue) || !Number.isFinite(pptxValue) || htmlValue <= 0) return null;
+  return pptxValue / htmlValue;
+}
+
+function validateJad64RootCauseSample(sample, dom, pptx, visual, regionChecks) {
+  const failures = [];
+  const warnings = [];
+  if (!visual?.available) failures.push(`${sample.label} rendered PPTX comparison unavailable: ${visual?.reason || 'unknown'}.`);
+  if (pptx.fullSlideImageOnlySlides.length) failures.push(`${sample.label} became full-slide-image-only: ${pptx.fullSlideImageOnlySlides.join(', ')}.`);
+  for (const anchor of dom.textAnchors || []) {
+    if (!anchor.found) warnings.push(`${sample.label} could not find optional DOM text probe "${anchor.probe}".`);
+  }
+  for (const check of regionChecks || []) {
+    if (!check.available) {
+      failures.push(`${sample.label} ${check.probe} region analysis unavailable: ${check.reason || 'unknown'}.`);
+      continue;
+    }
+    const m = check.metrics || {};
+    const rmse = Number(m.rmse);
+    const edgeRmse = Number(m.edgeRmse);
+    if (check.probe === 'material-region') {
+      if (Number.isFinite(rmse) && rmse > 0.18) failures.push(`${sample.label} material crop RMSE ${rmse.toFixed(4)} exceeds 0.1800.`);
+      if (Number.isFinite(edgeRmse) && edgeRmse > 0.245) failures.push(`${sample.label} material edge RMSE ${edgeRmse.toFixed(4)} exceeds 0.2450.`);
+      const htmlGreen = Number(m.htmlStats?.greenRatio || 0);
+      const pptxGreen = Number(m.pptxStats?.greenRatio || 0);
+      if (htmlGreen > 0.04 && pptxGreen < htmlGreen * 0.55) {
+        failures.push(`${sample.label} material crop lost green/cyan glow pixels (${pptxGreen.toFixed(4)} < ${(htmlGreen * 0.55).toFixed(4)}; HTML ${htmlGreen.toFixed(4)}).`);
+      }
+    } else {
+      const rmseLimit = check.probe === 'svg-aspect' ? 0.14 : 0.22;
+      if (Number.isFinite(rmse) && rmse > rmseLimit) failures.push(`${sample.label} ${check.probe} crop RMSE ${rmse.toFixed(4)} exceeds ${rmseLimit.toFixed(4)}.`);
+      if (Number.isFinite(edgeRmse) && edgeRmse > 0.30) failures.push(`${sample.label} ${check.probe} edge RMSE ${edgeRmse.toFixed(4)} exceeds 0.3000.`);
+      if (Number.isFinite(m.contentAspectDelta) && m.contentAspectDelta > 0.14) {
+        failures.push(`${sample.label} ${check.probe} content aspect drift ${(m.contentAspectDelta * 100).toFixed(1)}% exceeds 14.0%.`);
+      }
+      if (Number.isFinite(m.contentWidthRatio) && m.contentWidthRatio < 0.82) {
+        failures.push(`${sample.label} ${check.probe} rendered content width ratio ${m.contentWidthRatio.toFixed(3)} is below 0.820, indicating crop/loss.`);
+      }
+      if (Number.isFinite(m.contentHeightRatio) && m.contentHeightRatio < 0.82) {
+        failures.push(`${sample.label} ${check.probe} rendered content height ratio ${m.contentHeightRatio.toFixed(3)} is below 0.820, indicating crop/loss.`);
+      }
+    }
+  }
+  return { passed: failures.length === 0, failures, warnings };
 }
 
 function createMatrixContactSheet(themeResults, matrixDir) {
@@ -3585,7 +5363,7 @@ function runQuickLookVisualComparison(pptxFile, htmlScreenshot, visualDir) {
   rmSync(compareDir, { recursive: true, force: true });
   mkdirSync(quickLookDir, { recursive: true });
   mkdirSync(compareDir, { recursive: true });
-  const ql = spawnSync('qlmanage', ['-t', '-s', '960', '-o', quickLookDir, pptxFile], { encoding: 'utf8' });
+  const ql = spawnSync('qlmanage', ['-t', '-x', '-s', '960', '-o', quickLookDir, pptxFile], { encoding: 'utf8' });
   if (ql.status !== 0) return { available: false, reason: `qlmanage-failed:${ql.stderr || ql.stdout}` };
   const png = readdirSync(quickLookDir).find(name => name.endsWith('.png'));
   if (!png) return { available: false, reason: 'qlmanage-produced-no-png' };
@@ -4143,15 +5921,24 @@ function inspectExtractedMedia(dir) {
   walk(dir);
   return files.map(file => {
     const identified = commandAvailable('magick')
-      ? spawnSync('magick', ['identify', '-format', '%w %h %[mean]', file], { encoding: 'utf8' })
+      ? spawnSync('magick', ['identify', '-format', '%w\t%h\t%[mean]\t%[channels]\t%[opaque]\t%[fx:minima.a]\t%[fx:maxima.a]', file], { encoding: 'utf8' })
       : null;
-    const [width, height, mean] = String(identified?.stdout || '').trim().split(/\s+/).map(Number);
+    const [widthValue, heightValue, meanValue, channels = '', opaqueValue = '', minAlphaValue = '', maxAlphaValue = ''] = String(identified?.stdout || '').trim().split(/\t/);
+    const width = Number(widthValue);
+    const height = Number(heightValue);
+    const mean = Number(meanValue);
+    const minAlpha = Number(minAlphaValue);
+    const maxAlpha = Number(maxAlphaValue);
     return {
       file,
       relativePath: path.relative(ROOT, file),
       width: Number.isFinite(width) ? width : 0,
       height: Number.isFinite(height) ? height : 0,
       mean: Number.isFinite(mean) ? mean : null,
+      channels,
+      opaque: /^true$/i.test(opaqueValue),
+      minAlpha: Number.isFinite(minAlpha) ? minAlpha : null,
+      maxAlpha: Number.isFinite(maxAlpha) ? maxAlpha : null,
       hash: hashBuffer(readFileSync(file)),
       size: readFileSync(file).length,
     };

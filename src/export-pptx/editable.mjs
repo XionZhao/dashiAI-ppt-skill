@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import PptxGenJS from 'pptxgenjs';
+import { PNG } from 'pngjs';
 
 const SOURCE_W = 1920;
 const SOURCE_H = 1080;
@@ -243,19 +244,34 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
     let hiddenToken = null;
     try {
       if (node.stripTextForScreenshot || node.stripOverlayForScreenshot) {
-        hiddenToken = await page.evaluate(({ exportId, mode, stripText, stripOverlay }) => {
-          const root = document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
+        hiddenToken = await page.evaluate(({ exportId, mode, stripText, stripOverlay, screenshotRect }) => {
+          const root = document.querySelector(`#deck > .slide.active [data-editable-pptx-export-id="${exportId}"], #deck > .slide[data-deck-active] [data-editable-pptx-export-id="${exportId}"]`)
+            || document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
           if (!root) return null;
           const token = `hide-${Date.now()}-${Math.random().toString(36).slice(2)}`;
           const entries = [];
           const rootRect = root.getBoundingClientRect();
+          const targetRect = screenshotRect
+            ? {
+              left: Number(screenshotRect.x || 0),
+              top: Number(screenshotRect.y || 0),
+              right: Number(screenshotRect.x || 0) + Number(screenshotRect.w || 0),
+              bottom: Number(screenshotRect.y || 0) + Number(screenshotRect.h || 0),
+              width: Number(screenshotRect.w || 0),
+              height: Number(screenshotRect.h || 0),
+            }
+            : rootRect;
           const slide = mode === 'screenshot-rect'
             ? root.closest('#deck > .slide') || document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]')
             : root;
           const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-          const mark = (el) => {
+          const remember = (el) => {
             if (!el || entries.some(entry => entry.el === el)) return;
             entries.push({ el, style: el.getAttribute('style') });
+          };
+          const mark = (el) => {
+            if (!el) return;
+            remember(el);
             const style = getComputedStyle(el);
             el.style.setProperty('color', 'transparent', 'important');
             el.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
@@ -269,8 +285,8 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
             }
           };
           const markOverlay = (el) => {
-            if (!el || entries.some(entry => entry.el === el)) return;
-            entries.push({ el, style: el.getAttribute('style') });
+            if (!el) return;
+            remember(el);
             el.style.setProperty('opacity', '0', 'important');
           };
           const hasOverlayPaint = (el) => {
@@ -288,12 +304,12 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
           };
           const isMostlyRootSized = (rect) => {
             const area = rect.width * rect.height;
-            const rootArea = Math.max(1, rootRect.width * rootRect.height);
-            return area / rootArea > 0.86
-              && Math.abs(rect.left - rootRect.left) < 8
-              && Math.abs(rect.top - rootRect.top) < 8
-              && Math.abs(rect.right - rootRect.right) < 8
-              && Math.abs(rect.bottom - rootRect.bottom) < 8;
+            const targetArea = Math.max(1, targetRect.width * targetRect.height);
+            return area / targetArea > 0.86
+              && Math.abs(rect.left - targetRect.left) < 8
+              && Math.abs(rect.top - targetRect.top) < 8
+              && Math.abs(rect.right - targetRect.right) < 8
+              && Math.abs(rect.bottom - targetRect.bottom) < 8;
           };
           const isVisible = (el) => {
             const style = getComputedStyle(el);
@@ -309,7 +325,7 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
               if (el === root || root.contains(el) || el.contains(root)) return;
               if (!isVisible(el)) return;
               const rect = el.getBoundingClientRect();
-              if (!intersects(rect, rootRect) || isMostlyRootSized(rect) || !hasOverlayPaint(el)) return;
+              if (!intersects(rect, targetRect) || isMostlyRootSized(rect) || !hasOverlayPaint(el)) return;
               markOverlay(el);
             });
           }
@@ -317,7 +333,7 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
             if (mode !== 'screenshot-rect') return true;
             const rects = [...range.getClientRects()];
             const bounds = range.getBoundingClientRect();
-            return (rects.length ? rects : [bounds]).some(rect => rect.width > 1 && rect.height > 1 && intersects(rect, rootRect));
+            return (rects.length ? rects : [bounds]).some(rect => rect.width > 1 && rect.height > 1 && intersects(rect, targetRect));
           };
           if (stripText) {
             const walker = document.createTreeWalker(slide || root, NodeFilter.SHOW_TEXT);
@@ -335,7 +351,7 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
                 return;
               }
               const rect = el.getBoundingClientRect();
-              if (rect.width > 1 && rect.height > 1 && intersects(rect, rootRect)) mark(el);
+              if (rect.width > 1 && rect.height > 1 && intersects(rect, targetRect)) mark(el);
             });
           }
           window.__editablePptxHiddenTextStyles ||= new Map();
@@ -343,13 +359,25 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
           return token;
         }, {
           exportId: node.exportId,
-          mode: node.imageKind === 'unicorn-background' ? 'screenshot-rect' : 'descendant',
+          mode: node.screenshotMode || (node.imageKind === 'unicorn-background' ? 'screenshot-rect' : 'descendant'),
           stripText: Boolean(node.stripTextForScreenshot),
           stripOverlay: Boolean(node.stripOverlayForScreenshot),
+          screenshotRect: node.screenshotRect || null,
         });
       }
-      const bytes = await page.locator(`[data-editable-pptx-export-id="${node.exportId}"]`).screenshot({ type: 'png' });
-      node.imageData = `data:image/png;base64,${bytes.toString('base64')}`;
+      if (hiddenToken) {
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      }
+      const locator = page.locator(`#deck > .slide.active [data-editable-pptx-export-id="${node.exportId}"], #deck > .slide[data-deck-active] [data-editable-pptx-export-id="${node.exportId}"]`).first();
+      const clip = node.screenshotRect ? screenshotClip(node.screenshotRect) : null;
+      let bytes = null;
+      if (shouldUseAlphaMatteScreenshot(node)) {
+        bytes = await captureAlphaMatteScreenshot(page, locator, node.exportId, node.imageKind, clip).catch(() => null);
+        if (!bytes) warnings.push({ slide: node.slideIndex, type: 'alpha-matte-screenshot-failed', tag: node.tag, kind: node.imageKind });
+      }
+      if (!bytes) bytes = clip ? await page.screenshot({ type: 'png', clip }) : await locator.screenshot({ type: 'png' });
+      if (node.elementScreenshot && shouldApplyNodeRadiusAlphaMask(node)) bytes = applyNodeRadiusAlphaMask(bytes, node);
+      node.imageData = pngBufferToDataUrl(bytes);
       if (hiddenToken) {
         await page.evaluate(token => {
           const entries = window.__editablePptxHiddenTextStyles?.get(token) || [];
@@ -363,7 +391,8 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
       }
       if (!options.freeze) continue;
       await page.evaluate(({ exportId, data }) => {
-        const el = document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
+        const el = document.querySelector(`#deck > .slide.active [data-editable-pptx-export-id="${exportId}"], #deck > .slide[data-deck-active] [data-editable-pptx-export-id="${exportId}"]`)
+          || document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
         if (!el) return;
         el.replaceChildren();
         const img = document.createElement('img');
@@ -396,10 +425,252 @@ async function resolveElementScreenshots(page, root, warnings, options = {}) {
   }
 }
 
+function shouldUseAlphaMatteScreenshot(node) {
+  return isBrowserVisualImageKind(node?.imageKind);
+}
+
+function shouldApplyNodeRadiusAlphaMask(node) {
+  return !isBrowserVisualImageKind(node?.imageKind);
+}
+
+async function captureAlphaMatteScreenshot(page, locator, exportId, imageKind, clip = null) {
+  let token = null;
+  try {
+    token = await page.evaluate(({ exportId, imageKind }) => {
+      const root = document.querySelector(`#deck > .slide.active [data-editable-pptx-export-id="${exportId}"], #deck > .slide[data-deck-active] [data-editable-pptx-export-id="${exportId}"]`)
+        || document.querySelector(`[data-editable-pptx-export-id="${exportId}"]`);
+      if (!root) return null;
+      const slide = root.closest('#deck > .slide') || document.querySelector('#deck > .slide.active, #deck > .slide[data-deck-active]');
+      if (!slide) return null;
+      const token = `alpha-matte-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const entries = [];
+      const matteEls = [document.documentElement, document.body, slide].filter(Boolean);
+      const remember = (el) => {
+        if (!el || entries.some(entry => entry.el === el)) return;
+        entries.push({ el, style: el.getAttribute('style') });
+      };
+      const setStyle = (el, name, value) => {
+        remember(el);
+        el.style.setProperty(name, value, 'important');
+      };
+      const neutralizeAncestor = (el) => {
+        setStyle(el, 'background-image', 'none');
+        setStyle(el, 'background-color', 'transparent');
+        setStyle(el, 'box-shadow', 'none');
+        setStyle(el, 'border-color', 'transparent');
+      };
+      neutralizeAncestor(document.documentElement);
+      neutralizeAncestor(document.body);
+      [...slide.querySelectorAll('*')].forEach(el => {
+        if (el === root || root.contains(el)) return;
+        if (el.contains(root)) neutralizeAncestor(el);
+        else setStyle(el, 'opacity', '0');
+      });
+      setStyle(slide, 'background-image', 'none');
+      setStyle(slide, 'background-color', '#000');
+      setStyle(slide, 'box-shadow', 'none');
+      setStyle(root, 'mix-blend-mode', 'normal');
+      if (imageKind === 'unicorn-background') {
+        setStyle(root, 'background-image', 'none');
+        setStyle(root, 'background-color', 'transparent');
+      }
+      for (const el of matteEls) setStyle(el, 'background-color', '#000');
+      window.__editablePptxAlphaMatteStyles ||= new Map();
+      window.__editablePptxAlphaMatteStyles.set(token, { entries, matteEls });
+      return token;
+    }, { exportId, imageKind });
+    if (!token) return null;
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const shoot = () => clip ? page.screenshot({ type: 'png', clip }) : locator.screenshot({ type: 'png' });
+    const blackBytes = await shoot();
+    await page.evaluate(({ token, color }) => {
+      const state = window.__editablePptxAlphaMatteStyles?.get(token);
+      if (!state) return;
+      for (const el of state.matteEls || []) {
+        el.style.setProperty('background-color', color, 'important');
+      }
+    }, { token, color: '#fff' });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const whiteBytes = await shoot();
+    return composeAlphaMattePng(blackBytes, whiteBytes);
+  } finally {
+    if (token) {
+      await page.evaluate(token => {
+        const state = window.__editablePptxAlphaMatteStyles?.get(token);
+        const entries = state?.entries || [];
+        for (const entry of entries) {
+          if (entry.style == null) entry.el.removeAttribute('style');
+          else entry.el.setAttribute('style', entry.style);
+        }
+        window.__editablePptxAlphaMatteStyles?.delete(token);
+      }, token).catch(() => {});
+    }
+  }
+}
+
+function composeAlphaMattePng(blackBytes, whiteBytes) {
+  const black = PNG.sync.read(Buffer.from(blackBytes));
+  const white = PNG.sync.read(Buffer.from(whiteBytes));
+  if (black.width !== white.width || black.height !== white.height) throw new Error('Alpha matte screenshot dimensions differ.');
+  const out = new PNG({ width: black.width, height: black.height });
+  for (let i = 0; i < black.data.length; i += 4) {
+    const br = black.data[i];
+    const bg = black.data[i + 1];
+    const bb = black.data[i + 2];
+    const wr = white.data[i];
+    const wg = white.data[i + 1];
+    const wb = white.data[i + 2];
+    const delta = ((wr - br) + (wg - bg) + (wb - bb)) / 3;
+    let alpha = Math.round(255 - delta);
+    alpha = Math.max(0, Math.min(255, alpha));
+    if (alpha <= 2) {
+      out.data[i] = 0;
+      out.data[i + 1] = 0;
+      out.data[i + 2] = 0;
+      out.data[i + 3] = 0;
+      continue;
+    }
+    if (alpha >= 253) alpha = 255;
+    const scale = 255 / alpha;
+    out.data[i] = clampByte(Math.round(br * scale));
+    out.data[i + 1] = clampByte(Math.round(bg * scale));
+    out.data[i + 2] = clampByte(Math.round(bb * scale));
+    out.data[i + 3] = alpha;
+  }
+  bleedTransparentRgb(out);
+  return PNG.sync.write(out);
+}
+
+function applyNodeRadiusAlphaMask(bytes, node) {
+  const radius = maxCssRadius(node?.style || {}, node?.rect?.w || 0, node?.rect?.h || 0);
+  if (radius <= 0) return bytes;
+  try {
+    const image = PNG.sync.read(Buffer.from(bytes));
+    const scaleX = image.width / Math.max(1, Number(node?.rect?.w || image.width));
+    const scaleY = image.height / Math.max(1, Number(node?.rect?.h || image.height));
+    const radiusPx = Math.min(image.width / 2, image.height / 2, radius * Math.max(scaleX, scaleY));
+    if (radiusPx <= 0) return bytes;
+    applyRoundedAlphaMask(image, radiusPx);
+    trimLowAlphaEdges(image);
+    bleedTransparentRgb(image);
+    return PNG.sync.write(image);
+  } catch {
+    return bytes;
+  }
+}
+
+function applyRoundedAlphaMask(image, radius) {
+  const { width, height, data } = image;
+  const rx = Math.min(radius, width / 2);
+  const ry = Math.min(radius, height / 2);
+  const r = Math.min(rx, ry);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const px = x + 0.5;
+      const py = y + 0.5;
+      let coverage = 1;
+      const cx = px < rx ? rx : px > width - rx ? width - rx : px;
+      const cy = py < ry ? ry : py > height - ry ? height - ry : py;
+      if (cx !== px || cy !== py) {
+        const dist = Math.hypot(px - cx, py - cy);
+        coverage = Math.max(0, Math.min(1, r + 0.5 - dist));
+      }
+      if (coverage >= 1) continue;
+      const index = (y * width + x) * 4 + 3;
+      data[index] = Math.round(data[index] * coverage);
+    }
+  }
+}
+
+function trimLowAlphaEdges(image, threshold = 18) {
+  const { width, height, data } = image;
+  const total = width * height;
+  const seen = new Uint8Array(total);
+  const queue = new Int32Array(total);
+  let head = 0;
+  let tail = 0;
+  const push = (index) => {
+    if (index < 0 || index >= total || seen[index]) return;
+    if (data[index * 4 + 3] > threshold) return;
+    seen[index] = 1;
+    queue[tail++] = index;
+  };
+  for (let x = 0; x < width; x += 1) {
+    push(x);
+    push((height - 1) * width + x);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    push(y * width);
+    push(y * width + width - 1);
+  }
+  while (head < tail) {
+    const index = queue[head++];
+    data[index * 4 + 3] = 0;
+    const x = index % width;
+    const y = Math.floor(index / width);
+    if (x > 0) push(index - 1);
+    if (x < width - 1) push(index + 1);
+    if (y > 0) push(index - width);
+    if (y < height - 1) push(index + width);
+  }
+}
+
+function bleedTransparentRgb(image) {
+  const { width, height, data } = image;
+  const total = width * height;
+  const seen = new Uint8Array(total);
+  const queue = new Int32Array(total);
+  let head = 0;
+  let tail = 0;
+  for (let index = 0; index < total; index += 1) {
+    if (data[index * 4 + 3] <= 12) continue;
+    seen[index] = 1;
+    queue[tail++] = index;
+  }
+  while (head < tail) {
+    const index = queue[head++];
+    const x = index % width;
+    const y = Math.floor(index / width);
+    const base = index * 4;
+    const neighbors = [
+      x > 0 ? index - 1 : -1,
+      x < width - 1 ? index + 1 : -1,
+      y > 0 ? index - width : -1,
+      y < height - 1 ? index + width : -1,
+    ];
+    for (const neighbor of neighbors) {
+      if (neighbor < 0 || seen[neighbor]) continue;
+      const target = neighbor * 4;
+      data[target] = data[base];
+      data[target + 1] = data[base + 1];
+      data[target + 2] = data[base + 2];
+      seen[neighbor] = 1;
+      queue[tail++] = neighbor;
+    }
+  }
+}
+
+function clampByte(value) {
+  return Math.max(0, Math.min(255, value));
+}
+
+function pngBufferToDataUrl(bytes) {
+  return `data:image/png;base64,${Buffer.from(bytes).toString('base64')}`;
+}
+
 function walkCapturedNodes(node, visit) {
   if (!node) return;
   visit(node);
   for (const child of node.children || []) walkCapturedNodes(child, visit);
+}
+
+function screenshotClip(rect) {
+  return {
+    x: Math.max(0, Math.floor(Number(rect.x || 0))),
+    y: Math.max(0, Math.floor(Number(rect.y || 0))),
+    width: Math.max(1, Math.ceil(Number(rect.w ?? rect.width ?? 1))),
+    height: Math.max(1, Math.ceil(Number(rect.h ?? rect.height ?? 1))),
+  };
 }
 
 async function installBrowserCollector(page) {
@@ -466,6 +737,10 @@ async function installBrowserCollector(page) {
           'filter',
           'clipPath',
           'overflow',
+          'mask',
+          'maskImage',
+          'webkitMask',
+          'webkitMaskImage',
           'mixBlendMode',
         ])};
         ${collectActiveSlide.toString()}
@@ -484,8 +759,31 @@ async function installBrowserCollector(page) {
         ${rangeBoundsForOffsets.toString()}
         ${effectiveTextStyle.toString()}
         ${elementRenderRect.toString()}
+        ${visualEffectRect.toString()}
+        ${svgVisualRect.toString()}
+        ${expandedClampedRect.toString()}
+        ${shadowOutsetPx.toString()}
+        ${splitShadowLayers.toString()}
+        ${visualScreenshotFallbackKind.toString()}
+        ${visualScreenshotRect.toString()}
+        ${hasCssMask.toString()}
+        ${visibleElementChildren.toString()}
+        ${shouldScreenshotBlendGroup.toString()}
+        ${shouldScreenshotRoundedVisual.toString()}
+        ${cornerRadiiPx.toString()}
+        ${hasNonUniformCssRadius.toString()}
+        ${hasRoundedClipStyle.toString()}
+        ${shouldScreenshotGradientEffect.toString()}
+        ${shouldUseLocalMaterialFallback.toString()}
+        ${isEditableTextContainer.toString()}
+        ${isInsideEditableTextContainer.toString()}
+        ${hasOnlyInlineTextChildren.toString()}
+        ${isInlineTextOnlyElement.toString()}
+        ${shouldSkipDecorativeGradientFallback.toString()}
+        ${backgroundHasTransparentStop.toString()}
         ${transparentCssPaint.toString()}
         ${hasTextPaintSource.toString()}
+        ${isLowAlphaLinearGradient.toString()}
         ${readStyle.toString()}
         ${summarizeCapturedTree.toString()}
         ${summarizeNode.toString()}
@@ -497,6 +795,7 @@ async function installBrowserCollector(page) {
         ${shouldUseNativeGradientShape.toString()}
         ${patternBackgroundImageData.toString()}
         ${parseRepeatingGradient.toString()}
+        ${backgroundCropForClippedRect.toString()}
         ${gradientBackgroundImageData.toString()}
         ${drawLinearGradient.toString()}
         ${drawRadialGradient.toString()}
@@ -515,6 +814,11 @@ async function installBrowserCollector(page) {
         ${isTurbulenceDataImage.toString()}
         ${maxCssRadius.toString()}
         ${cssRadiusPx.toString()}
+        ${slideClipRect.toString()}
+        ${intersectClientRect.toString()}
+        ${nextChildClipRect.toString()}
+        ${hasClipStyle.toString()}
+        ${sameClientRect.toString()}
         ${rotateFromTransform.toString()}
         ${scaleFromTransform.toString()}
         ${finishEditablePptxAnimations.toString()}
@@ -531,6 +835,10 @@ async function installBrowserCollector(page) {
         ${blobToDataUrl.toString()}
         ${isVisibleElement.toString()}
         ${isMediaChrome.toString()}
+        ${shouldScreenshotImageSlot.toString()}
+        ${isImageSlotElement.toString()}
+        ${hasTransformedAncestor.toString()}
+        ${isRotatedOrSkewedTransform.toString()}
         ${clippedRect.toString()}
         ${rectObject.toString()}
         ${normalizeText.toString()}
@@ -561,19 +869,39 @@ function renderCapturedNode(slide, node, slideRect, warnings, totals) {
   if (node.tag === 'pseudo' && node.text) renderText(slide, { ...node, tag: '#text', singleLine: true }, slideRect, warnings, totals);
 
   if (node.tag === 'img' || node.tag === 'canvas') return;
-  for (const child of node.children || []) renderCapturedNode(slide, child, slideRect, warnings, totals);
+  for (const child of sortedChildrenForRendering(node.children || [])) renderCapturedNode(slide, child, slideRect, warnings, totals);
+}
+
+function sortedChildrenForRendering(children) {
+  return children
+    .map((child, index) => ({ child, index }))
+    .sort((a, b) => stackingOrder(a.child) - stackingOrder(b.child) || a.index - b.index)
+    .map(item => item.child);
+}
+
+function stackingOrder(node) {
+  const z = String(node?.style?.zIndex || '').trim();
+  if (!z || z === 'auto') return 0;
+  const value = Number.parseFloat(z);
+  return Number.isFinite(value) ? value : 0;
 }
 
 function renderBox(slide, node, slideRect, warnings, totals) {
+  if (isBrowserVisualImageKind(node.imageKind)) return;
   const c = coords(node, slideRect);
   if (c.w < 0.003 || c.h < 0.003) return;
   const style = node.style || {};
+  if (shouldSkipNativeDecorativeBlurBox(node, c, style)) {
+    warnings.push({ slide: node.slideIndex, type: 'decorative-blur-shape-skipped', tag: node.tag });
+    return;
+  }
   const borderTriangle = cssBorderTriangle(style, c);
   const hasLocalBackgroundImage = node.backgroundImageData || node.patternImageData;
   const polygonPoints = borderTriangle?.points || cssClipPolygonPoints(style.clipPath, c);
+  const allowGradientFillApproximation = !hasLocalBackgroundImage && !shouldSuppressGradientFillApproximation(node, style, c);
   const fill = borderTriangle?.fill || (isTextClippedBackground(style)
     ? parseCssColor(style.backgroundColor)
-    : parseCssColor(style.backgroundColor) || (hasLocalBackgroundImage ? null : colorFromBackgroundImage(style.backgroundImage)));
+    : parseCssColor(style.backgroundColor) || (allowGradientFillApproximation ? colorFromBackgroundImage(style.backgroundImage) : null));
   const radiusPx = maxCssRadius(style, node.rect?.w || 0, node.rect?.h || 0);
   const radius = Math.min(radiusPx, 48) / slideRect.w * PPT_W;
   const borders = readBorders(style);
@@ -590,8 +918,10 @@ function renderBox(slide, node, slideRect, warnings, totals) {
   const isNarrowGradientLine = fill?.gradient && Math.min(c.w, c.h) <= 0.12 && Math.max(c.w, c.h) >= 0.35;
   const isDecorativeGradient = fill?.gradient && !isLargeGradient && !isNarrowGradientLine && !(node.children || []).length;
   const fillAlpha = isDecorativeGradient ? Math.min(fill.alpha, 0.08) : fill?.alpha;
+  const forceRectForThinPill = radius > 0.02 && !hasBorder && Math.min(c.w, c.h) <= 0.16 && Math.max(c.w, c.h) >= 0.35;
   const shapeName = polygonPoints ? 'custGeom'
     : isCircleLikeBox(node, radiusPx) ? 'ellipse'
+    : forceRectForThinPill ? 'rect'
     : isDecorativeGradient && radius > Math.min(c.w, c.h) * 0.2
     ? 'ellipse'
     : radius > 0.02 ? 'roundRect' : 'rect';
@@ -638,6 +968,25 @@ function isTinyRotatedBorderOnlyPseudo(node, c, hasFill, hasBorder, rotate) {
     && Math.min(c.w, c.h) < 0.18;
 }
 
+function shouldSkipNativeDecorativeBlurBox(node, c, style) {
+  if (!String(style?.filter || '').includes('blur(')) return false;
+  if (nodeHasTextDescendant(node)) return false;
+  if ((node.children || []).some(child => child.tag && child.tag !== '#text')) return false;
+  const areaRatio = c.w * c.h / (PPT_W * PPT_H);
+  if (areaRatio < 0.08) return false;
+  const backgroundImage = String(style.backgroundImage || '');
+  const hasPaint = !transparentCssPaint(style.backgroundColor)
+    || (backgroundImage && backgroundImage !== 'none')
+    || (style.boxShadow && style.boxShadow !== 'none');
+  return Boolean(hasPaint);
+}
+
+function nodeHasTextDescendant(node) {
+  if (node.tag === '#text' && normalizeText(node.text || '')) return true;
+  if (node.text && normalizeText(node.text)) return true;
+  return (node.children || []).some(child => nodeHasTextDescendant(child));
+}
+
 function renderBorders(slide, c, borders, slideRect, opacity, totals) {
   const [top, right, bottom, left] = borders;
   const borderRects = [
@@ -674,26 +1023,19 @@ function renderText(slide, node, slideRect, warnings, totals) {
   if (c.w < 0.01 || c.h < 0.01) return;
   const style = node.style || {};
   const color = textColorForStyle(style, node);
-  const fontSizePx = Math.max(4, Math.min(260, parseFloat(style.fontSize || '16') || 16));
+  const fontSizePx = Math.max(4, Math.min(900, parseFloat(style.fontSize || '16') || 16));
   if (isDecorativeStrokeOnlyText(style, fontSizePx)) return;
   if (isDecorativeLowAlphaText(color, style, fontSizePx)) return;
   if (isDecorativeRotatedSmallText(value, style, fontSizePx, node)) return;
   if (isDecorativeSparkleText(value)) {
     return;
   }
-  const leadingSymbol = leadingNativeSymbol(value);
-  if (leadingSymbol) {
-    const symbolWidth = renderLeadingNativeSymbol(slide, c, style, leadingSymbol, totals);
-    value = value.slice(leadingSymbol.raw.length).trimStart();
-    if (!value.trim()) return;
-    c.x += symbolWidth;
-    c.w = Math.max(0.08, c.w - symbolWidth);
-  }
-  const fontFace = firstFont(style.fontFamily);
+  const fontFace = fontFaceForText(style.fontFamily, value);
   const weight = String(style.fontWeight || '');
   const singleLine = node.singleLine && !/[\r\n]/.test(value);
   const verticalText = isVerticalWritingMode(style);
-  const autoWidth = !verticalText && singleLine && shouldUseAutoWidthText(value, fontSizePx, c, node);
+  const verticalContainerText = Boolean(node.textMetrics?.verticalContainer);
+  const autoWidth = !node.clipped && !verticalText && singleLine && shouldUseAutoWidthText(value, fontSizePx, c, node);
   const align = normalizeAlign(style.textAlign);
   const options = {
     x: c.x,
@@ -704,28 +1046,37 @@ function renderText(slide, node, slideRect, warnings, totals) {
     fit: autoWidth ? 'resize' : 'shrink',
     wrap: autoWidth ? false : !isNoWrap(style.whiteSpace),
     fontFace,
-    fontSize: pptFontSize(fontSizePx, fontFace),
+    fontSize: pptFontSize(fontSizePx, fontFace, style, value),
     color: color.color,
     bold: weight === 'bold' || Number.parseInt(weight, 10) >= 600,
     italic: style.fontStyle === 'italic',
     underline: String(style.textDecorationLine || '').includes('underline'),
     strike: String(style.textDecorationLine || '').includes('line-through'),
     align,
-    valign: normalizeValign(style.verticalAlign),
+    valign: verticalContainerText ? 'mid' : normalizeValign(style.verticalAlign),
     rotate: rotateFromTransform(style.transform) || 0,
     transparency: combinedTransparency(color.alpha, style.opacity),
     charSpacing: letterSpacing(style.letterSpacing),
   };
+  const yOffset = verticalContainerText ? 0 : pptTextYOffset(c, fontSizePx, fontFace, style, value, node);
+  if (yOffset) options.y += yOffset;
+  const lineSpacing = pptLineSpacing(style.lineHeight, fontSizePx, fontFace, style, value);
+  if (lineSpacing) {
+    options.lineSpacing = lineSpacing;
+  }
   if (verticalText) {
     options.vert = 'eaVert';
   }
-  if (/Songti SC/i.test(fontFace) && fontSizePx >= 80 && node.parentTag === 'span') {
+  if (/Songti SC/i.test(fontStack(style, fontFace)) && fontSizePx >= 80 && node.parentTag === 'span') {
     options.y = Math.max(0, options.y - c.h * 0.28);
+  }
+  if (style.materialBackground === 'true' && fontSizePx >= 72 && /PingFang SC|Songti SC/i.test(fontStack(style, fontFace))) {
+    options.y += c.h * 0.12;
   }
   if (!autoWidth) {
     options.w = Math.max(0.08, c.w + 0.04);
   } else {
-    options.w = singleLineWidth(value, fontSizePx, c);
+    options.w = singleLineWidth(value, fontSizePx, c, fontFace, style);
   }
   if (autoWidth && align !== 'left') {
     if (align === 'right') options.x = Math.max(0, c.x + c.w - options.w);
@@ -737,44 +1088,6 @@ function renderText(slide, node, slideRect, warnings, totals) {
   } catch {
     warnings.push({ slide: node.slideIndex, type: 'render-text-failed', text: value.slice(0, 60) });
   }
-}
-
-function leadingNativeSymbol(value) {
-  const match = String(value || '').match(/^([→➜➤▶►])\s*/);
-  if (!match) return null;
-  return { raw: match[0], symbol: match[1], shape: 'rightArrow' };
-}
-
-function renderLeadingNativeSymbol(slide, box, style, symbol, totals) {
-  const color = textColorForStyle(style);
-  const size = Math.max(0.08, Math.min(0.18, box.h * 0.42));
-  const width = size * 1.75;
-  try {
-    slide.addShape(symbol.shape, {
-      x: box.x,
-      y: box.y + Math.max(0, (box.h - size) / 2),
-      w: size * 1.45,
-      h: size,
-      fill: { color: color.color, transparency: combinedTransparency(color.alpha, style.opacity) },
-      line: { color: color.color, transparency: 100 },
-    });
-    totals.shapeObjects += 1;
-    return width;
-  } catch {
-    try {
-      slide.addShape('triangle', {
-        x: box.x,
-        y: box.y + Math.max(0, (box.h - size) / 2),
-        w: size,
-        h: size,
-        rotate: 90,
-        fill: { color: color.color, transparency: combinedTransparency(color.alpha, style.opacity) },
-        line: { color: color.color, transparency: 100 },
-      });
-      totals.shapeObjects += 1;
-    } catch {}
-  }
-  return width;
 }
 
 function isDecorativeStrokeOnlyText(style, fontSizePx) {
@@ -819,13 +1132,15 @@ function shouldUseAutoWidthText(value, fontSizePx, box, node) {
   if (['p', 'li', 'td', 'th', 'blockquote'].includes(parentTag) && units > 24) return false;
   if (units <= 20) return true;
   if (fontSizePx >= 36 && units <= 32) return true;
+  if (!['p', 'li', 'td', 'th', 'blockquote'].includes(parentTag) && fontSizePx >= 24 && units <= 44) return true;
   return box.w < 1.3 && units <= 28;
 }
 
-function singleLineWidth(value, fontSizePx, box) {
-  const fontPt = pptFontSize(fontSizePx);
+function singleLineWidth(value, fontSizePx, box, fontFace, style = {}) {
+  const fontPt = pptFontSize(fontSizePx, fontFace, style, value);
   const units = textUnits(value);
-  const estimated = units * fontPt / 72;
+  const spacing = Math.max(0, letterSpacing(style.letterSpacing)) * Math.max(0, Array.from(String(value || '')).length - 1) / 72 * 1.75;
+  const estimated = units * fontPt / 72 + spacing;
   const width = Math.max(0.08, box.w + 0.1, estimated + 0.12);
   return Math.min(PPT_W - Math.max(0, box.x), width);
 }
@@ -848,12 +1163,14 @@ function renderNodeImage(slide, node, slideRect, warnings, totals) {
   if (node.imageData) items.push({ data: node.imageData, kind: node.imageKind || node.tag });
   if (!items.length) return;
 
-  const c = coords(node, slideRect);
-  const rotate = rotateFromTransform(node.style?.transform) || 0;
+  const c = coords(node, slideRect, { visual: node.elementScreenshot });
+  const rotate = node.elementScreenshot ? 0 : rotateFromTransform(node.style?.transform) || 0;
   for (const item of items) {
     try {
       slide.addImage({
-        data: item.data,
+        data: normalizeTransparentPngDataUrl(item.data, {
+          trimLowAlphaEdges: !shouldPreserveTransparentEdges(node, item.kind),
+        }),
         x: c.x,
         y: c.y,
         w: c.w,
@@ -870,13 +1187,43 @@ function renderNodeImage(slide, node, slideRect, warnings, totals) {
   }
 }
 
+function normalizeTransparentPngDataUrl(dataUrl, options = {}) {
+  const raw = String(dataUrl || '');
+  const match = raw.match(/^data:image\/png;base64,(.+)$/i);
+  if (!match) return dataUrl;
+  try {
+    const image = PNG.sync.read(Buffer.from(match[1], 'base64'));
+    let hasTransparentPixels = false;
+    for (let i = 3; i < image.data.length; i += 4) {
+      if (image.data[i] !== 0) continue;
+      hasTransparentPixels = true;
+      break;
+    }
+    if (!hasTransparentPixels) return dataUrl;
+    if (options.trimLowAlphaEdges !== false) trimLowAlphaEdges(image);
+    bleedTransparentRgb(image);
+    return pngBufferToDataUrl(PNG.sync.write(image));
+  } catch {
+    return dataUrl;
+  }
+}
+
+function isBrowserVisualImageKind(kind) {
+  return ['material-background', 'unicorn-background', 'effect-background', 'masked-element', 'blend-group'].includes(kind);
+}
+
+function shouldPreserveTransparentEdges(node, kind) {
+  return node?.elementScreenshot && isBrowserVisualImageKind(kind);
+}
+
 function localBackgroundShadow(style, kind) {
-  if (kind !== 'background-image' && kind !== 'pattern-background') return null;
+  if (kind !== 'background-image' && kind !== 'pattern-background' && kind !== 'material-background') return null;
+  if (kind === 'material-background') return null;
   return parseBoxShadow(style?.boxShadow) || parseDropShadow(style?.filter);
 }
 
-function coords(node, slideRect) {
-  const rect = node.renderRect || node.rect;
+function coords(node, slideRect, options = {}) {
+  const rect = options.visual ? node.rect : node.renderRect || node.rect;
   return {
     x: round((rect.x - slideRect.x) / slideRect.w * PPT_W),
     y: round((rect.y - slideRect.y) / slideRect.h * PPT_H),
@@ -903,17 +1250,19 @@ async function collectActiveSlide(slideNumber) {
   const slideRect = rectObject(rawRect);
   const warnings = [];
   markUnicornOverlayText(slide, slideRect);
-  const root = await captureElement(slide, slideRect, warnings, 0, slideNumber);
+  const root = await captureElement(slide, slideRect, warnings, 0, slideNumber, slideClipRect(slideRect));
   const summary = summarizeCapturedTree(root);
   summary.key = slide.dataset.vmSlideId || slide.dataset.layoutKey || slide.id || '';
   return { index: slideNumber, rect: slideRect, root, warnings, summary };
 }
 
-async function captureElement(el, slideRect, warnings, depth, slideIndex) {
+async function captureElement(el, slideRect, warnings, depth, slideIndex, clipRect = null) {
   if (!(el instanceof Element) || isMediaChrome(el)) return null;
   const style = styleWithCumulativeRotation(readStyle(el), el);
   if (!isVisibleElement(el, slideRect, style)) return null;
-  const clipped = clippedRect(el.getBoundingClientRect(), slideRect);
+  const activeClip = clipRect || slideClipRect(slideRect);
+  const rawRect = el.getBoundingClientRect();
+  const clipped = intersectClientRect(rawRect, activeClip);
   if (!clipped) return null;
   const tag = el.tagName.toLowerCase();
   const node = {
@@ -926,10 +1275,12 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
   const renderRect = elementRenderRect(el, clipped, style, slideRect);
   if (renderRect) node.renderRect = renderRect;
   if (tag === 'a' && el.href && !String(el.getAttribute('href') || '').startsWith('#')) node.href = el.href;
+  const childClip = nextChildClipRect(el, style, rawRect, activeClip);
 
   if (el.classList?.contains('bt-unicorn-frame')) {
     const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
     el.setAttribute('data-editable-pptx-export-id', exportId);
+    el.setAttribute('data-editable-pptx-material-background', '');
     node.exportId = exportId;
     node.elementScreenshot = true;
     node.imageKind = 'unicorn-background';
@@ -988,8 +1339,76 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
     return node;
   }
 
+  if (shouldScreenshotImageSlot(el)) {
+    const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
+    const screenshotRect = visualScreenshotRect(rawRect, style, slideRect);
+    el.setAttribute('data-editable-pptx-export-id', exportId);
+    node.exportId = exportId;
+    node.elementScreenshot = true;
+    node.imageKind = 'masked-element';
+    node.rect = rectObject(screenshotRect);
+    node.screenshotRect = rectObject(screenshotRect);
+    node.screenshotMode = 'screenshot-rect';
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'image-slot', count: 1, source: 'browser-image-slot' });
+    return node;
+  }
+
+  const visualFallback = visualScreenshotFallbackKind(el, style, clipped, rawRect, slideRect);
+  if (visualFallback) {
+    const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
+    const screenshotRect = visualScreenshotRect(rawRect, style, slideRect);
+    el.setAttribute('data-editable-pptx-export-id', exportId);
+    node.exportId = exportId;
+    node.elementScreenshot = true;
+    node.imageKind = visualFallback;
+    node.rect = rectObject(screenshotRect);
+    node.screenshotRect = rectObject(screenshotRect);
+    node.screenshotMode = 'screenshot-rect';
+    const textNodes = collectDomFallbackTextNodes(el, slideRect, slideIndex);
+    const overlayText = visibleTextInScreenshotRect(el, slideRect, screenshotRect);
+    const overlayPaint = visibleOverlayPaintInScreenshotRect(el, slideRect, screenshotRect);
+    if (textNodes.length) node.children.push(...textNodes);
+    node.stripTextForScreenshot = textNodes.length > 0 || overlayText.count > 0;
+    node.stripOverlayForScreenshot = overlayPaint.count > 0;
+    if (textNodes.length || overlayText.count) {
+      warnings.push({ slide: slideIndex, type: 'node-image-fallback-text-extracted', node: visualFallback, textCount: Math.max(textNodes.length, overlayText.count), sample: overlayText.sample });
+    }
+    if (overlayPaint.count) {
+      warnings.push({ slide: slideIndex, type: 'node-image-fallback-overlay-extracted', node: visualFallback, overlayCount: overlayPaint.count, sample: overlayPaint.sample, scope: 'screenshot-rect' });
+    }
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: visualFallback, count: 1, source: 'browser-visual-effect' });
+    return node;
+  }
+
+  if (shouldUseLocalMaterialFallback(el, style, clipped, slideRect)) {
+    const exportId = `editable-pptx-${slideIndex}-${depth}-${Math.random().toString(36).slice(2, 9)}`;
+    const screenshotRect = visualScreenshotRect(rawRect, style, slideRect);
+    el.setAttribute('data-editable-pptx-export-id', exportId);
+    el.setAttribute('data-editable-pptx-material-background', '');
+    node.exportId = exportId;
+    node.elementScreenshot = true;
+    node.imageKind = 'material-background';
+    node.rect = rectObject(screenshotRect);
+    node.screenshotRect = rectObject(screenshotRect);
+    node.screenshotMode = 'screenshot-rect';
+    const materialText = fallbackTextRisk(el, slideRect);
+    const overlayText = visibleTextInScreenshotRect(el, slideRect, screenshotRect);
+    const overlayPaint = visibleOverlayPaintInScreenshotRect(el, slideRect, screenshotRect);
+    node.stripTextForScreenshot = materialText.count > 0 || overlayText.count > 0;
+    node.stripOverlayForScreenshot = overlayPaint.count > 0;
+    if (materialText.count || overlayText.count) {
+      warnings.push({ slide: slideIndex, type: 'node-image-fallback-text-extracted', node: 'material-background', textCount: Math.max(materialText.count, overlayText.count), sample: materialText.sample || overlayText.sample });
+    }
+    if (overlayPaint.count) {
+      warnings.push({ slide: slideIndex, type: 'node-image-fallback-overlay-extracted', node: 'material-background', overlayCount: overlayPaint.count, sample: overlayPaint.sample, scope: 'screenshot-rect' });
+    }
+    warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'material-background', count: 1, source: 'browser-local-material' });
+  }
+
   const bg = backgroundUrl(style.backgroundImage);
-  if (bg) {
+  if (node.imageKind === 'material-background') {
+    // The browser screenshot carries the local material; editable children are collected below.
+  } else if (bg) {
     const isTurbulence = isTurbulenceDataImage(bg);
     node.backgroundImageData = await fetchImageDataUrl(bg, clipped.width, clipped.height, isTurbulence ? 0.02 : 1);
     if (isTurbulence) node.backgroundImageTransparency = 0;
@@ -997,17 +1416,23 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
   } else if (String(style.backgroundImage || '').includes('repeating-linear-gradient')) {
     node.patternImageData = patternBackgroundImageData(style.backgroundImage, clipped.width, clipped.height, maxCssRadius(style, clipped.width, clipped.height));
     if (node.patternImageData) warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'css-pattern-background', count: 1 });
-  } else if (!isTextClippedBackground(style) && String(style.backgroundImage || '').includes('gradient') && !shouldUseNativeGradientShape(style, clipped.width, clipped.height) && !shouldUseNativeGradientShape(style, (el.offsetWidth || clipped.width) * (slideRect.w || 1920) / 1920, (el.offsetHeight || clipped.height) * (slideRect.h || 1080) / 1080) && !String(style.clipPath || '').includes('polygon(')) {
-    node.backgroundImageData = gradientBackgroundImageData(style.backgroundImage, clipped.width, clipped.height, maxCssRadius(style, clipped.width, clipped.height));
+  } else if (!isTextClippedBackground(style) && String(style.backgroundImage || '').includes('gradient') && !shouldSkipDecorativeGradientFallback(el, style, clipped, slideRect) && !shouldUseNativeGradientShape(style, clipped.width, clipped.height) && !shouldUseNativeGradientShape(style, (el.offsetWidth || clipped.width) * (slideRect.w || 1920) / 1920, (el.offsetHeight || clipped.height) * (slideRect.h || 1080) / 1080) && !String(style.clipPath || '').includes('polygon(')) {
+    node.backgroundImageData = gradientBackgroundImageData(
+      style.backgroundImage,
+      rawRect.width || clipped.width,
+      rawRect.height || clipped.height,
+      maxCssRadius(style, rawRect.width || clipped.width, rawRect.height || clipped.height),
+      backgroundCropForClippedRect(rawRect, clipped),
+    );
     if (node.backgroundImageData) warnings.push({ slide: slideIndex, type: 'node-image-fallback', node: 'css-gradient-background', count: 1 });
   }
 
-  const before = capturePseudoElement(el, '::before', slideRect, slideIndex);
+  const before = node.imageKind === 'material-background' ? null : capturePseudoElement(el, '::before', slideRect, slideIndex, childClip);
   if (before) node.children.push(before);
-  const wholeText = captureWholeTextElement(el, slideRect, style, slideIndex);
+  const wholeText = captureWholeTextElement(el, slideRect, style, slideIndex, childClip);
   if (wholeText) {
     node.children.push(wholeText);
-    const after = capturePseudoElement(el, '::after', slideRect, slideIndex);
+    const after = node.imageKind === 'material-background' ? null : capturePseudoElement(el, '::after', slideRect, slideIndex, childClip);
     if (after) node.children.push(after);
     return node;
   }
@@ -1016,33 +1441,35 @@ async function captureElement(el, slideRect, warnings, depth, slideIndex) {
   for (const childNodes of childNodeLists) {
     for (const child of childNodes) {
       if (child.nodeType === Node.TEXT_NODE) {
-        const textNode = captureTextNode(child, el, slideRect, style, slideIndex);
+        const textNode = captureTextNode(child, el, slideRect, style, slideIndex, childClip);
         if (Array.isArray(textNode)) node.children.push(...textNode);
         else if (textNode) node.children.push(textNode);
       } else if (child.nodeType === Node.ELEMENT_NODE) {
-        const childNode = await captureElement(child, slideRect, warnings, depth + 1, slideIndex);
+        const childNode = await captureElement(child, slideRect, warnings, depth + 1, slideIndex, childClip);
         if (childNode) node.children.push(childNode);
       }
     }
   }
-  const after = capturePseudoElement(el, '::after', slideRect, slideIndex);
+  const after = node.imageKind === 'material-background' ? null : capturePseudoElement(el, '::after', slideRect, slideIndex, childClip);
   if (after) node.children.push(after);
   return node;
 }
 
-function capturePseudoElement(el, pseudo, slideRect, slideIndex) {
+function capturePseudoElement(el, pseudo, slideRect, slideIndex, clipRect = null) {
   const style = readStyle(el, pseudo);
   const content = String(style.content || '').trim();
   const hasText = content && content !== 'none' && content !== 'normal' && content !== '\"\"' && content !== "''";
   const hasVisual = hasPaint(style.backgroundColor) || backgroundUrl(style.backgroundImage) || String(style.backgroundImage || '').includes('gradient') || hasAnyBorder(style);
   if (style.display === 'none' || style.visibility === 'hidden' || (!hasText && !hasVisual)) return null;
   const rect = pseudoRect(el, style, slideRect);
-  if (!rect || rect.w < 1 || rect.h < 1) return null;
+  const clipped = rect ? intersectClientRect(rect, clipRect || slideClipRect(slideRect)) : null;
+  if (!clipped || clipped.width < 1 || clipped.height < 1) return null;
   return {
     tag: 'pseudo',
     slideIndex,
-    rect,
+    rect: rectObject(clipped),
     style,
+    clipped: !sameClientRect(rect, clipped),
     text: hasText ? content.replace(/^['"]|['"]$/g, '') : '',
     children: [],
   };
@@ -1089,7 +1516,7 @@ function pseudoRect(el, style, slideRect) {
   return { x, y, w: boxWidth * stageScaleX, h: boxHeight * stageScaleY };
 }
 
-function captureWholeTextElement(el, slideRect, style, slideIndex) {
+function captureWholeTextElement(el, slideRect, style, slideIndex, clipRect = null) {
   const tag = el.tagName.toLowerCase();
   if (!['p', 'li', 'blockquote'].includes(tag)) return null;
   const inlineChildren = [...el.children];
@@ -1100,7 +1527,8 @@ function captureWholeTextElement(el, slideRect, style, slideIndex) {
   range.selectNodeContents(el);
   const lineRects = [...range.getClientRects()].filter(rect => rect.width > 1 && rect.height > 1);
   range.detach?.();
-  const clipped = clippedRect(el.getBoundingClientRect(), slideRect);
+  const rawRect = el.getBoundingClientRect();
+  const clipped = intersectClientRect(rawRect, clipRect || slideClipRect(slideRect));
   if (!clipped || clipped.width < 1 || clipped.height < 1) return null;
   return {
     tag: '#text',
@@ -1108,7 +1536,9 @@ function captureWholeTextElement(el, slideRect, style, slideIndex) {
     rect: rectObject(clipped),
     style: effectiveTextStyle(el, slideRect),
     text: value,
+    textMetrics: { usesLineBox: true },
     singleLine: lineRects.length <= 1 && !/[\r\n]/.test(value),
+    clipped: !sameClientRect(rawRect, clipped),
     parentTag: tag,
     children: [],
   };
@@ -1131,7 +1561,7 @@ function hasInlineVisualTreatment(child) {
     || (style.boxShadow && style.boxShadow !== 'none');
 }
 
-function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
+function captureTextNode(textNode, parent, slideRect, style, slideIndex, clipRect = null) {
   const keepWhitespace = ['pre', 'pre-wrap', 'pre-line', 'break-spaces'].includes(style.whiteSpace);
   const value = keepWhitespace ? textNode.textContent || '' : normalizeText(textNode.textContent || '');
   if (!value.trim()) return null;
@@ -1140,7 +1570,7 @@ function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
   const lineRects = [...range.getClientRects()].filter(rect => rect.width > 1 && rect.height > 1);
   const singleLine = lineRects.length <= 1 && !/[\r\n]/.test(value);
   const tag = parent.tagName.toLowerCase();
-  const wrappedFragments = splitWrappedTextNode(textNode, lineRects, slideRect, keepWhitespace);
+  const wrappedFragments = splitWrappedTextNode(textNode, lineRects, slideRect, keepWhitespace, clipRect);
   if (wrappedFragments.length > 1) {
     range.detach?.();
     const parentStyle = effectiveTextStyle(parent, slideRect);
@@ -1151,6 +1581,7 @@ function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
       style: parentStyle,
       text: fragment.text,
       singleLine: true,
+      clipped: fragment.clipped,
       parentTag: tag,
       requiredText: parent.hasAttribute('data-editable-pptx-required-text'),
       href: parent.closest('a')?.href || undefined,
@@ -1158,16 +1589,34 @@ function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
     }));
   }
   const bounds = range.getBoundingClientRect();
-  let clipped = clippedRect(lineRects.length === 1 ? lineRects[0] : bounds, slideRect);
+  let rawTextRect = lineRects.length === 1 ? lineRects[0] : bounds;
   range.detach?.();
   const textNodeCount = [...parent.childNodes]
     .filter(child => child.nodeType === Node.TEXT_NODE && normalizeText(child.textContent || ''))
     .length;
   const visibleElementChildren = [...parent.children].filter(child => isVisibleElement(child, slideRect)).length;
+  let textMetrics = null;
+  if (singleLine && textNodeCount === 1 && visibleElementChildren === 0 && hasInlineVisualTreatment(parent)) {
+    const parentRect = parent.getBoundingClientRect();
+    const parentClipped = intersectClientRect(parentRect, clipRect || slideClipRect(slideRect));
+    if (parentClipped && parentRect.height > rawTextRect.height + 2 && parentRect.width > rawTextRect.width + 2) {
+      rawTextRect = {
+        left: rawTextRect.left,
+        top: parentRect.top,
+        right: rawTextRect.right,
+        bottom: parentRect.bottom,
+        width: rawTextRect.width,
+        height: parentRect.height,
+      };
+      textMetrics = { verticalContainer: true };
+    }
+  }
+  let clipped = intersectClientRect(rawTextRect, clipRect || slideClipRect(slideRect));
   if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'td', 'th', 'blockquote', 'button', 'label'].includes(tag)
       && textNodeCount === 1
       && visibleElementChildren === 0) {
-    clipped = clippedRect(parent.getBoundingClientRect(), slideRect) || clipped;
+    rawTextRect = parent.getBoundingClientRect();
+    clipped = intersectClientRect(rawTextRect, clipRect || slideClipRect(slideRect)) || clipped;
   }
   if (!clipped || clipped.width < 1 || clipped.height < 1) return null;
   const parentStyle = effectiveTextStyle(parent, slideRect);
@@ -1177,7 +1626,9 @@ function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
     rect: rectObject(clipped),
     style: parentStyle,
     text: value,
+    textMetrics,
     singleLine,
+    clipped: !sameClientRect(rawTextRect, clipped),
     parentTag: tag,
     requiredText: parent.hasAttribute('data-editable-pptx-required-text'),
     href: parent.closest('a')?.href || undefined,
@@ -1185,7 +1636,7 @@ function captureTextNode(textNode, parent, slideRect, style, slideIndex) {
   };
 }
 
-function splitWrappedTextNode(textNode, lineRects, slideRect, keepWhitespace) {
+function splitWrappedTextNode(textNode, lineRects, slideRect, keepWhitespace, clipRect = null) {
   if (lineRects.length <= 1) return [];
   const raw = textNode.textContent || '';
   if (!raw.trim() || raw.length > 600) return [];
@@ -1214,9 +1665,9 @@ function splitWrappedTextNode(textNode, lineRects, slideRect, keepWhitespace) {
     const text = keepWhitespace ? raw.slice(span.start, span.end) : normalizeText(raw.slice(span.start, span.end));
     if (!text.trim()) continue;
     const rect = rangeBoundsForOffsets(textNode, span.start, span.end);
-    const clipped = rect ? clippedRect(rect, slideRect) : null;
+    const clipped = rect ? intersectClientRect(rect, clipRect || slideClipRect(slideRect)) : null;
     if (!clipped || clipped.width < 1 || clipped.height < 1) continue;
-    fragments.push({ text, rect: rectObject(clipped) });
+    fragments.push({ text, rect: rectObject(clipped), clipped: !sameClientRect(rect, clipped) });
   }
   return fragments.length > 1 ? fragments : [];
 }
@@ -1285,6 +1736,7 @@ function rangeBoundsForOffsets(textNode, start, end) {
 
 function effectiveTextStyle(parent, slideRect) {
   const style = styleWithCumulativeRotation(readStyle(parent), parent);
+  if (parent.closest?.('[data-editable-pptx-material-background]')) style.materialBackground = 'true';
   if (!transparentCssPaint(style.webkitTextFillColor) || !transparentCssPaint(style.color) || isTextClippedBackground(style) || hasTextPaintSource(style)) {
     return style;
   }
@@ -1317,12 +1769,295 @@ function elementRenderRect(el, clipped, style, slideRect) {
   const scale = scaleFromTransform(style.transform);
   const stageScaleX = (slideRect?.w || 1920) / 1920;
   const stageScaleY = (slideRect?.h || 1080) / 1080;
-  const width = (el.offsetWidth || clipped.width) * scale.x * stageScaleX;
-  const height = (el.offsetHeight || clipped.height) * scale.y * stageScaleY;
+  const cssWidth = parseFloat(style.width || '0') || 0;
+  const cssHeight = parseFloat(style.height || '0') || 0;
+  const width = (el.offsetWidth || cssWidth || clipped.width) * scale.x * stageScaleX;
+  const height = (el.offsetHeight || cssHeight || clipped.height) * scale.y * stageScaleY;
   if (!width || !height) return null;
   const cx = clipped.left + clipped.width / 2;
   const cy = clipped.top + clipped.height / 2;
   return { x: cx - width / 2, y: cy - height / 2, w: width, h: height };
+}
+
+function visualEffectRect(rect, style, slideRect) {
+  const outset = shadowOutsetPx(style);
+  return expandedClampedRect(rect, slideRect, outset);
+}
+
+function svgVisualRect(svg, clipped, slideRect) {
+  const union = {
+    left: clipped.left,
+    top: clipped.top,
+    right: clipped.left + clipped.width,
+    bottom: clipped.top + clipped.height,
+  };
+  svg.querySelectorAll?.('*')?.forEach(child => {
+    const style = getComputedStyle(child);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) <= 0.01) return;
+    const rect = child.getBoundingClientRect();
+    if (rect.width <= 0.5 || rect.height <= 0.5) return;
+    union.left = Math.min(union.left, rect.left);
+    union.top = Math.min(union.top, rect.top);
+    union.right = Math.max(union.right, rect.right);
+    union.bottom = Math.max(union.bottom, rect.bottom);
+  });
+  return expandedClampedRect({
+    left: union.left,
+    top: union.top,
+    width: union.right - union.left,
+    height: union.bottom - union.top,
+  }, slideRect, 2);
+}
+
+function expandedClampedRect(rect, slideRect, outset = 0) {
+  const left = Math.max(slideRect.x, rect.left - outset);
+  const top = Math.max(slideRect.y, rect.top - outset);
+  const right = Math.min(slideRect.x + slideRect.w, rect.left + rect.width + outset);
+  const bottom = Math.min(slideRect.y + slideRect.h, rect.top + rect.height + outset);
+  return {
+    left,
+    top,
+    width: Math.max(1, right - left),
+    height: Math.max(1, bottom - top),
+  };
+}
+
+function shadowOutsetPx(style = {}) {
+  let outset = 0;
+  for (const layer of splitShadowLayers(style.boxShadow)) {
+    const numbers = layer.replace(/rgba?\([^)]+\)|color\([^)]+\)|#[0-9a-f]{3,8}/ig, '').match(/-?\d+(\.\d+)?px/g) || [];
+    const offsetX = Math.abs(parseFloat(numbers[0] || '0') || 0);
+    const offsetY = Math.abs(parseFloat(numbers[1] || '0') || 0);
+    const blur = Math.abs(parseFloat(numbers[2] || '0') || 0);
+    const spread = Math.abs(parseFloat(numbers[3] || '0') || 0);
+    outset = Math.max(outset, offsetX + offsetY + blur + spread);
+  }
+  const filter = String(style.filter || '');
+  for (const match of filter.matchAll(/blur\(([-\d.]+)px\)|drop-shadow\(([^)]+(?:\)[^)]+)?)\)/ig)) {
+    if (match[1]) {
+      outset = Math.max(outset, Math.abs(parseFloat(match[1]) || 0) * 2);
+    } else if (match[2]) {
+      const numbers = match[2].replace(/rgba?\([^)]+\)|color\([^)]+\)|#[0-9a-f]{3,8}/ig, '').match(/-?\d+(\.\d+)?px/g) || [];
+      const offsetX = Math.abs(parseFloat(numbers[0] || '0') || 0);
+      const offsetY = Math.abs(parseFloat(numbers[1] || '0') || 0);
+      const blur = Math.abs(parseFloat(numbers[2] || '0') || 0);
+      outset = Math.max(outset, offsetX + offsetY + blur);
+    }
+  }
+  return Math.min(160, Math.ceil(outset));
+}
+
+function splitShadowLayers(value) {
+  const raw = String(value || '');
+  if (!raw || raw === 'none') return [];
+  return splitCssLayers(raw);
+}
+
+function visualScreenshotFallbackKind(el, style, clipped, rawRect, slideRect) {
+  if (isTextClippedBackground(style)) return null;
+  const tag = el.tagName.toLowerCase();
+  if (['section', 'main', 'article', 'svg', 'canvas', 'img', 'video'].includes(tag)) return null;
+  const clipPath = String(style.clipPath || '').trim();
+  const masked = hasCssMask(style);
+  const clippedByPath = clipPath && clipPath !== 'none';
+  const background = String(style.backgroundImage || '');
+  const hasVisualBackground = (background && background !== 'none') || hasPaint(style.backgroundColor) || hasAnyBorder(style) || (style.boxShadow && style.boxShadow !== 'none');
+  if ((masked || clippedByPath) && hasVisualBackground) return 'masked-element';
+  if (shouldScreenshotBlendGroup(el, style, clipped, rawRect, slideRect)) return 'blend-group';
+  if (shouldScreenshotRoundedVisual(el, style, clipped, rawRect, slideRect)) return 'masked-element';
+  if (shouldScreenshotGradientEffect(el, style, clipped, rawRect, slideRect)) return 'effect-background';
+  return null;
+}
+
+function visualScreenshotRect(rawRect, style, slideRect) {
+  return visualEffectRect(rawRect, style, slideRect);
+}
+
+function hasCssMask(style = {}) {
+  const mask = `${style.mask || ''} ${style.maskImage || ''} ${style.webkitMask || ''} ${style.webkitMaskImage || ''}`.trim();
+  return Boolean(mask && !/^none(?:\s+none)*$/i.test(mask));
+}
+
+function visibleElementChildren(el, slideRect) {
+  return [...(el.children || [])].filter(child => {
+    const childStyle = getComputedStyle(child);
+    const rect = child.getBoundingClientRect();
+    return childStyle.display !== 'none'
+      && childStyle.visibility !== 'hidden'
+      && Number(childStyle.opacity || 1) > 0.01
+      && rect.width > 2
+      && rect.height > 2
+      && rect.right >= slideRect.x
+      && rect.left <= slideRect.x + slideRect.w
+      && rect.bottom >= slideRect.y
+      && rect.top <= slideRect.y + slideRect.h;
+  });
+}
+
+function shouldScreenshotBlendGroup(el, style, clipped, rawRect, slideRect) {
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.0005 || areaRatio > 0.55) return false;
+  let blendVisualCount = 0;
+  for (const child of visibleElementChildren(el, slideRect)) {
+    const childStyle = getComputedStyle(child);
+    const blend = String(childStyle.mixBlendMode || '');
+    if (!blend || blend === 'normal') continue;
+    const background = String(childStyle.backgroundImage || '');
+    if (background.includes('gradient') || hasCssMask(childStyle) || (childStyle.filter && childStyle.filter !== 'none')) {
+      blendVisualCount += 1;
+    }
+  }
+  return blendVisualCount >= 2;
+}
+
+function shouldScreenshotRoundedVisual(el, style, clipped, rawRect, slideRect) {
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.0002 || areaRatio > 0.22) return false;
+  if (hasTransformedAncestor(el)) return false;
+  const background = String(style.backgroundImage || '');
+  const hasVisualBackground = (background && background !== 'none') || hasPaint(style.backgroundColor) || hasAnyBorder(style) || (style.boxShadow && style.boxShadow !== 'none');
+  if (!hasVisualBackground) return false;
+  if (hasNonUniformCssRadius(style, clipped.width, clipped.height)) return true;
+  const radius = maxCssRadius(style, clipped.width, clipped.height);
+  const children = visibleElementChildren(el, slideRect);
+  const paintedRoundedContainer = radius >= 6
+    && (hasAnyBorder(style) || (style.boxShadow && style.boxShadow !== 'none'))
+    && children.length > 0
+    && !hasOnlyInlineTextChildren(el)
+    && !isEditableTextContainer(el);
+  if (paintedRoundedContainer) return true;
+  if (!hasRoundedClipStyle(style, clipped.width, clipped.height)) return false;
+  if (!children.length || hasOnlyInlineTextChildren(el)) return false;
+  return Boolean(el.querySelector?.('image-slot,[data-dashi-host-image-slot="true"],svg,canvas,img,video'))
+    || background.includes('gradient')
+    || (style.boxShadow && style.boxShadow !== 'none');
+}
+
+function cornerRadiiPx(style, width = 0, height = 0) {
+  return [
+    cssRadiusPx(style.borderTopLeftRadius, width, height),
+    cssRadiusPx(style.borderTopRightRadius, width, height),
+    cssRadiusPx(style.borderBottomRightRadius, width, height),
+    cssRadiusPx(style.borderBottomLeftRadius, width, height),
+  ];
+}
+
+function hasNonUniformCssRadius(style, width = 0, height = 0) {
+  const radii = cornerRadiiPx(style, width, height);
+  const max = Math.max(...radii);
+  if (max < 1) return false;
+  return radii.some(radius => Math.abs(radius - max) > 0.75);
+}
+
+function hasRoundedClipStyle(style, width = 0, height = 0) {
+  if (maxCssRadius(style, width, height) < 2) return false;
+  return /\b(hidden|clip)\b/i.test(`${style.overflow || ''} ${style.overflowX || ''} ${style.overflowY || ''}`);
+}
+
+function shouldScreenshotGradientEffect(el, style, clipped, rawRect, slideRect) {
+  const background = String(style.backgroundImage || '');
+  if (!background.includes('gradient') || backgroundUrl(background) || /repeating-linear-gradient/i.test(background)) return false;
+  if ((el.innerText || el.textContent || '').trim()) return false;
+  if (visibleElementChildren(el, slideRect).length) return false;
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  const hasBlendMode = style.mixBlendMode && style.mixBlendMode !== 'normal';
+  const hasFilterEffect = style.filter && style.filter !== 'none';
+  const isTransparentRadial = /radial-gradient/i.test(background)
+    && backgroundHasTransparentStop(background)
+    && transparentCssPaint(style.backgroundColor);
+  const isComplexGradient = /color-mix\(|color\(|closest-side|closest-corner|farthest-side|farthest-corner/i.test(background);
+  if (hasBlendMode || hasFilterEffect || hasCssMask(style)) return true;
+  return isTransparentRadial && (isComplexGradient || areaRatio > 0.005 || !sameClientRect(rawRect, clipped));
+}
+
+function shouldUseLocalMaterialFallback(el, style, clipped, slideRect) {
+  if (isTextClippedBackground(style) || String(style.clipPath || '').includes('polygon(')) return false;
+  const tag = el.tagName.toLowerCase();
+  if (['section', 'main', 'article', 'svg', 'canvas', 'img', 'video'].includes(tag)) return false;
+  if (/^h[1-6]$/.test(tag) || ['p', 'li', 'td', 'th', 'blockquote'].includes(tag)) return false;
+  if (isEditableTextContainer(el)) return false;
+  if (!(el.innerText || el.textContent || '').trim() && isInsideEditableTextContainer(el)) return false;
+  if (el.querySelector?.('svg, canvas, img, video')) return false;
+  const rawRect = el.getBoundingClientRect();
+  const slideLeft = Number(slideRect.left ?? slideRect.x ?? 0);
+  const slideTop = Number(slideRect.top ?? slideRect.y ?? 0);
+  const slideRight = Number(slideRect.right ?? (slideLeft + Number(slideRect.width ?? slideRect.w ?? 0)));
+  const slideBottom = Number(slideRect.bottom ?? (slideTop + Number(slideRect.height ?? slideRect.h ?? 0)));
+  if (rawRect.left < slideLeft - 1
+    || rawRect.top < slideTop - 1
+    || rawRect.right > slideRight + 1
+    || rawRect.bottom > slideBottom + 1) {
+    return false;
+  }
+  const visibleChildren = visibleElementChildren(el, slideRect);
+  if (visibleChildren.length && !hasOnlyInlineTextChildren(el)) return false;
+  const background = String(style.backgroundImage || '');
+  if (!background.includes('gradient') && !background.includes('url(')) return false;
+  if (backgroundUrl(background)) return false;
+  if (shouldUseNativeGradientShape(style, clipped.width, clipped.height)) return false;
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.0002 || areaRatio > 0.12) return false;
+  const hasDepth = (style.boxShadow && style.boxShadow !== 'none')
+    || (style.filter && style.filter !== 'none')
+    || (style.mixBlendMode && style.mixBlendMode !== 'normal')
+    || maxCssRadius(style, clipped.width, clipped.height) >= 10
+    || splitCssLayers(background).filter(layer => layer.includes('gradient')).length > 1;
+  return Boolean(hasDepth);
+}
+
+function isEditableTextContainer(el) {
+  return el.isContentEditable
+    || String(el.getAttribute?.('contenteditable') || '').toLowerCase() === 'true'
+    || String(el.getAttribute?.('role') || '').toLowerCase() === 'textbox'
+    || el.hasAttribute?.('data-editable-id')
+    || el.hasAttribute?.('data-editable-ready');
+}
+
+function isInsideEditableTextContainer(el) {
+  const slide = el.closest?.('#deck > .slide');
+  for (let parent = el.parentElement; parent && parent !== slide?.parentElement; parent = parent.parentElement) {
+    if (isEditableTextContainer(parent)) return true;
+    if (parent === slide) break;
+  }
+  return false;
+}
+
+function hasOnlyInlineTextChildren(el) {
+  return [...(el.children || [])].every(child => isInlineTextOnlyElement(child));
+}
+
+function isInlineTextOnlyElement(el) {
+  if (!isInlineTextChild(el)) return false;
+  if (el.querySelector?.('svg, canvas, img, video')) return false;
+  return [...(el.children || [])].every(child => isInlineTextOnlyElement(child));
+}
+
+function shouldSkipDecorativeGradientFallback(el, style, clipped, slideRect) {
+  const background = String(style.backgroundImage || '');
+  if (!background.includes('gradient')) return false;
+  const areaRatio = clipped.width * clipped.height / Math.max(1, slideRect.w * slideRect.h);
+  if (areaRatio <= 0.18) return false;
+  if ((el.innerText || '').trim()) return false;
+  const visibleChildren = visibleElementChildren(el, slideRect);
+  if (visibleChildren.length) return false;
+  if (background.includes('radial-gradient') && transparentCssPaint(style.backgroundColor) && !String(style.filter || '').includes('blur(')) return false;
+  return String(style.filter || '').includes('blur(')
+    || Number(style.opacity || 1) < 0.9;
+}
+
+function shouldSuppressGradientFillApproximation(node, style, c) {
+  const background = String(style.backgroundImage || '');
+  if (!background.includes('radial-gradient') || !backgroundHasTransparentStop(background)) return false;
+  const areaRatio = (c.w || 0) * (c.h || 0) / Math.max(0.0001, PPT_W * PPT_H);
+  if (areaRatio <= 0.12) return false;
+  return !(node.children || []).length;
+}
+
+function backgroundHasTransparentStop(value) {
+  const raw = String(value || '').toLowerCase();
+  return raw.includes('transparent')
+    || /rgba?\([^)]*,\s*0(?:\.0+)?\s*\)/i.test(raw)
+    || /\/\s*0(?:\.0+)?\s*\)/i.test(raw);
 }
 
 function transparentCssPaint(value) {
@@ -1419,8 +2154,8 @@ async function svgElementData(svg, width, height, options = {}) {
     const clone = cloneSvgWithComputedStyle(svg);
     if (options.stripText) clone.querySelectorAll('text, foreignObject').forEach(el => el.remove());
     clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    if (!clone.getAttribute('width')) clone.setAttribute('width', String(Math.max(1, Math.round(width))));
-    if (!clone.getAttribute('height')) clone.setAttribute('height', String(Math.max(1, Math.round(height))));
+    clone.setAttribute('width', String(Math.max(1, Math.round(width))));
+    clone.setAttribute('height', String(Math.max(1, Math.round(height))));
     const xml = new XMLSerializer().serializeToString(clone);
     const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -1565,7 +2300,16 @@ function parseRepeatingGradient(backgroundImage) {
   };
 }
 
-function gradientBackgroundImageData(backgroundImage, width, height, radius = 0) {
+function backgroundCropForClippedRect(rawRect, clipped) {
+  const width = rawRect.width || clipped.width;
+  const height = rawRect.height || clipped.height;
+  const x = Math.max(0, clipped.left - rawRect.left);
+  const y = Math.max(0, clipped.top - rawRect.top);
+  if (Math.abs(x) < 0.5 && Math.abs(y) < 0.5 && Math.abs(clipped.width - width) < 0.5 && Math.abs(clipped.height - height) < 0.5) return null;
+  return { x, y, width: clipped.width, height: clipped.height };
+}
+
+function gradientBackgroundImageData(backgroundImage, width, height, radius = 0, crop = null) {
   const layers = splitCssLayers(backgroundImage).filter(layer => /(?:linear|radial)-gradient/i.test(layer));
   if (!layers.length) return null;
   const scale = Math.max(1, Math.min(2, Math.ceil(900 / Math.max(width, height))));
@@ -1584,6 +2328,25 @@ function gradientBackgroundImageData(backgroundImage, width, height, radius = 0)
     else drawLinearGradient(ctx, layer, w, h);
   }
   ctx.restore();
+  if (crop) {
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = Math.max(1, Math.round(crop.width * scale));
+    cropCanvas.height = Math.max(1, Math.round(crop.height * scale));
+    const cropCtx = cropCanvas.getContext('2d');
+    if (!cropCtx) return null;
+    cropCtx.drawImage(
+      canvas,
+      Math.round(crop.x * scale),
+      Math.round(crop.y * scale),
+      cropCanvas.width,
+      cropCanvas.height,
+      0,
+      0,
+      cropCanvas.width,
+      cropCanvas.height,
+    );
+    return cropCanvas.toDataURL('image/png');
+  }
   return canvas.toDataURL('image/png');
 }
 
@@ -1625,6 +2388,7 @@ function drawRadialGradient(ctx, layer, width, height) {
   let cx = width / 2;
   let cy = height / 2;
   const first = String(args[0] || '');
+  const firstLower = first.toLowerCase();
   if (!/^(?:rgba?|#)/i.test(first.trim())) {
     const at = first.match(/\bat\s+([-\d.]+)%?\s+([-\d.]+)%?/i);
     if (at) {
@@ -1633,7 +2397,9 @@ function drawRadialGradient(ctx, layer, width, height) {
     }
     startIndex = 1;
   }
-  const radius = Math.max(width, height) * 0.72;
+  const radius = firstLower.includes('closest-side')
+    ? Math.max(1, Math.min(cx, cy, width - cx, height - cy))
+    : Math.max(width, height) * 0.72;
   const stops = normalizeGradientStops(parseGradientColorStops(args.slice(startIndex)), radius);
   if (stops.length < 2) return;
   const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
@@ -1909,9 +2675,9 @@ function visibleTextInSubtree(root, slideRect) {
   return texts;
 }
 
-function visibleTextInScreenshotRect(root, slideRect) {
+function visibleTextInScreenshotRect(root, slideRect, target = null) {
   const slide = root.closest('#deck > .slide') || root;
-  const targetRect = root.getBoundingClientRect();
+  const targetRect = target || root.getBoundingClientRect();
   const texts = [];
   const seen = new Set();
   const add = (text, rect) => {
@@ -1947,9 +2713,9 @@ function visibleTextInScreenshotRect(root, slideRect) {
   return { count: texts.length, sample: texts.join(' ').slice(0, 160) };
 }
 
-function visibleOverlayPaintInScreenshotRect(root, slideRect) {
+function visibleOverlayPaintInScreenshotRect(root, slideRect, target = null) {
   const slide = root.closest('#deck > .slide') || root;
-  const targetRect = root.getBoundingClientRect();
+  const targetRect = target || root.getBoundingClientRect();
   const items = [];
   const seen = new Set();
   const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
@@ -2087,6 +2853,39 @@ function isMediaChrome(el) {
   return !!el.closest('script,style,noscript,template,#nav,#preview-panel,#slide-rail,.theme03-theme-toggle,.ctl,.spill,input');
 }
 
+function shouldScreenshotImageSlot(el) {
+  return isImageSlotElement(el) && !hasTransformedAncestor(el);
+}
+
+function isImageSlotElement(el) {
+  return !!el.matches?.('image-slot,[data-dashi-host-image-slot="true"]');
+}
+
+function hasTransformedAncestor(el) {
+  const slide = el.closest?.('#deck > .slide');
+  for (let parent = el.parentElement; parent && parent !== slide; parent = parent.parentElement) {
+    const transform = String(getComputedStyle(parent).transform || '');
+    if (isRotatedOrSkewedTransform(transform)) return true;
+  }
+  return false;
+}
+
+function isRotatedOrSkewedTransform(transform) {
+  const raw = String(transform || '').trim();
+  if (!raw || raw === 'none') return false;
+  const matrix = raw.match(/^matrix\(([^)]+)\)$/);
+  if (matrix) {
+    const [a, b, c, d] = matrix[1].split(',').map(value => Number.parseFloat(value.trim()) || 0);
+    return Math.abs(b) > 0.001 || Math.abs(c) > 0.001 || Math.abs(a - d) > 0.001;
+  }
+  const matrix3d = raw.match(/^matrix3d\(([^)]+)\)$/);
+  if (matrix3d) {
+    const values = matrix3d[1].split(',').map(value => Number.parseFloat(value.trim()) || 0);
+    return Math.abs(values[1]) > 0.001 || Math.abs(values[4]) > 0.001 || Math.abs(values[0] - values[5]) > 0.001;
+  }
+  return /rotate|skew/i.test(raw);
+}
+
 function clippedRect(rect, slideRect) {
   const left = Math.max(rect.left, slideRect.x);
   const top = Math.max(rect.top, slideRect.y);
@@ -2094,6 +2893,62 @@ function clippedRect(rect, slideRect) {
   const bottom = Math.min(rect.bottom, slideRect.y + slideRect.h);
   if (right <= left || bottom <= top) return null;
   return { left, top, width: right - left, height: bottom - top };
+}
+
+function slideClipRect(slideRect) {
+  const left = Number(slideRect.x || 0);
+  const top = Number(slideRect.y || 0);
+  const width = Number(slideRect.w || slideRect.width || 0);
+  const height = Number(slideRect.h || slideRect.height || 0);
+  return { left, top, right: left + width, bottom: top + height, width, height };
+}
+
+function intersectClientRect(rect, clipRect) {
+  if (!rect || !clipRect) return null;
+  const rectLeft = Number(rect.left ?? rect.x ?? 0);
+  const rectTop = Number(rect.top ?? rect.y ?? 0);
+  const rectRight = Number(rect.right ?? (rectLeft + Number(rect.width ?? rect.w ?? 0)));
+  const rectBottom = Number(rect.bottom ?? (rectTop + Number(rect.height ?? rect.h ?? 0)));
+  const clipLeft = Number(clipRect.left ?? clipRect.x ?? 0);
+  const clipTop = Number(clipRect.top ?? clipRect.y ?? 0);
+  const clipRight = Number(clipRect.right ?? (clipLeft + Number(clipRect.width ?? clipRect.w ?? 0)));
+  const clipBottom = Number(clipRect.bottom ?? (clipTop + Number(clipRect.height ?? clipRect.h ?? 0)));
+  const left = Math.max(rectLeft, clipLeft);
+  const top = Math.max(rectTop, clipTop);
+  const right = Math.min(rectRight, clipRight);
+  const bottom = Math.min(rectBottom, clipBottom);
+  if (right <= left || bottom <= top) return null;
+  return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+
+function nextChildClipRect(el, style, rawRect, currentClip) {
+  if (!hasClipStyle(style)) return currentClip;
+  return intersectClientRect(rawRect || el.getBoundingClientRect(), currentClip) || currentClip;
+}
+
+function hasClipStyle(style) {
+  const overflow = String(style?.overflow || '').trim().toLowerCase();
+  if (overflow && overflow !== 'visible') return true;
+  const clipPath = String(style?.clipPath || '').trim();
+  if (clipPath && clipPath !== 'none') return true;
+  const mask = `${style?.mask || ''} ${style?.maskImage || ''} ${style?.webkitMask || ''} ${style?.webkitMaskImage || ''}`.trim();
+  return Boolean(mask && !/^none(?:\s+none)*$/i.test(mask));
+}
+
+function sameClientRect(a, b, tolerance = 0.5) {
+  if (!a || !b) return false;
+  const aLeft = Number(a.left ?? a.x ?? 0);
+  const aTop = Number(a.top ?? a.y ?? 0);
+  const aRight = Number(a.right ?? (aLeft + Number(a.width ?? a.w ?? 0)));
+  const aBottom = Number(a.bottom ?? (aTop + Number(a.height ?? a.h ?? 0)));
+  const bLeft = Number(b.left ?? b.x ?? 0);
+  const bTop = Number(b.top ?? b.y ?? 0);
+  const bRight = Number(b.right ?? (bLeft + Number(b.width ?? b.w ?? 0)));
+  const bBottom = Number(b.bottom ?? (bTop + Number(b.height ?? b.h ?? 0)));
+  return Math.abs(aLeft - bLeft) <= tolerance
+    && Math.abs(aTop - bTop) <= tolerance
+    && Math.abs(aRight - bRight) <= tolerance
+    && Math.abs(aBottom - bBottom) <= tolerance;
 }
 
 function rectObject(rect) {
@@ -2175,9 +3030,29 @@ function isTextClippedBackground(style) {
 function shouldUseNativeGradientShape(style = {}, width = 0, height = 0) {
   const background = String(style.backgroundImage || '');
   if (!/linear-gradient/i.test(background) || /repeating-linear-gradient/i.test(background)) return false;
+  const gradientLayers = splitCssLayers(background).filter(layer => /(?:linear|radial)-gradient/i.test(layer));
+  if (gradientLayers.length === 1 && isLowAlphaLinearGradient(gradientLayers[0])) return true;
   const minSide = Math.min(Number(width) || 0, Number(height) || 0);
   const maxSide = Math.max(Number(width) || 0, Number(height) || 0);
   return minSide > 0 && minSide <= 16 && maxSide >= 24;
+}
+
+function isLowAlphaLinearGradient(layer) {
+  if (!/linear-gradient/i.test(String(layer || '')) || /radial-gradient/i.test(String(layer || ''))) return false;
+  const body = String(layer).replace(/^.*?linear-gradient\(/i, '').replace(/\)\s*$/, '');
+  const args = splitCssArgs(body);
+  let startIndex = 0;
+  if (/([-\d.]+deg|to\s+)/i.test(String(args[0] || ''))) startIndex = 1;
+  const stops = parseGradientColorStops(args.slice(startIndex));
+  if (stops.length < 2) return false;
+  if (!stops.every(stop => stop.color && stop.color.a > 0 && stop.color.a <= 0.28)) return false;
+  const [first] = stops;
+  return stops.every(stop => {
+    const color = stop.color;
+    return Math.abs(color.r - first.color.r) <= 24
+      && Math.abs(color.g - first.color.g) <= 24
+      && Math.abs(color.b - first.color.b) <= 24;
+  });
 }
 
 function cssBorderTriangle(style = {}, c) {
@@ -2406,24 +3281,79 @@ function letterSpacing(value) {
   return Number.isFinite(n) ? Math.max(-2, Math.min(12, n * PX_TO_PT)) : 0;
 }
 
-function firstFont(value) {
-  const families = String(value || 'Arial')
+function fontFamilies(value) {
+  return String(value || 'Arial')
     .split(',')
-    .map(item => item.replace(/^["']|["']$/g, '').trim())
+    .map(item => item.trim().replace(/^["']|["']$/g, ''))
     .filter(Boolean);
-  for (const family of families) {
-    if (/space mono|monospace/i.test(family)) return 'Menlo';
-    if (/noto sans sc|pingfang|system-ui|-apple-system|blinkmacsystemfont|sans-serif/i.test(family)) return 'PingFang SC';
-    if (/noto serif sc|songti|serif/i.test(family)) return 'Songti SC';
+}
+
+function fontFaceForText(fontFamily, text = '') {
+  const families = fontFamilies(fontFamily);
+  if (hasCjkText(text)) {
+    const cjk = families.find(isCjkFontFamily);
+    if (cjk) return cjk;
   }
   return families[0] || 'Arial';
 }
 
-function pptFontSize(px, fontFace) {
-  const scale = /PingFang SC|Songti SC/i.test(fontFace) ? 0.60
-    : /Menlo/i.test(fontFace) ? 0.66
-      : PX_TO_PT;
-  return px * scale;
+function isCjkFontFamily(value) {
+  return /Noto Sans SC|PingFang SC|Songti SC|Microsoft YaHei|Source Han|思源|黑体|宋体/i.test(String(value || ''));
+}
+
+function fontStack(style = {}, fontFace = '') {
+  return [fontFace, style.fontFamily].filter(Boolean).join(',');
+}
+
+function pptFontSize(px, fontFace, style = {}, text = '') {
+  return px * pptFontScale(fontFace, style, text);
+}
+
+function pptFontScale(fontFace, style = {}, text = '') {
+  const stack = fontStack(style, fontFace);
+  if (/Space Mono|IBM Plex Mono|SFMono|ui-monospace|monospace|Menlo/i.test(stack)) return 0.66;
+  if (hasCjkText(text) || /Noto Sans SC|PingFang SC|Songti SC|Microsoft YaHei|Source Han|思源|黑体|宋体|sans-serif|system-ui|-apple-system/i.test(stack)) return 0.60;
+  return PX_TO_PT;
+}
+
+function hasCjkText(value) {
+  return /[\u2e80-\u9fff]/.test(String(value || ''));
+}
+
+function pptLineSpacing(value, fontSizePx, fontFace, style = {}, text = '') {
+  const raw = String(value || '').trim();
+  if (!raw || raw === 'normal') return null;
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const lineHeightPx = raw.endsWith('px') ? n : n <= 4 ? n * fontSizePx : n;
+  if (!Number.isFinite(lineHeightPx) || lineHeightPx <= 0) return null;
+  return pptFontSize(lineHeightPx, fontFace, style, text);
+}
+
+function pptTextYOffset(box, fontSizePx, fontFace, style = {}, text = '', node = null) {
+  const stack = fontStack(style, fontFace);
+  if (fontSizePx < 28) return 0;
+  const parentTag = String(node?.parentTag || '');
+  const cjkStack = /Noto Sans SC|PingFang SC|Songti SC|Microsoft YaHei|Source Han|思源|黑体|宋体|sans-serif|system-ui|-apple-system/i.test(stack);
+  const numericText = /^[\s¥$€£+\-−–—.,:%/0-9A-Za-z]+$/.test(String(text || ''));
+  if (numericText && cjkStack) {
+    if (fontSizePx >= 220) return box.h * 0.12;
+    if (fontSizePx >= 160) return box.h * 0.10;
+    if (fontSizePx >= 96) return box.h * 0.07;
+    if (fontSizePx >= 60) return box.h * 0.045;
+  }
+  const compactCjkUnit = parentTag === 'span' && /^[\s¥$€£+\-−–—.,:%/0-9万亿兆]+$/.test(String(text || ''));
+  if (compactCjkUnit && cjkStack && fontSizePx >= 72) return -box.h * 0.035;
+  if (hasCjkText(text)) {
+    if (fontSizePx >= 180) return box.h * 0.05;
+    if (fontSizePx >= 120) return box.h * 0.04;
+    if (fontSizePx >= 96) return box.h * 0.03;
+    if (fontSizePx >= 48) return box.h * 0.018;
+    return box.h * 0.006;
+  }
+  if (/Anton/i.test(stack) && fontSizePx >= 80) return box.h * 0.09;
+  if (/Space Grotesk|Archivo|Arimo|IBM Plex Sans|Newsreader|Caveat/i.test(stack) && fontSizePx >= 48) return box.h * 0.045;
+  return 0;
 }
 
 function normalizeAlign(value) {
