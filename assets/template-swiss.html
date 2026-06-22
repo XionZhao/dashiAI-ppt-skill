@@ -1855,7 +1855,6 @@ function go(n, opts={}){
     }
     return;
   }
-  if(isEditMode() && !opts.force && !opts.skipThumbPause) pauseOverviewThumbs();
   if(opts.refreshSlideList) refreshSlideList();
   if(total <= 0){
     lock=true;
@@ -2490,6 +2489,19 @@ function cancelOverviewThumbQueue(){
 }
 window.__cancelOverviewThumbQueue = cancelOverviewThumbQueue;
 
+function isOverviewThumbVisibleNow(wrap){
+  const card = wrap?.closest?.('[data-overview-card="true"]');
+  if(!isEditMode() || !ov || !card?.isConnected) return false;
+  const railRect = ov.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  return cardRect.bottom > railRect.top + 1 && cardRect.top < railRect.bottom - 1;
+}
+
+function getNextOverviewThumbQueueIndex(){
+  if(performance.now() >= overviewThumbPauseUntil) return 0;
+  return overviewThumbQueue.findIndex(wrap => isOverviewThumbVisibleNow(wrap));
+}
+
 function deferOverviewThumbs(ms=650, reason='interaction'){
   overviewThumbPauseUntil = Math.max(overviewThumbPauseUntil, performance.now() + ms);
   recordOverviewInteraction(reason);
@@ -2696,9 +2708,9 @@ function getOverviewPreviewCost(slide){
   return elementCount + mediaCount * 8;
 }
 
-async function renderOverviewThumb(wrap, runId=overviewThumbRunId){
+async function renderOverviewThumb(wrap, runId=overviewThumbRunId, opts={}){
   if(!isEditMode() || !wrap?.isConnected || wrap.dataset.overviewRendered === 'true') return;
-  if(performance.now() < overviewThumbPauseUntil) return;
+  if(!opts.allowDuringPause && performance.now() < overviewThumbPauseUntil) return;
   delete wrap.dataset.overviewQueued;
   const card = wrap.closest('[data-overview-card="true"]');
   const slide = card?.__overviewSlide || getCatalogSlides()[Number(card?.dataset.index)];
@@ -2758,20 +2770,23 @@ function scheduleOverviewThumbQueue(opts={}){
     const sliceStartAt = performance.now();
     const budgetMs = 10;
     overviewPerfMarks.queueRuns.push({at:sliceStartAt, scheduler:'time-sliced', budgetMs, queueLength:overviewThumbQueue.length});
-    if(performance.now() < overviewThumbPauseUntil){
+    const nextIndex = getNextOverviewThumbQueueIndex();
+    if(nextIndex < 0){
       if(overviewThumbQueue.length) scheduleOverviewThumbQueue();
       return;
     }
     let processed=0;
     while(overviewThumbQueue.length && isEditMode() && runId === overviewThumbRunId){
-      if(performance.now() < overviewThumbPauseUntil) break;
+      const itemIndex = getNextOverviewThumbQueueIndex();
+      if(itemIndex < 0) break;
       if(processed > 0 || performance.now() - sliceStartAt >= budgetMs) break;
-      const wrap = overviewThumbQueue.shift();
+      const paused = performance.now() < overviewThumbPauseUntil;
+      const wrap = overviewThumbQueue.splice(itemIndex, 1)[0];
       if(wrap?.dataset) delete wrap.dataset.overviewQueued;
       if(wrap?.isConnected && wrap.dataset.overviewRendered !== 'true'){
         overviewThumbProcessing=true;
         try {
-          await renderOverviewThumb(wrap, runId);
+          await renderOverviewThumb(wrap, runId, {allowDuringPause:paused});
         } finally {
           overviewThumbProcessing=false;
         }
