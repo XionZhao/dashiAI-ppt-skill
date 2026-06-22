@@ -359,6 +359,7 @@ function testSkillPromptGuidance() {
   if (!skill.includes('--planned-images <n>')) missing.push('planned-images workflow guidance');
   if (!skill.includes('--provided-images <n>')) missing.push('provided-images workflow guidance');
   if (!skill.includes('--image-gen')) missing.push('image-gen workflow guidance');
+  if (!(/canPresetMedia/.test(skill) && /presetProp/.test(skill))) missing.push('preset media slot guidance');
   for (const term of ['随意', '自拟', '你来定', '不用问', '直接开干']) {
     if (!skill.includes(term)) missing.push(`delegated no-question mode term ${term}`);
   }
@@ -381,6 +382,7 @@ function testSkillPromptGuidance() {
   }
   if (!sync.includes('theme-style-grid.png')) missing.push('sync style grid asset handling');
   if (!(/copyBudgets/.test(sync) && /media:stage/.test(sync) && /props:safe -- --goal/.test(sync))) missing.push('sync reference copy/media/whole-goal props tool guidance');
+  if (!(/canPresetMedia/.test(sync) && /presetProp/.test(sync))) missing.push('sync reference preset media guidance');
   if (/THEME_CHOICE_HINTS/.test(sync)) missing.push('hardcoded THEME_CHOICE_HINTS table');
   assert(!missing.length, `Skill prompt guidance missing: ${missing.join(', ')}`);
 }

@@ -616,7 +616,7 @@ ${themeHints}
 
 每套主题的前 5 页都是封面候选。一个 deck 只能使用其中 1 页作为封面,正文页从第 6 页以后选择。
 
-选页先使用 \`npm run layout:query -- --theme <themePack> --role <role> --limit 8\`。需要图片槽时加 \`--needs-media\`、\`--planned-images <n>\`、\`--provided-images <n>\` 或 \`--image-gen\`,候选会基于真实 \`mediaSlots\`。
+选页先使用 \`npm run layout:query -- --theme <themePack> --role <role> --limit 8\`。需要图片槽时加 \`--needs-media\`、\`--planned-images <n>\`、\`--provided-images <n>\` 或 \`--image-gen\`,候选会基于真实 \`mediaSlots\`;用户给素材时只用 \`canPresetMedia: true\` 的槽,按 \`presetProp\` 写路径。
 
 单页契约使用 \`npm run inspect:layout -- <layout>\`,可一次传多个 layout 或多次 \`--layout\`。\`copyBudgets\` 给出文案长度预算;\`propShapes\` 给出 \`copy\`、对象数组和嵌套数组的内部 key。写 \`copy\`、\`cells\`、\`items\`、\`rows\` 等对象字段时只使用 \`propShapes\` 列出的 key,不要凭字段名猜测。写数组、数量或图片时使用 \`npm run props:safe -- <layout> '<props-json>' [--images <path...>]\`;写完整 \`goal.json\` 后使用 \`npm run props:safe -- --goal <goal-json>\` 做整份 props 检查。
 

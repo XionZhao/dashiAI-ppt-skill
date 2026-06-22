@@ -72,9 +72,11 @@ function testProvidedImageQuery() {
   for (const layout of result.layouts) {
     const slots = layout.mediaSlots || [];
     assert(slots.some(slot => slot.initialSrcSupported === true && mediaSlotCapacity(slot) >= 3), `${layout.layout} lacks initial media slot for 3 images`);
+    assert(slots.some(slot => slot.canPresetMedia === true && slot.presetProp), `${layout.layout} lacks canPresetMedia/presetProp hint`);
     for (const slot of slots) {
       assert(slot.field !== 'mediaCount' && slot.field !== 'imageCount', `${layout.layout} exposes count key as media field`);
       assert(slot.fieldPath, `${layout.layout} media slot missing fieldPath`);
+      if (slot.canPresetMedia) assert(slot.presetProp === slot.fieldPath, `${layout.layout} presetProp should match fieldPath`);
     }
   }
 }
@@ -90,7 +92,7 @@ function testVideoQuery() {
   assert(result.requireInitialMedia === true, 'expected requireInitialMedia=true');
   assert(result.layouts.length > 0, 'expected video-capable initial media candidates');
   for (const layout of result.layouts) {
-    assert((layout.mediaSlots || []).some(slot => slot.initialSrcSupported === true && (slot.acceptedKinds || []).includes('video')), `${layout.layout} lacks initial video-capable slot`);
+    assert((layout.mediaSlots || []).some(slot => slot.initialSrcSupported === true && slot.canPresetMedia === true && slot.presetProp && (slot.acceptedKinds || []).includes('video')), `${layout.layout} lacks initial video-capable slot`);
   }
 }
 

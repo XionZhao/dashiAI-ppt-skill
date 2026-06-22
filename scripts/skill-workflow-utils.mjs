@@ -241,13 +241,21 @@ function publicControl(control) {
 }
 
 function compactMediaSlot(slot) {
+  const canPresetMedia = slot.initialSrcSupported === true && Boolean(slot.fieldPath);
   return {
     field: slot.field,
+    fieldPath: slot.fieldPath,
     countKey: slot.countKey,
     publicCountKey: slot.publicCountKey || slot.countKey,
+    defaultCount: slot.defaultCount,
     max: slot.max,
     acceptedKinds: slot.acceptedKinds,
+    valueShape: slot.valueShape,
     initialSrcSupported: slot.initialSrcSupported,
+    writeMode: slot.writeMode,
+    canPresetMedia,
+    presetProp: canPresetMedia ? slot.fieldPath : null,
+    emptySlotBehavior: slot.emptySlotBehavior,
   };
 }
 

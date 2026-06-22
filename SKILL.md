@@ -54,6 +54,7 @@ node scripts/check_latest_version.mjs
 - 字段不清楚、对象/数组/count、图片/媒体:运行 `inspect:layout`;可一次查多个 layout。写对象、数组、数量或图片 props:运行 `props:safe` 并按 `propShapes` 填 key。
 - 文案长度:按 `inspect:layout` 的 `copyBudgets` 写;`display` / `metric` 字段只写短词、短句或数字。
 - 图片/视频只写 `props.images` / `props.media`。视觉素材任务先问是否预留图片槽;不能默认图片槽为 0。用户同意用 `--planned-images <n>`,用户给图用 `--provided-images <n>`,Codex 环境 image-gen 生成图片前先询问并用 `--image-gen`。
+- 用户给素材时优先选 `layout:query --provided-images/--provided-media` 候选;只使用 `mediaSlots[].canPresetMedia: true` 的槽,按 `presetProp` 写路径。
 - 用户提供本地图片/视频先运行 `npm run media:stage -- <deck-output-dir-or-ppt-dir> <media-file...>`,使用返回的 `relative` 路径;AVIF 会转成浏览器可用格式。
 - 用户提供的图片/视频素材每个最多使用一次。素材用完后,媒体插槽留空或改选无媒体插槽页面;除非用户明确要求,不要重复填充同一素材。
 - 元素出现动画使用 Claude Design 页面组件自带的原生效果。
