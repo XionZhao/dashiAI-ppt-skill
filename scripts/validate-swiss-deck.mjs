@@ -176,6 +176,25 @@ if (!/buildPdfExportSnapshot/.test(pdfExportSource)) {
   errors.push('PDF export must send the current deck state to the screenshot PDF service.');
 }
 
+const htmlExportStart = html.indexOf('window.__exportDeckHtml =');
+const htmlExportEnd = htmlExportStart >= 0 ? html.indexOf('async function materializeExportSlides', htmlExportStart) : -1;
+const htmlExportSource = htmlExportStart >= 0 && htmlExportEnd > htmlExportStart
+  ? html.slice(htmlExportStart, htmlExportEnd)
+  : '';
+const htmlExportMaterializeIndex = htmlExportSource.indexOf('materializeExportSlides');
+const htmlExportCloneIndex = htmlExportSource.indexOf('cloneNode');
+if (htmlExportMaterializeIndex < 0 || htmlExportCloneIndex < 0 || htmlExportMaterializeIndex > htmlExportCloneIndex) {
+  errors.push('HTML export must render every visible runtime slide before cloning the page.');
+}
+
+if (!/serializeHtmlExportClone\s*\(/.test(htmlExportSource) || !/function collectHtmlExportLocalMediaRefs\(/.test(html)) {
+  errors.push('HTML export must inline local image/video assets into the single exported HTML file.');
+}
+
+if (!/materializeHtmlExportViewModel/.test(html) || !/\.\.\.\(state\.props\?\.\[id\]\s*\|\|\s*\{\}\)/.test(html)) {
+  errors.push('HTML export must preserve current right-panel props in the embedded deck view model.');
+}
+
 if (!html.includes('deck-export-cancel')) {
   errors.push('Deck export overlay is missing a cancel button.');
 }
