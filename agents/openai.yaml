@@ -1,6 +1,6 @@
 interface:
-  display_name: "DashAI PPT DEV"
-  short_description: "Generate editable HTML/PPTX decks"
+  display_name: "DashAI PPT"
+  short_description: "Generate editable HTML presentation decks"
   icon_small: "./assets/skill/dashiai-ppt-small.png"
   icon_large: "./assets/skill/dashiai-ppt.png"
-  default_prompt: "Use $dashiai-ppt to turn my presentation goal into an editable HTML or PPTX deck."
+  default_prompt: "Use $dashiai-ppt to turn my presentation goal into an editable HTML deck."
