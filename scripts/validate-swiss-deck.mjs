@@ -195,6 +195,28 @@ if (!/materializeHtmlExportViewModel/.test(html) || !/\.\.\.\(state\.props\?\.\[
   errors.push('HTML export must preserve current right-panel props in the embedded deck view model.');
 }
 
+const htmlPrepareStart = html.indexOf('async function prepareSimpleHtmlExportClone');
+const htmlPrepareEnd = htmlPrepareStart >= 0 ? html.indexOf('function materializeHtmlExportViewModel', htmlPrepareStart) : -1;
+const htmlPrepareSource = htmlPrepareStart >= 0 && htmlPrepareEnd > htmlPrepareStart
+  ? html.slice(htmlPrepareStart, htmlPrepareEnd)
+  : '';
+const removedInteractiveExportNodes = [
+  '#deck-topbar',
+  '#deck-page-pager',
+  '#slide-rail',
+  '#preview-panel',
+  '#preview-panel-collapse',
+  '#image-picker-input',
+  '#media-picker-input',
+].filter((selector) => htmlPrepareSource.includes(`querySelector('${selector}')?.remove()`));
+if (removedInteractiveExportNodes.length) {
+  errors.push(`HTML export must keep the editable shell and media inputs: ${removedInteractiveExportNodes.join(', ')}.`);
+}
+
+if (/classList\.remove\([^)]*preview-panel-open|classList\.remove\([^)]*editor-panels-collapsed/.test(htmlPrepareSource)) {
+  errors.push('HTML export must preserve the current editor panel state instead of forcing a partial shell.');
+}
+
 if (!html.includes('deck-export-cancel')) {
   errors.push('Deck export overlay is missing a cancel button.');
 }

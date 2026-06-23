@@ -985,7 +985,7 @@ let deckLeft=0;
 let deckTop=0;
 let deckScale=1;
 let activeThemePack=document.documentElement.dataset.themePack || '';
-let deckMode='edit';
+let deckMode=document.body.dataset.mode === 'present' ? 'present' : 'edit';
 var overviewGrid=null;
 let adjacentPreloadTimer=null;
 const deckDiagnosticFlags={disableThumbGeneration:false,disableAdjacentPreload:false};
@@ -993,7 +993,9 @@ const CURRENT_SLIDE_STORE='dashi-ppt-current-slide';
 const DECK_ASPECT_W=16;
 const DECK_ASPECT_H=9;
 document.body.dataset.mode=deckMode;
-document.body.classList.add('preview-panel-open');
+if(deckMode === 'edit' && !document.body.classList.contains('editor-panels-collapsed')){
+  document.body.classList.add('preview-panel-open');
+}
 
 function isEditMode(){
   return deckMode === 'edit';
@@ -4681,15 +4683,9 @@ refreshRailCatalog();
     materializeHtmlExportViewModel(clone, visibleSlides);
     await inlineLocalScriptsForHtmlExport(clone);
     await embedUnicornAssetsForExport(clone);
-    clone.querySelector('#deck-topbar')?.remove();
-    clone.querySelector('#deck-page-pager')?.remove();
-    clone.querySelector('#slide-rail')?.remove();
-    clone.querySelector('#preview-panel-collapse')?.remove();
-    clone.querySelector('#image-picker-input')?.remove();
-    clone.querySelector('#media-picker-input')?.remove();
     clone.querySelector('.deck-export-overlay')?.remove();
     clone.querySelector('.page-transition-stage')?.remove();
-    clone.querySelector('body')?.classList.remove('preview-panel-open', 'editor-panels-collapsed', 'exporting-deck');
+    clone.querySelector('body')?.classList.remove('exporting-deck');
     clone.querySelectorAll('iframe[data-effect-src]').forEach(iframe => {
       if(!iframe.getAttribute('src') && iframe.dataset.effectSrc) iframe.setAttribute('src', iframe.dataset.effectSrc);
     });
