@@ -56,6 +56,7 @@ function runSingle(args) {
     props = {
       ...props,
       [slot.field]: mediaInput.items,
+      ...(slot.countKey ? { [slot.countKey]: mediaInput.items.length } : {}),
     };
     mediaIntent = mediaInput.kind === 'media' ? 'provided-media' : 'provided-images';
     mediaMapping = {

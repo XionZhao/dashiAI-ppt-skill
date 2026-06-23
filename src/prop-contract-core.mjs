@@ -13,6 +13,7 @@ export const COUNT_ARRAY_BINDINGS = {
   chipCount: ['chips'],
   colCount: ['columns', 'cols'],
   columnCount: ['columns', 'plans'],
+  featureCount: ['features', 'plans[].feats'],
   indexCount: ['items', 'index'],
   itemCount: ['items', 'stats', 'data'],
   laneCount: ['lanes'],
@@ -202,6 +203,7 @@ function hasAuthoredMedia(props = {}) {
 }
 
 export function neutralizeDefaultCopy(value, field = '') {
+  if (isSerializedReactElementLike(value)) return neutralizeDefaultCopy(reactElementText(value), field);
   if (typeof value === 'string') return shouldNeutralizeString(field, value) ? neutralPlaceholder(value) : value;
   if (Array.isArray(value)) return value.map(item => neutralizeDefaultCopy(item, field));
   if (!isPlainObject(value)) return value;
@@ -243,6 +245,18 @@ export function validateAuthoredPropShape(props = {}, defaults = {}) {
 }
 
 function validateValueShape(value, defaultValue, field, errors) {
+  if (isSerializedReactElementLike(value)) {
+    errors.push(`${field}: serialized React element is not allowed; use plain text`);
+    return;
+  }
+
+  if (isSerializedReactElementLike(defaultValue)) {
+    if (!['string', 'number'].includes(typeof value)) {
+      errors.push(`${field}: expected string`);
+    }
+    return;
+  }
+
   if (Array.isArray(defaultValue)) {
     if (!Array.isArray(value)) {
       errors.push(`${field}: expected array`);
@@ -287,6 +301,7 @@ export function describePropShapes(defaultProps = {}, keys = Object.keys(default
 }
 
 function describeValueShape(value) {
+  if (isSerializedReactElementLike(value)) return 'string';
   if (Array.isArray(value)) {
     const objectShape = mergeObjectShape(value);
     if (objectShape) return [describeValueShape(objectShape)];
@@ -503,12 +518,36 @@ function normalizeControlType(type) {
 function deriveCount(props, binding) {
   if (binding.key === 'phaseCount') return derivePhaseCount(props);
 
-  const counts = binding.arrays
-    .filter(key => Array.isArray(props[key]))
-    .map(key => ({ source: key, count: props[key].length }));
+  const counts = binding.arrays.flatMap(key => collectArrayCounts(props, key));
 
   if (!counts.length) return null;
+  if (binding.arrays.some(isNestedArrayPath)) return collapseNestedCounts(counts);
   return collapseCounts(counts);
+}
+
+function collectArrayCounts(value, pathName, sourcePrefix = '') {
+  if (!value || typeof value !== 'object') return [];
+  const [segment, ...restParts] = String(pathName || '').split('.');
+  const rest = restParts.join('.');
+  const arraySegment = segment.endsWith('[]');
+  const key = arraySegment ? segment.slice(0, -2) : segment;
+  const next = value[key];
+  const source = sourcePrefix ? `${sourcePrefix}.${key}` : key;
+
+  if (arraySegment) {
+    if (!Array.isArray(next)) return [];
+    if (!rest) return [{ source, count: next.length }];
+    return next.flatMap((item, index) => collectArrayCounts(item, rest, `${source}[${index}]`));
+  }
+
+  if (!rest) {
+    return Array.isArray(next) ? [{ source, count: next.length }] : [];
+  }
+  return collectArrayCounts(next, rest, source);
+}
+
+function isNestedArrayPath(pathName) {
+  return String(pathName || '').includes('[].');
 }
 
 function derivePhaseCount(props) {
@@ -538,6 +577,13 @@ function collapseCounts(counts) {
   };
 }
 
+function collapseNestedCounts(counts) {
+  return {
+    count: Math.min(...counts.map(item => item.count)),
+    source: counts.map(item => `${item.source}=${item.count}`).join('/'),
+  };
+}
+
 function validateCountRange(binding, count, source, errors) {
   const min = Number(binding.min);
   const max = Number(binding.max);
@@ -556,6 +602,7 @@ function resolveControlValue(value, defaults) {
 
 export function serializeValue(value) {
   if (value == null || ['string', 'number', 'boolean'].includes(typeof value)) return value;
+  if (isSerializedReactElementLike(value)) return reactElementText(value);
   if (Array.isArray(value)) return value.map(serializeValue);
   if (typeof value !== 'object') return undefined;
   return Object.fromEntries(
@@ -563,4 +610,24 @@ export function serializeValue(value) {
       .map(([key, item]) => [key, serializeValue(item)])
       .filter(([, item]) => item !== undefined),
   );
+}
+
+export function isSerializedReactElementLike(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (!value.props || typeof value.props !== 'object') return false;
+  return Object.prototype.hasOwnProperty.call(value, 'type')
+    || Object.prototype.hasOwnProperty.call(value, 'ref')
+    || Object.prototype.hasOwnProperty.call(value, 'key')
+    || Object.prototype.hasOwnProperty.call(value, '_owner')
+    || Object.prototype.hasOwnProperty.call(value, '_store');
+}
+
+export function reactElementText(value) {
+  if (value == null || value === false) return '';
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  if (Array.isArray(value)) return value.map(reactElementText).join('');
+  if (!value || typeof value !== 'object') return '';
+  if (String(value.type || '').toLowerCase() === 'br') return '\n';
+  if (isSerializedReactElementLike(value)) return reactElementText(value.props?.children);
+  return '';
 }

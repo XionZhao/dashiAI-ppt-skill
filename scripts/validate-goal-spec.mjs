@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { isSerializedReactElementLike } from '../src/prop-contract-core.mjs';
 import {
   getCopyBudgetsForLayout,
   getMediaSlotsForLayout,
@@ -27,6 +28,8 @@ export function validateGoalSpec(spec) {
 
   validateFreeHtml(spec?.title, 'deck', '<deck>', 'title', errors);
   validateFreeHtml(spec?.goal, 'deck', '<deck>', 'goal', errors);
+  validateNoSerializedReactElements(spec?.text, 'deck', '<deck>', 'text', errors);
+  validateNoSerializedReactElements(spec?.props, 'deck', '<deck>', 'props', errors);
   validateObjectStrings(spec?.text, 'deck', '<deck>', 'text', errors);
   validateObjectStrings(spec?.props, 'deck', '<deck>', 'props', errors);
 
@@ -63,7 +66,10 @@ export function validateGoalSpec(spec) {
 
     const record = getLayoutRecord(layout);
     const props = slide?.props || {};
+    validateNoSerializedReactElements(props, `slide ${slideNumber}`, layoutLabel, 'props', errors);
+    validateNoSerializedReactElements(slide?.copy, `slide ${slideNumber}`, layoutLabel, 'copy', errors);
     validateMediaIntent(slide, slideNumber, layoutLabel, props, errors);
+    validateMediaProps(slideNumber, layoutLabel, props, errors);
     collectMediaUsages(props, slideNumber, layoutLabel, mediaUsages);
 
     for (const key of unknownPropKeys(record, props)) {
@@ -116,8 +122,69 @@ function validateMediaIntent(slide, slideNumber, layout, props, errors) {
   const writtenSlot = slots.find(slot => Array.isArray(props?.[slot.field]) && props[slot.field].length >= Math.max(1, intent.count));
   if (!writtenSlot) {
     const fields = slots.map(slot => `props.${slot.field}`).join(' or ');
-    errors.push(`slide ${slideNumber} layout ${layout} field ${intent.field}: providedImages must be written to ${fields}; do not use slides[].media`);
+    errors.push(`slide ${slideNumber} layout ${layout} field ${intent.field}: ${intent.label} must be written to ${fields}; do not use slides[].media`);
   }
+}
+
+function validateMediaProps(slideNumber, layout, props, errors) {
+  const slots = getMediaSlotsForLayout(layout).filter(slot => slot.field && slot.initialSrcSupported === true);
+  const slotsByField = new Map(slots.map(slot => [slot.field, slot]));
+  for (const [key, value] of Object.entries(props || {})) {
+    if (!isMediaArrayKey(key)) continue;
+    const slot = slotsByField.get(key);
+    if (!slot) {
+      errors.push(`slide ${slideNumber} layout ${layout} field props.${key}: not a writable media slot for this layout`);
+      continue;
+    }
+    if (!Array.isArray(value)) {
+      errors.push(`slide ${slideNumber} layout ${layout} field props.${key}: expected array of media items`);
+      continue;
+    }
+    value.forEach((item, index) => validateMediaItem(item, slot, `slide ${slideNumber}`, layout, `props.${key}[${index}]`, errors));
+  }
+}
+
+function validateMediaItem(item, slot, scope, layout, field, errors) {
+  if (typeof item === 'string') {
+    const src = item.trim();
+    if (!src) {
+      errors.push(`${scope} layout ${layout} field ${field}: expected non-empty media source`);
+      return;
+    }
+    if (looksLikeVideoSrc(src) && !src.startsWith('data:video/')) {
+      errors.push(`${scope} layout ${layout} field ${field}: video media must use {src, kind:"video", type}`);
+      return;
+    }
+    validateAcceptedMediaKind(src.startsWith('data:video/') ? 'video' : 'image', slot, scope, layout, field, errors);
+    return;
+  }
+
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    errors.push(`${scope} layout ${layout} field ${field}: expected media item as string or {src}`);
+    return;
+  }
+
+  const src = typeof item.src === 'string' ? item.src.trim() : '';
+  if (!src) {
+    errors.push(`${scope} layout ${layout} field ${field}: expected media item with src`);
+    return;
+  }
+
+  const declaredKind = normalizeMediaKind(item.kind);
+  const typeText = String(item.type || '');
+  const inferredKind = declaredKind
+    || (typeText.startsWith('video/') || src.startsWith('data:video/') ? 'video' : 'image');
+  if (looksLikeVideoSrc(src) && inferredKind !== 'video') {
+    errors.push(`${scope} layout ${layout} field ${field}: video media must set kind:"video" or type:"video/*"`);
+    return;
+  }
+  validateAcceptedMediaKind(inferredKind, slot, scope, layout, field, errors);
+}
+
+function validateAcceptedMediaKind(kind, slot, scope, layout, field, errors) {
+  const accepted = slot.acceptedKinds || [];
+  if (!accepted.length || accepted.includes(kind)) return;
+  errors.push(`${scope} layout ${layout} field ${field}: ${kind} media is not supported by props.${slot.field}`);
 }
 
 function getSlideMediaIntent(slide) {
@@ -129,6 +196,17 @@ function getSlideMediaIntent(slide) {
       count: providedCount || 1,
       field: providedCount ? 'providedImages' : 'hasImages',
       label: providedCount ? 'providedImages' : 'hasImages',
+    };
+  }
+
+  const providedMediaCount = mediaCount(slide?.providedMedia);
+  if (providedMediaCount) {
+    return {
+      requiresMedia: true,
+      requiresWrittenProps: true,
+      count: providedMediaCount,
+      field: 'providedMedia',
+      label: 'providedMedia',
     };
   }
 
@@ -174,6 +252,19 @@ function mediaCount(value) {
 function validateObjectStrings(value, scope, layout, fieldPrefix, errors) {
   if (!value || typeof value !== 'object') return;
   visitStrings(value, fieldPrefix, (text, field) => validateFreeHtml(text, scope, layout, field, errors));
+}
+
+function validateNoSerializedReactElements(value, scope, layout, fieldPrefix, errors) {
+  if (!value || typeof value !== 'object') return;
+  if (isSerializedReactElementLike(value)) {
+    errors.push(`${scope} layout ${layout} field ${fieldPrefix}: serialized React element is not allowed; use plain text`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => validateNoSerializedReactElements(item, scope, layout, `${fieldPrefix}[${index}]`, errors));
+    return;
+  }
+  Object.entries(value).forEach(([key, item]) => validateNoSerializedReactElements(item, scope, layout, `${fieldPrefix}.${key}`, errors));
 }
 
 function validateCopyBudgets(layout, props, slideNumber, layoutLabel, errors) {
@@ -266,6 +357,19 @@ function normalizeMediaSrc(src) {
 
 function isMediaArrayKey(key) {
   return /^(images|media|photos|pictures|logos|thumbs|imageSlots|imgs)$/i.test(String(key || ''));
+}
+
+function looksLikeVideoSrc(src) {
+  return /\.(mp4|m4v|mov|webm|ogv)(?:[?#].*)?$/i.test(String(src || '').trim())
+    || String(src || '').startsWith('data:video/');
+}
+
+function normalizeMediaKind(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return '';
+  if (['image', 'img', 'photo', 'picture'].includes(text)) return 'image';
+  if (['video', 'movie', 'clip'].includes(text)) return 'video';
+  return text;
 }
 
 function stripInlineMarkers(value) {
