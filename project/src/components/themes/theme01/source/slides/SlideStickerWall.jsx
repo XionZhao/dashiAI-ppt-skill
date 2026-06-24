@@ -44,7 +44,7 @@ export const defaultProps = {
 };
 
 export const controls = [
-  { key: 'itemCount', label: '标签数量', type: 'number', default: 10, min: 6, max: 12, step: 1, unit: ' 个',
+  { key: 'itemCount', label: '标签数量', type: 'number', default: 10, min: 6, max: 12, step: 1, unit: ' 个', countArrays: ['tags'],
     description: '标签墙上展示的热词数量（自动保持错落构图）。' },
   { key: 'highlight', label: '高亮标签', type: 'boolean', default: true,
     description: '是否放大并发光强调其中一个标签。' },
@@ -66,14 +66,14 @@ export const controls = [
 const ROTS = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3, -4, 2];
 
 // One keyword sticker. tone: dark | light | glow. `on` promotes it (scale+glow).
-function Sticker({ term, note, tone, big, rot, on, ac }) {
+function Sticker({ term, note, tone, big, rot, on, ac, index }) {
   const isGlow = tone === 'glow' || on;
   const bg = on ? ac : tone === 'dark' ? '#1c1c22' : tone === 'glow' ? ac : '#ffffff';
   const fg = tone === 'dark' && !on ? '#ffffff' : '#1a1a1f';
   const noteFg = tone === 'dark' && !on ? hexA('#ffffff', 0.66) : hexA('#1a1a1f', 0.6);
   const size = (big ? 56 : 46) * (on ? 1.22 : 1);
   return (
-    <div style={{
+    <div data-editable-skip="true" style={{
       display: 'inline-flex', flexDirection: 'column', gap: 4,
       padding: big ? '16px 28px' : '13px 22px', borderRadius: 16,
       background: bg, transform: `rotate(${rot}deg)`,
@@ -84,8 +84,8 @@ function Sticker({ term, note, tone, big, rot, on, ac }) {
           ? `0 16px 34px ${hexA(ac, 0.4)}, 0 5px 14px rgba(26,26,31,.22)`
           : '0 16px 32px rgba(26,26,31,.26), 0 5px 12px rgba(26,26,31,.16)',
     }}>
-      <span style={{ fontSize: size, fontWeight: 900, lineHeight: 1, letterSpacing: '.01em', color: fg, whiteSpace: 'nowrap' }}>{term}</span>
-      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, letterSpacing: '.08em',
+      <span data-editable-path={`tags.${index}.term`} data-theme01-sticker-term={index} style={{ fontSize: size, fontWeight: 900, lineHeight: 1, letterSpacing: '.01em', color: fg, whiteSpace: 'nowrap' }}>{term}</span>
+      <span data-editable-path={`tags.${index}.note`} data-theme01-sticker-note={index} style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, letterSpacing: '.08em',
         textTransform: 'uppercase', color: noteFg, whiteSpace: 'nowrap' }}>{note}</span>
     </div>
   );
@@ -138,7 +138,7 @@ export default function SlideStickerWall(props) {
       <div style={{ flex: 1, minHeight: 0, marginTop: 10, display: 'flex', flexWrap: 'wrap', alignContent: 'center',
         justifyContent: 'center', alignItems: 'center', gap: '26px 30px', padding: '8px 10px' }}>
         {tags.map((t, i) => (
-          <Sticker key={i} term={t.term} note={t.note} tone={t.tone} big={t.big}
+          <Sticker key={i} index={i} term={t.term} note={t.note} tone={t.tone} big={t.big}
             rot={ROTS[i % ROTS.length]} on={i === hi} ac={ac} />
         ))}
       </div>

@@ -163,5 +163,5 @@ export const slideSpec = { defaults: defaultProps, slot:'market', name:'市场�
   { prop:'callout', type:'toggle', label:'解读卡', default:true },
   { prop:'labelType', type:'labelType', label:'标签类型', default:'数字' },
   { prop:'focus', type:'focus', label:'重点信息 Focus', default:true },
-  { prop:'focusIndex', type:'slider', label:'焦点序号', default:2, min:0, max:(p)=>p.granularity==='季度'?3:11, step:1, showIf:(p)=>p.focus },
+  { prop:'focusIndex', type:'slider', label:'焦点序号', default:2, min:0, max:(p)=>p.granularity==='季度'?3:11, maxByKey:'granularity', maxByValue:{ '季度':3, '月度':11 }, displayOffset:1, step:1, showIf:(p)=>p.focus },
 ]};

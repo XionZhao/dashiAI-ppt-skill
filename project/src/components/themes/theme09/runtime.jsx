@@ -683,7 +683,7 @@ const rawPages = ORDERED.map(section => {
     bgClass: section.bgClass,
     Component: withDkScope(entry.Component),
     spec: entry.spec,
-    controls: entry.spec.controls || [],
+    controls: withTheme09Controls(entry.spec.controls || []),
     defaultProps: defaultsFromSpec(entry.spec),
   };
 }).filter(Boolean);
@@ -699,6 +699,27 @@ function defaultsFromSpec(spec) {
     defaults[key] = typeof control.default === 'function' ? undefined : control.default;
   });
   return defaults;
+}
+
+function withTheme09Controls(controls = []) {
+  return controls.map(control => {
+    const key = control?.prop || control?.key;
+    if (key !== 'focusIndex') return control;
+    return {
+      ...inferFocusIndexBounds(control),
+      displayOffset: control.displayOffset ?? 1,
+    };
+  });
+}
+
+function inferFocusIndexBounds(control) {
+  if (control.maxFromKey || control.maxByKey || control.maxByValue) return control;
+  const maxSource = typeof control.max === 'function' ? String(control.max) : '';
+  const fromKeyMatch = maxSource.match(/p\.([A-Za-z0-9_$]+)\s*-\s*1/);
+  if (fromKeyMatch) {
+    return { ...control, maxFromKey: fromKeyMatch[1], maxFromKeyOffset: -1 };
+  }
+  return control;
 }
 
 function withDkScope(Component) {

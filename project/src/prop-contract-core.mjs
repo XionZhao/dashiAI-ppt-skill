@@ -94,7 +94,7 @@ export function createContract(page, themePack) {
   const countBindings = controls
     .map(control => ({
       control,
-      arrays: COUNT_ARRAY_BINDINGS[control.key] || inferCountArrayBindings(control.key, page.defaultProps),
+      arrays: normalizeCountArrays(control.countArrays) || COUNT_ARRAY_BINDINGS[control.key] || inferCountArrayBindings(control.key, page.defaultProps),
     }))
     .filter(item => item.arrays.length)
     .map(({ control, arrays }) => ({
@@ -456,7 +456,12 @@ function normalizeControls(page) {
       options: control.options,
       countKey: control.countKey,
       countIndex: control.countIndex,
+      countArrays: control.countArrays,
       maxFromKey: control.maxFromKey,
+      maxFromKeyOffset: control.maxFromKeyOffset,
+      maxByKey: control.maxByKey,
+      maxByValue: control.maxByValue,
+      displayOffset: control.displayOffset,
       dependsOn: control.dependsOn,
       dependsOnValue: control.dependsOnValue,
       dependsOnValues: control.dependsOnValues,
@@ -475,7 +480,12 @@ function normalizeControls(page) {
     options: control.options,
     countKey: control.countKey,
     countIndex: control.countIndex,
+    countArrays: control.countArrays,
     maxFromKey: control.maxFromKey,
+    maxFromKeyOffset: control.maxFromKeyOffset,
+    maxByKey: control.maxByKey,
+    maxByValue: control.maxByValue,
+    displayOffset: control.displayOffset,
     dependsOn: control.dependsOn,
     dependsOnValue: control.dependsOnValue,
     dependsOnValues: control.dependsOnValues,
@@ -498,12 +508,23 @@ function normalizeControl(control, defaults) {
     options: normalizeControlValue(serializeValue(control.options)),
     countKey: serializeValue(control.countKey),
     countIndex: serializeValue(control.countIndex),
+    countArrays: serializeValue(control.countArrays),
     maxFromKey: serializeValue(control.maxFromKey),
+    maxFromKeyOffset: serializeValue(control.maxFromKeyOffset),
+    maxByKey: serializeValue(control.maxByKey),
+    maxByValue: serializeValue(control.maxByValue),
+    displayOffset: serializeValue(control.displayOffset),
     dependsOn: serializeValue(control.dependsOn),
     dependsOnValue: serializeValue(control.dependsOnValue),
     dependsOnValues: serializeValue(control.dependsOnValues),
     desc: control.desc,
   };
+}
+
+function normalizeCountArrays(value) {
+  if (typeof value === 'string' && value) return [value];
+  if (Array.isArray(value)) return value.filter(item => typeof item === 'string' && item);
+  return null;
 }
 
 function normalizeControlType(type) {

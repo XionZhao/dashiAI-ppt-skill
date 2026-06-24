@@ -203,13 +203,16 @@ function theme03ToggleDark(next, button) {
   }
 }
 
-function theme03SetGlobalDark(next) {
+function theme03SetGlobalDark(next, opts = {}) {
   theme03GlobalDark = Boolean(next);
   setRDDark(theme03GlobalDark);
   theme03ApplyBodyDarkClass(theme03GlobalDark);
   try {
     window.localStorage.setItem('rd-theme', theme03GlobalDark ? 'dark' : 'light');
   } catch {}
+  if (opts.syncProps !== false) {
+    window.__syncTheme03ForceDarkProps?.(theme03GlobalDark, { source: 'theme03-global-toggle' });
+  }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('rd-themechange', { detail: { dark: theme03GlobalDark } }));
   }

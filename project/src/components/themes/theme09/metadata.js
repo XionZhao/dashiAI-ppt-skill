@@ -80,7 +80,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -211,7 +213,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -341,7 +345,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -450,7 +456,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -646,7 +654,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -729,7 +739,8 @@ export const pages = [
         "desc": "高亮第几条出处信息",
         "publicKey": "focusIndex",
         "publicLabel": "焦点序号",
-        "description": "高亮第几条出处信息"
+        "description": "高亮第几条出处信息",
+        "displayOffset": 1
       }
     ],
     "defaultProps": {
@@ -809,7 +820,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1020,7 +1033,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1127,7 +1142,8 @@ export const pages = [
         "max": 2,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1
       }
     ],
     "defaultProps": {
@@ -1248,7 +1264,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1416,7 +1434,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1587,7 +1607,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1701,7 +1723,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1826,7 +1850,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -1988,7 +2014,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2163,7 +2191,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2344,7 +2374,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2459,7 +2491,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2592,7 +2626,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2746,7 +2782,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2877,7 +2915,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -2979,7 +3019,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3108,7 +3150,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3163,8 +3207,8 @@ export const pages = [
         "label": "图片槽数量",
         "type": "slider",
         "default": 4,
-        "min": 0,
-        "max": 5,
+        "min": 1,
+        "max": 6,
         "step": 1,
         "publicKey": "imgCount",
         "publicLabel": "图片槽数量"
@@ -3214,6 +3258,10 @@ export const pages = [
         "type": "slider",
         "default": 0,
         "min": 0,
+        "max": 5,
+        "maxFromKey": "imgCount",
+        "maxFromKeyOffset": -1,
+        "displayOffset": 1,
         "step": 1,
         "publicKey": "focusIndex",
         "publicLabel": "焦点序号"
@@ -3245,6 +3293,9 @@ export const pages = [
         },
         {
           "caption": "庆功之夜 · 估值再创新高"
+        },
+        {
+          "caption": "沉浸展示 · 路演画面同步"
         }
       ]
     }
@@ -3319,7 +3370,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3441,7 +3494,9 @@ export const pages = [
           "右侧"
         ],
         "publicKey": "focusIndex",
-        "publicLabel": "焦点分组"
+        "publicLabel": "焦点分组",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3565,7 +3620,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3674,7 +3731,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -3888,7 +3947,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4168,7 +4229,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4314,7 +4377,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4471,7 +4536,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4658,7 +4725,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4797,7 +4866,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -4891,7 +4962,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5022,7 +5095,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5197,7 +5272,8 @@ export const pages = [
         "max": 1,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1
       }
     ],
     "defaultProps": {
@@ -5299,7 +5375,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5425,7 +5503,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5576,7 +5656,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5714,7 +5796,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -5884,7 +5968,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6034,7 +6120,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6160,7 +6248,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6316,7 +6406,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6461,7 +6553,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6662,7 +6756,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -6831,7 +6927,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7032,7 +7130,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7156,7 +7256,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7309,7 +7411,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7501,7 +7605,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7658,7 +7764,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -7831,7 +7939,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8042,7 +8152,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8142,7 +8254,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8267,7 +8381,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8411,7 +8527,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8540,7 +8658,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8627,7 +8747,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8772,7 +8894,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -8970,7 +9094,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9156,7 +9282,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9268,7 +9396,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9445,7 +9575,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9554,7 +9686,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9674,7 +9808,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -9839,7 +9975,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10029,7 +10167,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10137,7 +10277,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10236,7 +10378,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10372,7 +10516,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10564,7 +10710,8 @@ export const pages = [
         "desc": "高亮月份",
         "publicKey": "focusIndex",
         "publicLabel": "焦点序号",
-        "description": "高亮月份"
+        "description": "高亮月份",
+        "displayOffset": 1
       }
     ],
     "defaultProps": {
@@ -10688,7 +10835,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10840,7 +10989,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -10974,7 +11125,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11125,7 +11278,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11233,7 +11388,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11373,7 +11530,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11510,7 +11669,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11621,7 +11782,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11740,7 +11903,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11850,7 +12015,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -11963,7 +12130,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -12138,7 +12307,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -12276,7 +12447,8 @@ export const pages = [
         "desc": "标注第几个预测年",
         "publicKey": "focusIndex",
         "publicLabel": "焦点序号",
-        "description": "标注第几个预测年"
+        "description": "标注第几个预测年",
+        "displayOffset": 1
       }
     ],
     "defaultProps": {
@@ -12406,7 +12578,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -12579,7 +12753,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -12711,7 +12887,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -12855,7 +13033,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -13239,7 +13419,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -13412,7 +13594,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -13631,7 +13815,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -13729,7 +13915,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -13855,7 +14043,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14025,7 +14215,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14140,7 +14332,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14259,7 +14453,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14372,7 +14568,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14479,7 +14677,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14625,7 +14825,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {
@@ -14801,7 +15003,9 @@ export const pages = [
         "min": 0,
         "step": 1,
         "publicKey": "focusIndex",
-        "publicLabel": "焦点序号"
+        "publicLabel": "焦点序号",
+        "displayOffset": 1,
+        "max": 9
       }
     ],
     "defaultProps": {

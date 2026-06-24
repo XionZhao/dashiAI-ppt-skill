@@ -8783,6 +8783,9 @@
           "min": 6,
           "max": 12,
           "step": 1,
+          "countArrays": [
+            "tags"
+          ],
           "desc": "标签墙上展示的热词数量（自动保持错落构图）。",
           "publicKey": "itemCount",
           "publicLabel": "标签数量",
@@ -8879,9 +8882,7 @@
           "publicKey": "itemCount",
           "label": "标签数量",
           "arrays": [
-            "items",
-            "stats",
-            "data"
+            "tags"
           ],
           "min": 6,
           "max": 12
@@ -92305,7 +92306,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92398,7 +92401,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92490,7 +92495,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92561,7 +92568,9 @@
           "type": "range",
           "default": 2,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92702,7 +92711,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92746,6 +92757,7 @@
           "min": 0,
           "max": 1,
           "step": 1,
+          "displayOffset": 1,
           "desc": "高亮第几条出处信息",
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号",
@@ -92797,7 +92809,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92930,7 +92944,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -92993,6 +93009,7 @@
           "min": 0,
           "max": 2,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93081,7 +93098,9 @@
           "type": "range",
           "default": 2,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93161,7 +93180,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93241,7 +93262,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93323,7 +93346,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93421,7 +93446,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93519,7 +93546,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93608,7 +93637,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93685,7 +93716,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93764,7 +93797,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93852,7 +93887,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -93919,7 +93956,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94000,7 +94039,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94077,7 +94118,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94160,7 +94203,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94191,8 +94236,8 @@
           "label": "图片槽数量",
           "type": "range",
           "default": 4,
-          "min": 0,
-          "max": 5,
+          "min": 1,
+          "max": 6,
           "step": 1,
           "publicKey": "imgCount",
           "publicLabel": "图片槽数量"
@@ -94237,7 +94282,11 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 5,
           "step": 1,
+          "maxFromKey": "imgCount",
+          "maxFromKeyOffset": -1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94305,7 +94354,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94375,10 +94426,12 @@
           "label": "焦点分组",
           "type": "select",
           "default": "左侧",
+          "max": 9,
           "options": [
             "左侧",
             "右侧"
           ],
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点分组"
         }
@@ -94447,7 +94500,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94532,7 +94587,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94699,7 +94756,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -94928,7 +94987,9 @@
           "type": "range",
           "default": 4,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95018,7 +95079,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95112,7 +95175,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95214,7 +95279,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95297,7 +95364,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95366,7 +95435,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95451,7 +95522,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95537,6 +95610,7 @@
           "min": 0,
           "max": 1,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95606,7 +95680,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95698,7 +95774,9 @@
           "type": "range",
           "default": 4,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95787,7 +95865,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95864,7 +95944,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -95957,7 +96039,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96048,7 +96132,9 @@
           "type": "range",
           "default": 3,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96138,7 +96224,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96226,7 +96314,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96320,7 +96410,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96428,7 +96520,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96526,7 +96620,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96663,7 +96759,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96732,7 +96830,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96821,7 +96921,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96910,7 +97012,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -96981,7 +97085,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97094,7 +97200,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97199,7 +97307,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97268,7 +97378,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97359,7 +97471,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97452,7 +97566,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97527,7 +97643,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97596,7 +97714,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97690,7 +97810,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97800,7 +97922,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97881,7 +98005,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -97961,7 +98087,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98068,7 +98196,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98159,7 +98289,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98228,7 +98360,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98317,7 +98451,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98400,7 +98536,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98471,7 +98609,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98554,7 +98694,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98652,7 +98794,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98745,6 +98889,7 @@
           "min": 0,
           "max": 11,
           "step": 1,
+          "displayOffset": 1,
           "desc": "高亮月份",
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号",
@@ -98834,7 +98979,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98916,7 +99063,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -98996,7 +99145,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99069,7 +99220,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99133,7 +99286,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99225,7 +99380,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99306,7 +99463,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99385,7 +99544,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99458,7 +99619,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99543,7 +99706,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99631,7 +99796,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99734,7 +99901,9 @@
           "type": "range",
           "default": 7,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99812,6 +99981,7 @@
           "min": 0,
           "max": 2,
           "step": 1,
+          "displayOffset": 1,
           "desc": "标注第几个预测年",
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号",
@@ -99878,7 +100048,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -99978,7 +100150,9 @@
           "type": "range",
           "default": 4,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100068,7 +100242,9 @@
           "type": "range",
           "default": 4,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100160,7 +100336,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100423,7 +100601,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100531,7 +100711,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100677,7 +100859,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100746,7 +100930,9 @@
           "type": "range",
           "default": 1,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100836,7 +101022,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100917,7 +101105,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -100995,7 +101185,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -101081,7 +101273,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -101162,7 +101356,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -101229,7 +101425,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -101332,7 +101530,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }
@@ -101442,7 +101642,9 @@
           "type": "range",
           "default": 0,
           "min": 0,
+          "max": 9,
           "step": 1,
+          "displayOffset": 1,
           "publicKey": "focusIndex",
           "publicLabel": "焦点序号"
         }

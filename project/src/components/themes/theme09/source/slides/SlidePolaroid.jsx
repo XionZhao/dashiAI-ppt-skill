@@ -7,7 +7,7 @@
    ── 可调参数（Props） ──────────────────────────────────────────────────────
    | prop       | 类型                          | 默认值 | 说明                              |
    | shots      | {caption}[]                   | 见下   | 每张照片的图注数据源              |
-   | imgCount   | number (0–5)                  | 4      | 图片槽数量（拍立得张数）          |
+   | imgCount   | number (1–6)                  | 4      | 图片槽数量（拍立得张数）          |
    | scatter    | boolean                       | true   | 散落（轻微旋转/错位）/ 关则齐列    |
    | showTape   | boolean                       | true   | 顶部胶带装饰                      |
    | focus      | boolean                       | true   | 高亮某张（置前 + 摆正 + 描边）     |
@@ -40,6 +40,7 @@ export const defaultProps = {
       { caption: '机房一隅 · 算力即护城河' },
       { caption: '白板之上 · 模型路线之争' },
       { caption: '庆功之夜 · 估值再创新高' },
+      { caption: '沉浸展示 · 路演画面同步' },
     ],
 };
 
@@ -54,12 +55,12 @@ function SlidePolaroid(props){
     kicker, title, titleEN, shots,
   } = { ...defaultProps, ...props };
 
-  const n = Math.max(0, Math.min(imgCount, 5));
+  const n = Math.max(1, Math.min(imgCount, 6));
   const data = shots.slice(0, n);
   const fIdx = Math.max(0, Math.min(focusIndex, Math.max(0, n - 1)));
   const lbl = (i)=> deckLabel(labelType, i, { keyword:'PIC' });
-  const ROT = [-5, 4, -3, 6, -2];   // 预设旋转角（确定性，避免随机抖动）
-  const DY  = [16, -10, 22, -4, 12];
+  const ROT = [-5, 4, -3, 6, -2, 3];   // 预设旋转角（确定性，避免随机抖动）
+  const DY  = [16, -10, 22, -4, 12, 2];
 
   return (
     <SlideShell orbs={[{ w:560, h:560, right:-180, top:-160,
@@ -128,10 +129,10 @@ function SlidePolaroid(props){
 export default SlidePolaroid;
 
 export const slideSpec = { defaults: defaultProps, slot:'polaroid', name:'影像速写 · Polaroid', controls:[
-  { prop:'imgCount', type:'slider', label:'图片槽数量', default:4, min:0, max:5, step:1 },
+  { prop:'imgCount', type:'slider', label:'图片槽数量', default:4, min:1, max:6, step:1 },
   { prop:'scatter', type:'toggle', label:'散落排布', default:true },
   { prop:'showTape', type:'toggle', label:'装饰文案', default:true, desc:'胶带装饰' },
   { prop:'labelType', type:'labelType', label:'标签类型', default:'数字' },
   { prop:'focus', type:'focus', label:'重点信息 Focus', default:true },
-  { prop:'focusIndex', type:'slider', label:'焦点序号', default:0, min:0, max:(p)=>Math.max(0,p.imgCount-1), step:1, showIf:(p)=>p.focus && p.imgCount>0 },
+  { prop:'focusIndex', type:'slider', label:'焦点序号', default:0, min:0, max:(p)=>Math.max(0,p.imgCount-1), maxFromKey:'imgCount', maxFromKeyOffset:-1, displayOffset:1, step:1, showIf:(p)=>p.focus && p.imgCount>0 },
 ]};

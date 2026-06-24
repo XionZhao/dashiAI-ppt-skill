@@ -3948,7 +3948,12 @@ refreshRailCatalog();
         row.appendChild(group);
       } else {
         row.classList.add('is-range');
-        const min = Number(control.min ?? 0), max = Number(control.max ?? 10), step = Number(control.step ?? 1);
+        const displayOffset = Number(control.displayOffset ?? 0);
+        const rawMin = Number(control.min ?? 0);
+        const rawMax = resolveRangeMax(control, values, rawMin);
+        const step = Number(control.step ?? 1);
+        const min = rawMin + displayOffset;
+        const max = rawMax + displayOffset;
         const span = (max - min) / (step || 1);
         const stepped = Number.isInteger(step) && step >= 1 && Number.isInteger(min) && Number.isInteger(max) && span <= 12;
         const wrap = document.createElement('div');
@@ -3958,7 +3963,7 @@ refreshRailCatalog();
         const input = document.createElement('input');
         input.type = 'range';
         input.min = min; input.max = max; input.step = step;
-        input.value = values[control.key];
+        input.value = clampNumber(Number(values[control.key] ?? rawMin) + displayOffset, min, max);
         makePreviewControlKeyboardNeutral(input);
         track.appendChild(input);
         let ticks = null;
@@ -3981,9 +3986,9 @@ refreshRailCatalog();
           if(ticks) ticks.querySelectorAll('span').forEach((t, i) => t.classList.toggle('on', i <= (v - min) / step));
         };
         sync();
-        input.addEventListener('input', () => { sync(); updateCurrentProp(control, Number(input.value), {render:false}); });
+        input.addEventListener('input', () => { sync(); updateCurrentProp(control, Number(input.value) - displayOffset, {render:false}); });
         input.addEventListener('change', () => {
-          updateCurrentProp(control, Number(input.value));
+          updateCurrentProp(control, Number(input.value) - displayOffset);
           releasePreviewControlFocus(input);
         });
         wrap.appendChild(track);
@@ -3993,6 +3998,24 @@ refreshRailCatalog();
       propsPanel.appendChild(row);
     });
     applyPropValues(slide, values, {persist:false});
+  }
+
+  function resolveRangeMax(control, values, min){
+    if(control.maxFromKey){
+      const base = Number(values[control.maxFromKey]);
+      if(Number.isFinite(base)) return base + Number(control.maxFromKeyOffset ?? 0);
+    }
+    if(control.maxByKey && control.maxByValue && Object.prototype.hasOwnProperty.call(control.maxByValue, values[control.maxByKey])){
+      const mapped = Number(control.maxByValue[values[control.maxByKey]]);
+      if(Number.isFinite(mapped)) return mapped;
+    }
+    const max = Number(control.max ?? 10);
+    return Number.isFinite(max) ? max : min;
+  }
+
+  function clampNumber(value, min, max){
+    if(!Number.isFinite(value)) return min;
+    return Math.max(min, Math.min(value, max));
   }
 
   function normalizePropControlType(type, control = {}){
@@ -4099,11 +4122,16 @@ refreshRailCatalog();
 
   function applyTheme03GlobalDark(forceDark, opts = {}){
     const dark = !!forceDark;
-    window.__setTheme03GlobalDark?.(dark);
+    window.__setTheme03GlobalDark?.(dark, { syncProps: false });
     document.body.classList.toggle('rd-force-dark', dark);
     try {
       localStorage.setItem('rd-theme', dark ? 'dark' : 'light');
     } catch {}
+    syncTheme03ForceDarkProps(dark, opts);
+  }
+
+  function syncTheme03ForceDarkProps(forceDark, opts = {}){
+    const dark = !!forceDark;
     const vmState = viewModel?.getState?.() || {};
     document.querySelectorAll('#deck > .slide[data-theme-pack="theme03"]').forEach(target => {
       const root = target.querySelector('[data-prop-controls]');
@@ -4120,6 +4148,7 @@ refreshRailCatalog();
       }
     });
   }
+  window.__syncTheme03ForceDarkProps = syncTheme03ForceDarkProps;
 
   function applyTheme03GlobalAccent(accent, opts = {}){
     const vmState = viewModel?.getState?.() || {};
@@ -5299,7 +5328,7 @@ refreshRailCatalog();
       if(el !== root && !root.contains(el)) return;
       if(el !== root && el.parentElement?.closest('[data-editable-id]')) return;
       if(!el.dataset.editableId && !isTextCandidate(el)) return;
-      if(!el.dataset.editableId) el.dataset.editableId = nextTextId(el);
+      if(!el.dataset.editableId) el.dataset.editableId = explicitTextId(el) || nextTextId(el);
       if(defaultTextState[el.dataset.editableId] === undefined) defaultTextState[el.dataset.editableId] = el.innerHTML;
       if(el.dataset.syncText && defaultTextState[`sync:${el.dataset.syncText}`] === undefined){
         defaultTextState[`sync:${el.dataset.syncText}`] = el.innerHTML;
@@ -5494,6 +5523,14 @@ refreshRailCatalog();
     const count = (textCounters.get(slideKey) || 0) + 1;
     textCounters.set(slideKey, count);
     return `text:${slideKey}:${count}`;
+  }
+
+  function explicitTextId(el){
+    const path = el.dataset.editablePath;
+    if(!path) return '';
+    const slide = el.closest('.slide');
+    const slideKey = getTextSlideKey(slide);
+    return `text:${slideKey}:${path}`;
   }
 
   function getTextSlideKey(slide){

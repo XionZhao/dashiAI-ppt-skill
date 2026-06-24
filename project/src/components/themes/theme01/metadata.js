@@ -11349,6 +11349,9 @@ export const pages = [
         "min": 6,
         "max": 12,
         "step": 1,
+        "countArrays": [
+          "tags"
+        ],
         "desc": "标签墙上展示的热词数量（自动保持错落构图）。",
         "publicKey": "itemCount",
         "publicLabel": "标签数量",
