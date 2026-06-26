@@ -74,7 +74,7 @@ export const pullControls = [
   { key: 'showMark', type: 'toggle', label: '引号字符', default: true, describe: '金句上方的超大装饰引号。' },
   { key: 'showBig', type: 'toggle', label: '巨号数字', default: true, describe: '句中嵌入的巨号暖橙数字（关闭则回退为普通字号）。' },
   { key: 'showRule', type: 'toggle', label: '分隔细线', default: true, describe: '署名上方的分隔细线。' },
-  { key: 'showAttribution', type: 'toggle', label: '署名区块', default: true, describe: '金句下方的署名与来源。' },
+  { key: 'showAttribution', type: 'toggle', label: '辅助文本', default: true, describe: '金句下方的署名与来源。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '顶部导航处的章节标识。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -128,7 +128,7 @@ export default function PullSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '96%' }} /></span> 79 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '96%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">79</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

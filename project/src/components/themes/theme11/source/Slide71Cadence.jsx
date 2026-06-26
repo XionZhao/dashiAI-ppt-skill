@@ -191,7 +191,7 @@ export default function CadenceSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 16 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '85%' }} /></span> 70 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '85%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">70</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

@@ -87,7 +87,7 @@ export const shiftControls = [
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showLabels', type: 'toggle', label: '前后标签', default: true, describe: '面板左上角的「改版前 / 改版后」标签。' },
-  { key: 'showCaptions', type: 'toggle', label: '面板说明', default: true, describe: '面板底部的说明文案。' },
+  { key: 'showCaptions', type: 'toggle', label: '说明文案', default: true, describe: '面板底部的说明文案。' },
   { key: 'showSeam', type: 'toggle', label: '中缝徽标', default: true, describe: '两幅图中缝的箭头徽标。' },
   { key: 'showStrip', type: 'toggle', label: '成果条', default: true, describe: '底部的成果指标条。' },
   { key: 'statCount', type: 'slider', label: '成果数量', default: 3, min: 1, max: 3, step: 1, describe: '成果条中的指标数量。' },
@@ -159,7 +159,7 @@ export default function ShiftSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 22 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '70%' }} /></span> 57 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '70%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">57</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

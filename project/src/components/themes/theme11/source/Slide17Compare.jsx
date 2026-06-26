@@ -80,7 +80,7 @@ export const compareControls = [
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'columnCount', type: 'slider', label: '对比列数', default: 3, min: 2, max: 3, step: 1, describe: '参与对比的方案列数。' },
-  { key: 'rowCount', type: 'slider', label: '对比行数', default: 6, min: 3, max: 6, step: 1, describe: '对比维度（行）的数量。' },
+  { key: 'rowCount', type: 'slider', label: '对比行数', default: 6, min: 1, max: 6, step: 1, describe: '对比维度（行）的数量。' },
   { key: 'highlightColumnIndex', type: 'slider', label: '高亮列', default: 0, min: 0, max: 2, step: 1, describe: '需要高亮的方案列序号（从 0 起，默认燃点列）。' },
   { key: 'showHeadRow', type: 'toggle', label: '表头行', default: true, describe: '方案名称表头行的显示与隐藏。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
@@ -94,7 +94,7 @@ export default function CompareSlide(props) {
   injectCSS('ign-cmp-css', CSS);
   const p = { ...compareDefaultProps, ...props };
   const cc = clampInt(p.columnCount, 2, 3);
-  const rc = clampInt(p.rowCount, 3, 6);
+  const rc = clampInt(p.rowCount, 1, 6);
   const cols = (Array.isArray(p.cols) ? p.cols : []).slice(0, cc);
   const rows = (Array.isArray(p.rows) ? p.rows : []).slice(0, rc);
   const hero = clampInt(p.highlightColumnIndex, 0, cc - 1);
@@ -159,7 +159,7 @@ export default function CompareSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '26%' }} /></span> 21 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '26%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">21</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

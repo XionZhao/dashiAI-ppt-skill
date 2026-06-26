@@ -18,8 +18,8 @@ const CSS = `
 .ign-contact-cta .lab{display:inline-flex;align-items:baseline;gap:24px;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:68px;letter-spacing:-0.025em;line-height:1}
 .ign-contact-cta .lab .arw{font-size:50px}
 .ign-channels{display:flex;gap:56px;margin-top:40px}
-.ign-channel .cl{font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ign-ink3)}
-.ign-channel .cv{font-family:'Space Grotesk',sans-serif;font-size:32px;margin-top:10px;letter-spacing:-0.01em}
+.ign-channel-label{font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ign-ink3)}
+.ign-channel-value{font-family:'Space Grotesk',sans-serif;font-size:32px;margin-top:10px;letter-spacing:-0.01em}
 .ign-contact-foot{display:flex;align-items:center;justify-content:space-between;gap:40px}
 .ign-partners{display:flex;align-items:center;gap:34px;flex:1}
 .ign-partners .tl{font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ign-ink3);white-space:nowrap}
@@ -69,11 +69,11 @@ export const contactControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ember',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'showLede', type: 'toggle', label: '装饰引言', default: true, describe: '主标题上方的衬线斜体引言。' },
+  { key: 'showLede', type: 'toggle', label: '装饰小字', default: true, describe: '主标题上方的衬线斜体引言。' },
   { key: 'showSub', type: 'toggle', label: '副标题', default: true, describe: '主标题下方的说明副标题。' },
   { key: 'showCta', type: 'toggle', label: '行动召唤', default: true, describe: '排版化的主行动召唤语（大字 + 箭头 + 分隔线）。' },
-  { key: 'showChannels', type: 'toggle', label: '联系方式', default: true, describe: '邮箱 / 电话 / 地点等联系信息组。' },
-  { key: 'channelCount', type: 'slider', label: '联系方式数量', default: 3, min: 1, max: 3, step: 1, describe: '展示的联系方式条目数量。' },
+  { key: 'showChannels', type: 'toggle', label: '信息组', default: true, describe: '邮箱 / 电话 / 地点等信息组。' },
+  { key: 'channelCount', type: 'slider', label: '条目数量', default: 3, min: 1, max: 3, step: 1, describe: '展示的信息条目数量。' },
   { key: 'showBigMark', type: 'toggle', label: '右上品牌标', default: true, describe: '右上角的品牌图标锁定组合。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -119,7 +119,7 @@ export default function ContactSlide(props) {
           {p.showChannels && (
             <div className="ign-channels ign-a3">
               {channels.map((c, i) => (
-                <div key={i} className="ign-channel"><div className="cl">{c.l}</div><div className="cv">{c.v}</div></div>
+                <div key={i} className="ign-channel"><div className="ign-channel-label">{c.l}</div><div className="ign-channel-value">{c.v}</div></div>
               ))}
             </div>
           )}

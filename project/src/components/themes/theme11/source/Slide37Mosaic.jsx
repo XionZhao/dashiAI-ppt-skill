@@ -23,7 +23,8 @@ const CSS = `
   grid-template-areas:"a a b" "a a c";min-height:0}
 .ign-mos-grid.n2{grid-template-areas:"a a b" "a a b"}
 .ign-mos-grid.n3{grid-template-areas:"a a b" "a a c"}
-.ign-mos-grid.n4{grid-template-columns:1.5fr 1fr 1fr;grid-template-areas:"a a b" "a d c"}
+.ign-mos-grid.n4{grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;
+  grid-template-areas:"a a b" "a a c" "d d c"}
 .ign-mos-grid.n5{grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;
   grid-template-areas:"a a b" "a a c" "e d c"}
 .ign-mos-cell{position:relative;overflow:hidden;border:1px solid var(--ign-hair);min-height:0}
@@ -76,7 +77,7 @@ export const mosaicControls = [
   { key: 'tileCount', type: 'slider', label: '拼贴块数', default: 3, min: 2, max: 5, step: 1, describe: '拼贴的图块数量，每个图块都是可点击上传的图片槽，布局随之自适应。' },
   { key: 'showTags', type: 'toggle', label: '图块标注', default: true, describe: '每个图块左下角的编号标注。' },
   { key: 'showHead', type: 'toggle', label: '标题区', default: true, describe: '顶部标题与说明区域。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -131,7 +132,7 @@ export default function MosaicSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '45%' }} /></span> 37 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '45%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">37</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

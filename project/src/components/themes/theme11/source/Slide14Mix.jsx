@@ -14,7 +14,7 @@ const CSS = `
 .ign-mix-head h2 .ign-serif{color:var(--ign-a)}
 .ign-mix-head .note{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:26px;color:var(--ign-ink3);max-width:360px;text-align:right;line-height:1.4}
 .ign-mix-body{display:grid;grid-template-columns:0.9fr 1.1fr;gap:80px;align-items:center;margin-top:8px}
-.ign-mix-body.solo{grid-template-columns:1fr;max-width:1000px}
+.ign-mix-body.solo{grid-template-columns:1fr;width:720px;max-width:100%;margin-left:auto;margin-right:auto}
 .ign-mix-viz{position:relative;display:flex;align-items:center;justify-content:center}
 .ign-mix-viz svg{width:100%;height:auto;display:block;overflow:visible}
 .ign-donut-c{position:absolute;text-align:center}
@@ -226,7 +226,7 @@ export default function MixSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '11%' }} /></span> 9 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '11%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">9</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

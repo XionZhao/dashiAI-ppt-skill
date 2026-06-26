@@ -75,7 +75,7 @@ export const servicesControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'serviceCount', type: 'slider', label: '服务条目数', default: 4, min: 3, max: 5, step: 1, describe: '左侧服务清单的条目数量。' },
+  { key: 'serviceCount', type: 'slider', label: '条目数量', default: 4, min: 1, max: 5, step: 1, describe: '左侧清单的条目数量。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一条服务，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 4, step: 1, describe: '需要突出的服务序号（从 0 起）。' },
   { key: 'showArrow', type: 'toggle', label: '箭头母题', default: true, describe: '右侧的圆环箭头品牌母题。' },
@@ -90,7 +90,7 @@ export const servicesControls = [
 export default function ServicesSlide(props) {
   injectCSS('ign-svc-css', CSS);
   const p = { ...servicesDefaultProps, ...props };
-  const count = clampInt(p.serviceCount, 3, 5);
+  const count = clampInt(p.serviceCount, 1, 5);
   const services = (Array.isArray(p.services) ? p.services : []).slice(0, count);
   const emi = clampInt(p.emphasisIndex, 0, count - 1);
   const pc = clampInt(p.pillCount, 3, 8);

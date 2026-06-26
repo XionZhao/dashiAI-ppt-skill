@@ -80,13 +80,12 @@ export const showcaseControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ember',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '空槽占位与底纹的基调（图片满铺时主要影响占位区）。' },
-  { key: 'imageCount', type: 'slider', label: '图片数量', default: 1, min: 0, max: 2, step: 1, describe: '满铺图片槽数量：0 为留白占位，1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。' },
+  { key: 'imageCount', type: 'slider', label: '图片数量', default: 1, min: 1, max: 2, step: 1, describe: '满铺图片槽数量：1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。' },
   { key: 'overlayPosition', type: 'select', label: '文字位置', default: 'left',
     options: [{ value: 'left', label: '左下' }, { value: 'right', label: '右下' }], describe: '标题文字版块所在角落。' },
   { key: 'showCaption', type: 'toggle', label: '说明文案', default: true, describe: '标题下方的说明段落。' },
   { key: 'showOverlayStat', type: 'toggle', label: '浮层数字', default: true, describe: '画面一角的大号叠加指标。' },
   { key: 'showTag', type: 'toggle', label: '标签行', default: true, describe: '标题上方的分类标签行。' },
-  { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: false, describe: '角落超大幽灵字符装饰（满铺图片时通常关闭）。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
 ];
@@ -94,7 +93,7 @@ export const showcaseControls = [
 export default function ShowcaseSlide(props) {
   injectCSS('ign-show-css', CSS);
   const p = { ...showcaseDefaultProps, ...props };
-  const count = clampInt(p.imageCount, 0, 2);
+  const count = clampInt(p.imageCount, 1, 2);
   const imgs = Array.isArray(p.images) ? p.images : [];
   const right = p.overlayPosition === 'right';
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
@@ -107,7 +106,6 @@ export default function ShowcaseSlide(props) {
           <UnicornBackground scene={p.unicornScene} accent="var(--ign-a,#ffb168)" />
         ) : (
           <>
-            {count === 0 && <div className="half"><ImageSlot mode="fill" placeholder={p.placeholderFull} /></div>}
             {count >= 1 && <div className="half"><ImageSlot src={imgs[0]} mode="fill" placeholder={p.placeholder1} /></div>}
             {count >= 2 && <div className="half"><ImageSlot src={imgs[1]} mode="fill" placeholder={p.placeholder2} /></div>}
           </>
@@ -145,7 +143,7 @@ export default function ShowcaseSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '6%' }} /></span> 5 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '6%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">5</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

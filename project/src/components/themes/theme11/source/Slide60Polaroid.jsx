@@ -24,12 +24,12 @@ const CSS = `
 .ign-pol-tags span{font-family:'Space Grotesk',sans-serif;font-size:20px;letter-spacing:0.06em;color:var(--ign-ink2);
   border:1px solid var(--ign-hair2);border-radius:999px;padding:7px 16px}
 .ign-pol-stage{position:relative;height:780px}
-.ign-pol-card{position:absolute;background:#FBF7EF;padding:16px 16px 0;border-radius:3px;
+.ign-pol-card{position:absolute;background:#FBF7EF;padding:16px 16px 22px;border-radius:3px;
   box-shadow:0 24px 50px -18px rgba(20,10,4,0.55),0 2px 0 rgba(255,255,255,0.6) inset}
 .ign-slide[data-surface="paper"] .ign-pol-card{background:#FFFDF8}
 .ign-pol-card .ign-imgslot{width:100%}
 .ign-pol-cap{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:25px;color:#2A1C12;
-  padding:16px 4px 18px;line-height:1.2;text-align:center}
+  padding:14px 4px 0;line-height:1.2;text-align:center}
 .ign-pol-cap b{font-style:normal;font-weight:500;color:#C7401A}
 .ign-pol-pin{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#FF8A4A,#C7401A);box-shadow:0 3px 6px rgba(20,10,4,0.4)}
@@ -138,7 +138,7 @@ export default function PolaroidSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '72%' }} /></span> 59 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '72%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">59</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

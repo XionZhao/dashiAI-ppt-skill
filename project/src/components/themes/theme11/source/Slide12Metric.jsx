@@ -14,7 +14,8 @@ const CSS = `
   letter-spacing:0.28em;text-transform:uppercase;color:var(--ign-ink2);margin-bottom:18px}
 .ign-met-kick .tick{width:34px;height:1px;background:linear-gradient(90deg,var(--ign-b),transparent)}
 .ign-met-kick .no{color:var(--ign-a)}
-.ign-met-hero{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:420px;line-height:0.82;letter-spacing:-0.05em}
+.ign-met-hero{display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:420px;line-height:0.82;letter-spacing:-0.05em;
+  padding:0 0.08em;margin:0 -0.08em}
 .ign-met-cap{font-size:32px;font-weight:300;color:var(--ign-ink2);margin-top:26px;max-width:780px;line-height:1.4;text-wrap:pretty}
 .ign-met-trend{width:560px;height:60px;margin-top:30px}
 .ign-met-trend svg{width:100%;height:100%;display:block;overflow:visible}
@@ -65,9 +66,9 @@ export const metricControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '大数字上方的装饰性引导标签。' },
   { key: 'showTrend', type: 'toggle', label: '迷你趋势线', default: true, describe: '大数字下方的装饰趋势曲线。' },
-  { key: 'showCaption', type: 'toggle', label: '数字说明', default: true, describe: '大数字正下方的说明文案。' },
+  { key: 'showCaption', type: 'toggle', label: '说明文案', default: true, describe: '大数字正下方的说明文案。' },
   { key: 'showSubStats', type: 'toggle', label: '辅助数据行', default: true, describe: '底部分栏的辅助数据。' },
-  { key: 'subStatCount', type: 'slider', label: '辅助数据数量', default: 3, min: 1, max: 3, step: 1, describe: '底部辅助数据的条目数量。' },
+  { key: 'subStatCount', type: 'slider', label: '辅助数据数量', default: 3, min: 0, max: 3, step: 1, describe: '底部辅助数据的条目数量；为 0 时隐藏整行。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一条辅助数据，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 2, step: 1, describe: '需要突出的辅助数据序号（从 0 起）。' },
   { key: 'showNote', type: 'toggle', label: '装饰注释', default: true, describe: '底部居中的衬线注释文案。' },
@@ -79,10 +80,11 @@ export const metricControls = [
 export default function MetricSlide(props) {
   injectCSS('ign-met-css', CSS);
   const p = { ...metricDefaultProps, ...props };
-  const count = clampInt(p.subStatCount, 1, 3);
+  const count = clampInt(p.subStatCount, 0, 3);
   const subs = (Array.isArray(p.subs) ? p.subs : []).slice(0, count);
   const emi = clampInt(p.emphasisIndex, 0, count - 1);
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
+  const showSubs = p.showSubStats && subs.length > 0;
 
   return (
     <Slide surface={p.surface} className="ign-met">
@@ -120,7 +122,7 @@ export default function MetricSlide(props) {
           )}
         </div>
 
-        {p.showSubStats && (
+        {showSubs && (
           <div className="ign-met-subs ign-a3">
             {subs.map((s, i) => (
               <div key={i} className={`ign-met-sub ${p.emphasis ? (i === emi ? 'ign-lit' : 'ign-dim') : ''}`}>
@@ -135,7 +137,7 @@ export default function MetricSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.showNote ? p.noteText : ''}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '5%' }} /></span> 4 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '5%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">4</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

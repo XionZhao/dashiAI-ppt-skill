@@ -20,9 +20,10 @@ const CSS = `
 .ign-lgo-stat{text-align:right}
 .ign-lgo-stat .v{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:80px;line-height:0.85;letter-spacing:-0.04em}
 .ign-lgo-stat .l{font-size:22px;font-weight:300;color:var(--ign-ink2);margin-top:8px}
-.ign-lgo-wall{flex:1;display:grid;gap:0;margin-top:24px;border-top:1px solid var(--ign-hair);border-left:1px solid var(--ign-hair)}
-.ign-lgo-cell{position:relative;display:flex;align-items:center;justify-content:center;
-  border-right:1px solid var(--ign-hair);border-bottom:1px solid var(--ign-hair);padding:30px}
+.ign-lgo-wall{flex:1;min-height:0;display:grid;gap:0;margin-top:24px;border-top:1px solid var(--ign-hair);border-left:1px solid var(--ign-hair)}
+.ign-lgo-cell{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;overflow:hidden;
+  border-right:1px solid var(--ign-hair);border-bottom:1px solid var(--ign-hair);padding:20px}
+.ign-lgo-cell .ign-imgslot{max-width:100%;max-height:100%}
 .ign-lgo-mono{display:flex;align-items:center;gap:14px}
 .ign-lgo-mono .mk{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.02em;
   background:var(--ign-ember);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -70,8 +71,8 @@ export const logosControls = [
   { key: 'columns', type: 'slider', label: '每行列数', default: 4, min: 3, max: 6, step: 1, describe: '品牌墙每行的列数。' },
   { key: 'logoCount', type: 'slider', label: 'Logo 槽数量', default: 0, min: 0, max: 12, step: 1, describe: '使用真实 logo 的格子数；其余回退为字母组合标记。' },
   { key: 'showNames', type: 'toggle', label: '品牌名', default: true, describe: '字母标记旁的品牌名称。' },
-  { key: 'showStat', type: 'toggle', label: '信任数据', default: true, describe: '右上角的客户数量大数字。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showStat', type: 'toggle', label: '成果数字', default: true, describe: '右上角的客户数量大数字。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -116,11 +117,11 @@ export default function LogosSlide(props) {
         </div>
 
         <div className="ign-lgo-wall ign-a2"
-          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }}>
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
           {brands.map((b, i) => (
             <div key={i} className="ign-lgo-cell">
               {i < filled
-                ? <ImageSlot src={images[i]} placeholder={b.nm} mode="height" height={52} radius={0} fit="contain" />                : <div className="ign-lgo-mono"><span className="mk">{b.mk}</span>{p.showNames && <span className="nm">{b.nm}</span>}</div>}
+                ? <ImageSlot src={images[i]} placeholder={b.nm} mode="fill" radius={0} fit="cover" />                : <div className="ign-lgo-mono"><span className="mk">{b.mk}</span>{p.showNames && <span className="nm">{b.nm}</span>}</div>}
             </div>
           ))}
         </div>
@@ -129,7 +130,7 @@ export default function LogosSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '46%' }} /></span> 38 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '46%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">38</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

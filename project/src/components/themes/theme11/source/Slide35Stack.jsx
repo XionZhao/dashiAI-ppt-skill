@@ -91,7 +91,7 @@ export const stackControls = [
   { key: 'showGrid', type: 'toggle', label: '网格线', default: true, describe: '背景的水平刻度网格。' },
   { key: 'showLegend', type: 'toggle', label: '图例', default: true, describe: '右上角的渠道图例。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: true, describe: '开启后突出最新一根柱子，其余弱化。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -169,7 +169,7 @@ export default function StackSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '43%' }} /></span> 35 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '43%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">35</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

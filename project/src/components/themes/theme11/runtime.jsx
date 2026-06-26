@@ -177,4 +177,41 @@ const rawPages = [
   { Comp: Closing, defaults: closingDefaultProps, controls: closingControls, label: '谢幕' },
 ];
 
-export const runtimePages = normalizeRuntimePages(rawPages, { themeKey: 'theme11', layoutPrefix: 'THEME11' });
+const runtimeRawPages = rawPages.map(page => ({
+  ...page,
+  controls: normalizeTheme11Controls(page.controls),
+}));
+
+export const runtimePages = normalizeRuntimePages(runtimeRawPages, { themeKey: 'theme11', layoutPrefix: 'THEME11' });
+
+function normalizeTheme11Controls(controls = []) {
+  return controls.map(control => {
+    if (!isOrdinalControl(control)) return control;
+    return {
+      ...control,
+      displayOffset: control.displayOffset ?? 1,
+      desc: normalizeOrdinalDescription(control.desc),
+      describe: normalizeOrdinalDescription(control.describe),
+      description: normalizeOrdinalDescription(control.description),
+    };
+  });
+}
+
+function isOrdinalControl(control) {
+  const key = String(control?.key || control?.prop || '');
+  const label = String(control?.label || '');
+  const type = String(control?.type || '').toLowerCase();
+  if (!['slider', 'number', 'range'].includes(type)) return false;
+  if (Number(control?.min ?? 0) !== 0) return false;
+  return /(^|[A-Z])(Index|Current|Row|Column)$/.test(key) || /(序号|当前|高亮|主推|重点)/.test(label);
+}
+
+function normalizeOrdinalDescription(value) {
+  if (!value) return value;
+  return String(value)
+    .replace(/（从 0 起，([^）]+)）/g, '（$1）')
+    .replace(/（从 0 起）/g, '')
+    .replace(/，从 0 起/g, '')
+    .replace(/从 0 起/g, '')
+    .replace(/0 =/g, '1 =');
+}

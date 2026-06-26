@@ -40,6 +40,7 @@ const CSS = `
 .ign-dev-chrome .dot{width:13px;height:13px;border-radius:50%;background:var(--ign-ink4)}
 .ign-dev-chrome .url{margin-left:18px;font-family:'Space Grotesk',sans-serif;font-size:19px;letter-spacing:0.04em;color:var(--ign-ink3)}
 .ign-dev-screen{position:relative}
+.ign-dev-screen .ign-imgslot{max-height:760px}
 .ign-dev-pin{position:absolute;width:42px;height:42px;border-radius:50%;transform:translate(-50%,-50%);
   display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:24px;
   color:#1B1108;background:var(--ign-ember);box-shadow:0 0 0 6px rgba(255,110,46,0.18),0 0 22px rgba(255,110,46,0.7);z-index:3}
@@ -90,12 +91,12 @@ export const deviceControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 1, min: 0, max: 1, step: 1, describe: '样机内的截图槽数量；为 0 时显示条纹占位。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: true, describe: '样机内截图的显示与隐藏。' },
   { key: 'imagePosition', type: 'select', label: '样机位置', default: 'right',
     options: [{ value: 'left', label: '左' }, { value: 'right', label: '右' }], describe: '设备样机相对文字的位置。' },
   { key: 'showChrome', type: 'toggle', label: '浏览器外框', default: true, describe: '样机顶部的浏览器窗口外框。' },
   { key: 'showPins', type: 'toggle', label: '标注点', default: true, describe: '截图上的编号标注点与左侧说明清单。' },
-  { key: 'pinCount', type: 'slider', label: '标注数量', default: 3, min: 2, max: 3, step: 1, describe: '编号标注点的数量。' },
+  { key: 'pinCount', type: 'slider', label: '列表数量', default: 3, min: 1, max: 3, step: 1, describe: '编号标注列表的数量。' },
   { key: 'showCaption', type: 'toggle', label: '图片说明', default: true, describe: '样机下方的说明标注。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
@@ -108,7 +109,7 @@ export default function DeviceSlide(props) {
   const p = { ...deviceDefaultProps, ...props };
   const hasImg = clampInt(p.imageCount, 0, 1) > 0;
   const images = Array.isArray(p.images) ? p.images : [];
-  const pc = clampInt(p.pinCount, 2, 3);
+  const pc = clampInt(p.pinCount, 1, 3);
   const pins = (Array.isArray(p.pins) ? p.pins : []).slice(0, pc);
   const flip = p.imagePosition === 'left';
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
@@ -178,7 +179,7 @@ export default function DeviceSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '39%' }} /></span> 32 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '39%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">32</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

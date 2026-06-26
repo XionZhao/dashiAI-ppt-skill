@@ -72,7 +72,7 @@ export const heroControls = [
   { key: 'showTag', type: 'toggle', label: '顶部标签', default: true, describe: '左上角的装饰标签。' },
   { key: 'showSub', type: 'toggle', label: '副标题', default: true, describe: '主标题下方的衬线副标题。' },
   { key: 'showStrip', type: 'toggle', label: '指标条', default: true, describe: '底部的关键指标条。' },
-  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 2, max: 3, step: 1, describe: '指标条中的指标数量。' },
+  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 1, max: 3, step: 1, describe: '指标条中的指标数量。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: false, describe: '角落超大幽灵字符装饰（满铺图上默认关闭）。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -82,7 +82,7 @@ export default function HeroSlide(props) {
   injectCSS('ign-hero-css', CSS);
   const p = { ...heroDefaultProps, ...props };
   const images = Array.isArray(p.images) ? p.images : [];
-  const sc = clampInt(p.statCount, 2, 3);
+  const sc = clampInt(p.statCount, 1, 3);
   const stats = (Array.isArray(p.stats) ? p.stats : []).slice(0, sc);
   const useUnicorn = p.backgroundMode === 'unicorn';
 
@@ -125,7 +125,7 @@ export default function HeroSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 36 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '62%' }} /></span> 51 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '62%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">51</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

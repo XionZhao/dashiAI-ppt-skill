@@ -67,7 +67,7 @@ export const codaControls = [
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '金句上方的装饰标签。' },
   { key: 'showArrow', type: 'toggle', label: '箭头母题', default: true, describe: '句末的箭头母题。' },
   { key: 'showRule', type: 'toggle', label: '细分隔线', default: true, describe: '金句下方的细分隔线。' },
-  { key: 'showSignoff', type: 'toggle', label: '署名', default: true, describe: '分隔线旁的品牌署名。' },
+  { key: 'showSignoff', type: 'toggle', label: '辅助文本', default: true, describe: '分隔线旁的品牌署名。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -116,7 +116,7 @@ export default function CodaSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '79%' }} /></span> 65 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '79%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">65</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

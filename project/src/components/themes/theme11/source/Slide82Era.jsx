@@ -81,7 +81,7 @@ export const eraControls = [
   { key: 'eraCount', type: 'slider', label: '阶段数量', default: 5, min: 3, max: 5, step: 1, describe: '历程的阶段节点数量。' },
   { key: 'currentIndex', type: 'slider', label: '当前阶段', default: 4, min: 0, max: 4, step: 1, describe: '点亮为暖橙的「当前」阶段序号（进度填充至此）。' },
   { key: 'showYears', type: 'toggle', label: '年份', default: true, describe: '每个节点上方的年份。' },
-  { key: 'showDesc', type: 'toggle', label: '阶段说明', default: true, describe: '每个节点下方的一句话说明。' },
+  { key: 'showDesc', type: 'toggle', label: '说明文案', default: true, describe: '每个节点下方的一句话说明。' },
   { key: 'showTags', type: 'toggle', label: '阶段标签', default: true, describe: '每个节点的英文阶段标签。' },
   { key: 'showAxis', type: 'toggle', label: '时间轴线', default: true, describe: '贯穿的横向时间轴与进度填充。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
@@ -148,7 +148,7 @@ export default function EraSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 18 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '99%' }} /></span> 81 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '99%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">81</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

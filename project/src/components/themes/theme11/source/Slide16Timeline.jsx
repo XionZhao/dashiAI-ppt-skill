@@ -67,11 +67,11 @@ export const timelineControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ember',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'milestoneCount', type: 'slider', label: '里程碑数量', default: 5, min: 3, max: 5, step: 1, describe: '时间轴里程碑的数量。' },
+  { key: 'milestoneCount', type: 'slider', label: '条目数量', default: 5, min: 1, max: 5, step: 1, describe: '时间轴条目的数量。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一里程碑，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 4, step: 1, describe: '需要突出的里程碑序号（从 0 起）。' },
   { key: 'showAxis', type: 'toggle', label: '时间轴线', default: true, describe: '左侧的竖向轴线与节点圆点。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '标题下方的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵数字装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -81,7 +81,7 @@ export const timelineControls = [
 export default function TimelineSlide(props) {
   injectCSS('ign-tl-css', CSS);
   const p = { ...timelineDefaultProps, ...props };
-  const count = clampInt(p.milestoneCount, 3, 5);
+  const count = clampInt(p.milestoneCount, 1, 5);
   const miles = (Array.isArray(p.miles) ? p.miles : []).slice(0, count);
   const emi = clampInt(p.emphasisIndex, 0, count - 1);
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
@@ -129,7 +129,7 @@ export default function TimelineSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '21%' }} /></span> 17 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '21%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">17</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

@@ -12,7 +12,7 @@ const CSS = `
 .ign-vox .ign-frame{justify-content:space-between}
 .ign-vox .b1{width:1180px;height:1180px;right:-160px;top:50%;transform:translateY(-50%);
   background:radial-gradient(50% 50% at 50% 50%,rgba(255,120,52,0.46),rgba(226,42,12,0) 66%);filter:blur(56px)}
-.ign-vox .ign-ghost{font-size:680px;left:0;top:-160px}
+.ign-vox .ign-ghost{font-size:620px;left:72px;top:20px;color:rgba(255,192,122,0.10)}
 .ign-vox-body{flex:1;display:grid;grid-template-columns:1.32fr 0.68fr;gap:96px;align-items:center}
 .ign-vox-body.solo{grid-template-columns:1fr}
 .ign-vox-quote .mk{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:160px;line-height:0.6;color:var(--ign-a);display:block;height:84px}
@@ -43,7 +43,7 @@ const CSS = `
 
 export const voiceDefaultProps = {
   surface: 'ember',
-  avatarCount: 1,
+  avatarCount: true,
   avatar: [],
   portraitShape: 'rounded',
   showRating: true,
@@ -78,13 +78,12 @@ export const voiceControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ember',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'avatarCount', type: 'slider', label: '头像数量', default: 1, min: 0, max: 1, step: 1, describe: '客户头像图片槽数量（0 为留白占位）。' },
+  { key: 'avatarCount', type: 'toggle', label: '图片', default: true, describe: '客户头像图片槽，关闭时留白占位。' },
   { key: 'portraitShape', type: 'select', label: '头像形状', default: 'rounded',
     options: [{ value: 'rounded', label: '圆角方形' }, { value: 'circle', label: '正圆' }], describe: '头像槽的裁切形状。' },
   { key: 'showRating', type: 'toggle', label: '评分行', default: true, describe: '引文上下的菱形评分点。' },
   { key: 'showMetric', type: 'toggle', label: '成果数字', default: true, describe: '左下角的大号成果指标。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '导航旁的装饰标签。' },
-  { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵引号装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
 ];
@@ -153,7 +152,7 @@ export default function VoiceSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '16%' }} /></span> 13 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '16%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">13</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

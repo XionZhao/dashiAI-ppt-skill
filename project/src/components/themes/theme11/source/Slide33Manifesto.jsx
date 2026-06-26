@@ -59,9 +59,9 @@ export const manifestoControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'align', type: 'select', label: '对齐方式', default: 'left',
     options: [{ value: 'left', label: '左对齐' }, { value: 'center', label: '居中' }], describe: '宣言文字的对齐方式。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '宣言上方的装饰性引导标签。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '宣言上方的装饰性引导标签。' },
   { key: 'showRule', type: 'toggle', label: '强调短线', default: true, describe: '宣言下方的暖橙强调短线。' },
-  { key: 'showFootLine', type: 'toggle', label: '落款句', default: true, describe: '宣言下方的衬线收束句。' },
+  { key: 'showFootLine', type: 'toggle', label: '辅助文本', default: true, describe: '宣言下方的衬线收束句。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -105,7 +105,7 @@ export default function ManifestoSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '40%' }} /></span> 33 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '40%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">33</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

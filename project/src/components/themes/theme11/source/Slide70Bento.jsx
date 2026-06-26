@@ -21,7 +21,7 @@ const CSS = `
 .ign-bto-head h2{font-size:54px;font-weight:900;line-height:1.0;letter-spacing:-0.03em}
 .ign-bto-head h2 .ign-serif{color:var(--ign-a)}
 .ign-bto-head .note{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:23px;color:var(--ign-ink3);text-align:right;max-width:320px;line-height:1.4}
-.ign-bto-grid{flex:1;display:grid;grid-template-columns:1.32fr 0.84fr 0.84fr;grid-template-rows:1fr 1fr;
+.ign-bto-grid{flex:1;min-height:0;display:grid;grid-template-columns:1.32fr 0.84fr 0.84fr;grid-template-rows:1fr 1fr;
   gap:18px;margin-top:24px;
   grid-template-areas:"hero shot stat" "hero kpi band"}
 .ign-bto-tile{position:relative;border-radius:8px;overflow:hidden;min-height:0}
@@ -149,7 +149,7 @@ export default function BentoSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 22 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '84%' }} /></span> 69 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '84%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">69</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

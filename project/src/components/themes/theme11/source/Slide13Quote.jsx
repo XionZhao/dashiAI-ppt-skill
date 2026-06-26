@@ -13,8 +13,8 @@ const CSS = `
 .ign-quo-mark{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:300px;line-height:0.5;
   color:var(--ign-a);opacity:0.9;height:120px;margin-bottom:18px;user-select:none}
 .ign-quo q{quotes:none;font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:88px;line-height:1.16;
-  letter-spacing:-0.01em;display:block;max-width:1340px;text-wrap:pretty}
-.ign-quo q .ign-ember-text{font-style:italic}
+  letter-spacing:-0.01em;display:block;max-width:1340px;text-wrap:pretty;padding:0.04em 0.08em 0.06em;margin:-0.04em -0.08em -0.06em}
+.ign-quo q .ign-ember-text{font-style:italic;padding-top:0.12em}
 .ign-quo-attr{display:flex;align-items:center;gap:24px;margin-top:54px;padding-top:30px;border-top:1px solid var(--ign-hair)}
 .ign-quo-attr .who .nm{font-size:30px;font-weight:700}
 .ign-quo-attr .who .rl{font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:0.1em;color:var(--ign-ink3);margin-top:6px}
@@ -27,7 +27,7 @@ export const quoteDefaultProps = {
   showMark: true,
   showRule: true,
   showAttribution: true,
-  avatarCount: 0,
+  avatarCount: false,
   avatar: [],
   showKicker: true,
   showGhostMark: true,
@@ -55,11 +55,10 @@ export const quoteControls = [
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showMark', type: 'toggle', label: '引号字符', default: true, describe: '金句上方的超大装饰引号。' },
-  { key: 'showAttribution', type: 'toggle', label: '署名区块', default: true, describe: '金句下方的署名与来源行。' },
+  { key: 'showAttribution', type: 'toggle', label: '辅助文本', default: true, describe: '金句下方的署名与来源行。' },
   { key: 'showRule', type: 'toggle', label: '分隔细线', default: true, describe: '署名上方的分隔细线。' },
-  { key: 'avatarCount', type: 'slider', label: '头像图片槽', default: 0, min: 0, max: 1, step: 1, describe: '署名旁的头像图片槽数量（0 或 1），自动裁为圆形。' },
+  { key: 'avatarCount', type: 'toggle', label: '图片', default: false, describe: '署名旁的圆形头像图片槽。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '顶部导航处的章节标识。' },
-  { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵数字装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: false, describe: '底部页脚信息与进度条。' },
 ];
@@ -106,7 +105,7 @@ export default function QuoteSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '7%' }} /></span> 6 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '7%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">6</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

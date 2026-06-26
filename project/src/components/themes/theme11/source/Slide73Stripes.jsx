@@ -23,9 +23,9 @@ const CSS = `
 .ign-srp-stack{flex:1;display:flex;flex-direction:column;gap:14px;margin-top:24px;min-height:0}
 .ign-srp-band{position:relative;flex:1;border-radius:8px;overflow:hidden;min-height:0;border:1px solid var(--ign-hair)}
 .ign-srp-band .ign-imgslot{position:absolute;inset:0;width:100%;height:100%;border-radius:8px}
-.ign-srp-scrim{position:absolute;inset:0;z-index:2;
+.ign-srp-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:linear-gradient(90deg,rgba(6,5,4,0.82) 0%,rgba(6,5,4,0.5) 42%,rgba(6,5,4,0) 72%)}
-.ign-srp-in{position:absolute;z-index:3;inset:0;display:flex;align-items:center;gap:34px;padding:0 40px}
+.ign-srp-in{position:absolute;z-index:3;inset:0;display:flex;align-items:center;gap:34px;padding:0 40px;pointer-events:none}
 .ign-srp-no{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:96px;line-height:0.8;letter-spacing:-0.04em;
   color:rgba(246,239,230,0.22);flex:none}
 .ign-srp-band.lead .ign-srp-no{color:transparent;background:linear-gradient(135deg,#FFC07A,#E22A0C);-webkit-background-clip:text;background-clip:text}
@@ -35,7 +35,7 @@ const CSS = `
 .ign-srp-tag .tick{width:22px;height:1px;background:linear-gradient(90deg,var(--ign-b),transparent)}
 .ign-srp-t{font-size:32px;font-weight:700;letter-spacing:-0.01em;color:#F6EFE6}
 .ign-srp-c{font-size:21px;font-weight:300;color:rgba(246,239,230,0.74);line-height:1.4;max-width:560px;text-wrap:pretty}
-.ign-srp-kpi{position:absolute;z-index:3;right:40px;top:50%;transform:translateY(-50%);text-align:right}
+.ign-srp-kpi{position:absolute;z-index:3;right:40px;top:50%;transform:translateY(-50%);text-align:right;pointer-events:none}
 .ign-srp-kpi .v{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:54px;line-height:0.86;letter-spacing:-0.03em;color:#F6EFE6}
 .ign-srp-band.lead .ign-srp-kpi .v{color:transparent;background:linear-gradient(135deg,#FFC07A,#E22A0C);-webkit-background-clip:text;background-clip:text}
 .ign-srp-kpi .l{font-size:18px;font-weight:300;color:rgba(246,239,230,0.6);margin-top:6px}
@@ -151,7 +151,7 @@ export default function StripesSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 18 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '88%' }} /></span> 72 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '88%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">72</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

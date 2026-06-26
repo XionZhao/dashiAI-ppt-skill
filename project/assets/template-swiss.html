@@ -1219,6 +1219,10 @@ function syncDeckPageNumbers(scope=document){
     slide.querySelectorAll('[data-dashi-page-number]').forEach(slot => {
       syncDeckPageNumberSlot(slot, state);
     });
+    slide.querySelectorAll('[data-dashi-page-progress]').forEach(el => {
+      const pct = state.total > 0 ? Math.max(0, Math.min(100, Math.round((state.current / state.total) * 100))) : 0;
+      el.style.width = pct + '%';
+    });
   });
 }
 window.__syncDeckPageNumbers = syncDeckPageNumbers;

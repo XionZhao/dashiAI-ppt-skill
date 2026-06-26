@@ -97,10 +97,10 @@ export const voicesControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'quoteCount', type: 'slider', label: '证言数量', default: 4, min: 2, max: 5, step: 1, describe: '展示的客户证言数量（含主推）。' },
   { key: 'columns', type: 'slider', label: '列表列数', default: 1, min: 1, max: 2, step: 1, describe: '右侧次要证言的排布列数；证言较多时可用 2 列。' },
-  { key: 'showLeadQuote', type: 'toggle', label: '主推证言', default: true, describe: '首条证言作为左侧大号引述锚点；关闭则全部并入列表。' },
-  { key: 'showBylines', type: 'toggle', label: '署名', default: true, describe: '每条证言下方的姓名与职务。' },
-  { key: 'showStat', type: 'toggle', label: '信任数据', default: true, describe: '右上角的满意度大数字。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showLeadQuote', type: 'toggle', label: '重点突出', default: true, describe: '首条证言作为左侧大号引述锚点；关闭则全部并入列表。' },
+  { key: 'showBylines', type: 'toggle', label: '辅助文本', default: true, describe: '每条证言下方的姓名与职务。' },
+  { key: 'showStat', type: 'toggle', label: '成果数字', default: true, describe: '右上角的满意度大数字。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -183,7 +183,7 @@ export default function VoicesSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '59%' }} /></span> 48 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '59%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">48</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

@@ -77,7 +77,7 @@ export const triptychControls = [
   { key: 'orientation', type: 'select', label: '排列方向', default: 'row',
     options: [{ value: 'row', label: '横向并列' }, { value: 'stack', label: '纵向堆叠' }], describe: '大数字的排列方向。' },
   { key: 'showDeltas', type: 'toggle', label: '趋势标记', default: true, describe: '每个数字的趋势/对比标记。' },
-  { key: 'showCaptions', type: 'toggle', label: '数字说明', default: true, describe: '每个数字的说明文案。' },
+  { key: 'showCaptions', type: 'toggle', label: '说明文案', default: true, describe: '每个数字的说明文案。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一个数字，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 2, step: 1, describe: '需要突出的数字序号（从 0 起）。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
@@ -133,7 +133,7 @@ export default function TriptychSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '50%' }} /></span> 41 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '50%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">41</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

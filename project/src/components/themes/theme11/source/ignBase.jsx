@@ -116,7 +116,7 @@ export function Wordmark() {
  *   'fill'   → fills given box, object-fit cover (good for circles/cards)
  * Empty (no src) renders a striped placeholder with a monospace hint.
  * ------------------------------------------------------------------------- */
-export function ImageSlot({ src, placeholder = '图片', mode = 'ratio', height, radius = 4, fit = 'cover', uploadable = true }) {
+export function ImageSlot({ src, placeholder = '图片', mode = 'ratio', height, width, radius = 4, fit = 'cover', uploadable = true }) {
   const [ratio, setRatio] = React.useState(null);
   const [picked, setPicked] = React.useState(null);
   const [drag, setDrag] = React.useState(false);
@@ -175,7 +175,7 @@ export function ImageSlot({ src, placeholder = '图片', mode = 'ratio', height,
   const onDrop = (e) => { e.preventDefault(); e.stopPropagation(); setDrag(false); ingest(e.dataTransfer.files && e.dataTransfer.files[0]); };
   let boxStyle = { borderRadius: radius };
   if (mode === 'height') { boxStyle.height = height || 44; boxStyle.aspectRatio = ratio || '3 / 1'; boxStyle.width = 'auto'; }
-  else if (mode === 'fill') { boxStyle.height = height || '100%'; boxStyle.width = height || '100%'; }
+  else if (mode === 'fill') { boxStyle.height = height || '100%'; boxStyle.width = width || height || '100%'; }
   else { boxStyle.width = '100%'; boxStyle.aspectRatio = ratio || '4 / 3'; }
   return (
     <div className={`ign-imgslot${uploadable ? ' ign-imgslot-up' : ''}${drag ? ' ign-imgslot-drag' : ''}`} style={boxStyle}

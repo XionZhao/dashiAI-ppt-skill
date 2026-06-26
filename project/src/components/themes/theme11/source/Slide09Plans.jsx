@@ -79,11 +79,11 @@ export const plansControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'paper',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'planCount', type: 'slider', label: '套餐数量', default: 3, min: 2, max: 3, step: 1, describe: '价格套餐卡片的数量。' },
+  { key: 'planCount', type: 'slider', label: '卡片数量', default: 3, min: 1, max: 3, step: 1, describe: '价格套餐卡片的数量。' },
   { key: 'featured', type: 'toggle', label: '主推套餐', default: true, describe: '开启后高亮某一张套餐为主推方案。' },
   { key: 'featuredIndex', type: 'slider', label: '主推序号', default: 1, min: 0, max: 2, step: 1, describe: '主推套餐的序号（从 0 起），仅在“主推套餐”开启时生效。' },
   { key: 'featureCount', type: 'slider', label: '权益条目数', default: 4, min: 3, max: 5, step: 1, describe: '每张套餐展示的权益条目数量。' },
-  { key: 'showPriceNote', type: 'toggle', label: '价格注释', default: true, describe: '标题旁的衬线说明文案。' },
+  { key: 'showPriceNote', type: 'toggle', label: '装饰小字', default: true, describe: '标题旁的衬线说明文案。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰眉标。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵数字装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -93,7 +93,7 @@ export const plansControls = [
 export default function PlansSlide(props) {
   injectCSS('ign-plans-css', CSS);
   const p = { ...plansDefaultProps, ...props };
-  const count = clampInt(p.planCount, 2, 3);
+  const count = clampInt(p.planCount, 1, 3);
   const plans = (Array.isArray(p.plans) ? p.plans : []).slice(0, count);
   const fi = clampInt(p.featuredIndex, 0, count - 1);
   const fc = clampInt(p.featureCount, 3, 5);
@@ -149,7 +149,7 @@ export default function PlansSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '28%' }} /></span> 23 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '28%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">23</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

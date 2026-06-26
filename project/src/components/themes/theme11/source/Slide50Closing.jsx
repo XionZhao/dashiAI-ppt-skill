@@ -33,14 +33,14 @@ const CSS = `
 .ign-cls-cl .v .ar{color:var(--ign-a)}
 .ign-cls-media{position:relative;height:100%;min-height:0}
 .ign-cls-media .ign-imgslot{height:100%}
-.ign-cls-media.ratio .ign-imgslot{height:auto}
-.ign-cls-badge{position:absolute;left:24px;top:24px;z-index:2;font-family:'Space Grotesk',sans-serif;font-size:20px;
+.ign-cls-media.ratio .ign-imgslot{height:auto;max-height:720px}
+.ign-cls-badge{position:absolute;left:24px;top:24px;z-index:2;pointer-events:none;font-family:'Space Grotesk',sans-serif;font-size:20px;
   letter-spacing:0.2em;text-transform:uppercase;color:#F8ECE2;text-shadow:0 1px 12px rgba(0,0,0,0.7)}
 `;
 
 export const closingDefaultProps = {
   surface: 'ink',
-  imageCount: 1,
+  imageCount: true,
   image: '',
   imagePosition: 'right',
   imageMode: 'fill',
@@ -79,17 +79,16 @@ export const closingControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 1, min: 0, max: 1, step: 1, describe: '配图槽数量；为 0 时谢幕语整宽居中。' },
-  { key: 'image', type: 'image', label: '配图上传', default: '', boundCount: 'imageCount', describe: '上传谢幕配图，按原图比例自适应。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: true, describe: '显示配图区;开启后点击该区域即可上传/更换图片。' },
   { key: 'imagePosition', type: 'select', label: '配图位置', default: 'right',
     options: [{ value: 'left', label: '左' }, { value: 'right', label: '右' }], describe: '配图相对文字的位置。' },
   { key: 'imageMode', type: 'select', label: '配图填充', default: 'fill',
     options: [{ value: 'fill', label: '满铺裁切' }, { value: 'ratio', label: '原比例' }], describe: '配图的填充方式。' },
-  { key: 'showSub', type: 'toggle', label: '谢幕说明', default: true, describe: '谢幕语下方的说明句。' },
+  { key: 'showSub', type: 'toggle', label: '说明文案', default: true, describe: '谢幕语下方的说明句。' },
   { key: 'showRule', type: 'toggle', label: '强调短线', default: true, describe: '谢幕语下方的暖橙强调短线。' },
-  { key: 'showContact', type: 'toggle', label: '联系方式', default: true, describe: '排版化的联系方式清单（非按钮控件）。' },
-  { key: 'contactCount', type: 'slider', label: '联系条数', default: 3, min: 1, max: 3, step: 1, describe: '联系方式的条目数量。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '谢幕语上方的装饰引导标签。' },
+  { key: 'showContact', type: 'toggle', label: '信息组', default: true, describe: '排版化的信息清单（非按钮控件）。' },
+  { key: 'contactCount', type: 'slider', label: '条目数量', default: 3, min: 1, max: 3, step: 1, describe: '信息条目的数量。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '谢幕语上方的装饰引导标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -98,6 +97,7 @@ export const closingControls = [
 export default function ClosingSlide(props) {
   injectCSS('ign-cls-css', CSS);
   const p = { ...closingDefaultProps, ...props };
+  const images = Array.isArray(p.images) ? p.images : [];
   const hasImg = clampInt(p.imageCount, 0, 1) > 0;
   const cc = clampInt(p.contactCount, 1, 3);
   const contact = (Array.isArray(p.contact) ? p.contact : []).slice(0, cc);
@@ -126,7 +126,7 @@ export default function ClosingSlide(props) {
 
   const Media = hasImg ? (
     <div className={`ign-cls-media ${ratio ? 'ratio' : ''}`} style={ratio ? undefined : { height: 640 }}>
-      <ImageSlot src={p.image || undefined} placeholder={ratio ? p.imagePlaceholderRatio : p.imagePlaceholderFill}
+      <ImageSlot src={images[0] || p.image || undefined} placeholder={ratio ? p.imagePlaceholderRatio : p.imagePlaceholderFill}
         mode={ratio ? 'ratio' : 'fill'} radius={0} />
       <div className="ign-cls-badge">{p.badge}</div>
     </div>
@@ -157,7 +157,7 @@ export default function ClosingSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '100%' }} /></span> 82 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '100%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">82</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

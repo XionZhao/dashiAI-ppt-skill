@@ -69,12 +69,12 @@ export const ringsControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'ringCount', type: 'slider', label: '指标环数量', default: 4, min: 2, max: 4, step: 1, describe: '展示的 KPI 进度环数量。' },
+  { key: 'ringCount', type: 'slider', label: '指标环数量', default: 4, min: 1, max: 4, step: 1, describe: '展示的 KPI 进度环数量。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一个环，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 3, step: 1, describe: '需要突出的环序号（从 0 起）。' },
   { key: 'showCenterValue', type: 'toggle', label: '环心数值', default: true, describe: '每个环中心的百分比数值。' },
   { key: 'showDelta', type: 'toggle', label: '同比增幅', default: true, describe: '名称下方的同比增幅标记。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -84,7 +84,7 @@ export const ringsControls = [
 export default function RingsSlide(props) {
   injectCSS('ign-rng-css', CSS);
   const p = { ...ringsDefaultProps, ...props };
-  const count = clampInt(p.ringCount, 2, 4);
+  const count = clampInt(p.ringCount, 1, 4);
   const rings = (Array.isArray(p.rings) ? p.rings : []).slice(0, count);
   const emi = clampInt(p.emphasisIndex, 0, count - 1);
   const R = 84, C = 2 * Math.PI * R;
@@ -150,7 +150,7 @@ export default function RingsSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '37%' }} /></span> 30 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '37%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">30</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

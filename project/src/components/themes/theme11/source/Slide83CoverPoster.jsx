@@ -72,7 +72,7 @@ export const coverPosterControls = [
   { key: 'showStatus', type: 'toggle', label: '状态胶囊', default: true, describe: '顶部的接单状态胶囊。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的刊号式装饰小标。' },
   { key: 'showSweep', type: 'toggle', label: '暖橙扫光条', default: true, describe: '主标题下方的暖橙渐变扫光条（图形母题）。' },
-  { key: 'showLede', type: 'toggle', label: '衬线引言', default: true, describe: '扫光条下方的衬线斜体引言。' },
+  { key: 'showLede', type: 'toggle', label: '装饰小字', default: true, describe: '扫光条下方的衬线斜体引言。' },
   { key: 'showTicker', type: 'toggle', label: '关键词跑马条', default: true, describe: '底部的箭头串联关键词跑马条。' },
   { key: 'tickerCount', type: 'slider', label: '关键词数量', default: 5, min: 3, max: 5, step: 1, describe: '跑马条中的关键词数量（末项点亮）。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落的超大幽灵字符装饰。' },

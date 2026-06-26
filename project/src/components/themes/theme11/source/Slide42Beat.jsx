@@ -25,7 +25,7 @@ const CSS = `
 .ign-bet-pt .tx{font-size:25px;font-weight:600;line-height:1.34}
 .ign-bet-pt .tx .sub{display:block;font-size:21px;font-weight:300;color:var(--ign-ink2);margin-top:5px}
 .ign-bet-media{position:relative}
-.ign-bet-media .ign-imgslot{width:100%}
+.ign-bet-media .ign-imgslot{width:100%;max-height:780px}
 .ign-bet-tab{position:absolute;left:0;bottom:34px;background:var(--ign-bg);border:1px solid var(--ign-hair2);
   border-left:3px solid;border-image:var(--ign-ember) 1;padding:18px 26px 18px 24px;display:flex;flex-direction:column;gap:4px;
   box-shadow:0 18px 50px rgba(0,0,0,0.3)}
@@ -72,11 +72,11 @@ export const beatControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 1, min: 0, max: 1, step: 1, describe: '配图槽数量；为 0 时正文区扩展为整宽。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: true, describe: '是否显示配图槽。' },
   { key: 'imagePosition', type: 'select', label: '配图位置', default: 'right',
     options: [{ value: 'left', label: '左' }, { value: 'right', label: '右' }], describe: '配图相对正文的位置。' },
   { key: 'pointCount', type: 'slider', label: '要点数量', default: 3, min: 2, max: 3, step: 1, describe: '编号要点的数量。' },
-  { key: 'showLede', type: 'toggle', label: '导语', default: true, describe: '标题下方的说明段落。' },
+  { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '标题下方的说明段落。' },
   { key: 'showStatTab', type: 'toggle', label: '数据浮签', default: true, describe: '配图上叠加的数据浮签。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
@@ -148,7 +148,7 @@ export default function BeatSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '51%' }} /></span> 42 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '51%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">42</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

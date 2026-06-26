@@ -78,11 +78,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "衬线引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "扫光条下方的衬线斜体引言。",
         "publicKey": "showLede",
-        "publicLabel": "衬线引言",
+        "publicLabel": "装饰小字",
         "desc": "扫光条下方的衬线斜体引言。",
         "description": "扫光条下方的衬线斜体引言。"
       },
@@ -222,31 +222,6 @@ export const pages = [
         "description": "选择固定 Unicorn shader 场景"
       },
       {
-        "key": "surface",
-        "type": "select",
-        "label": "背景基调",
-        "default": "ink",
-        "options": [
-          {
-            "value": "ink",
-            "label": "深色"
-          },
-          {
-            "value": "paper",
-            "label": "浅色"
-          },
-          {
-            "value": "ember",
-            "label": "暖橙"
-          }
-        ],
-        "describe": "页面背景主题，用于在相邻页之间制造色彩跳跃。",
-        "publicKey": "surface",
-        "publicLabel": "背景基调",
-        "desc": "页面背景主题，用于在相邻页之间制造色彩跳跃。",
-        "description": "页面背景主题，用于在相邻页之间制造色彩跳跃。"
-      },
-      {
         "key": "showScrim",
         "type": "toggle",
         "label": "压暗叠层",
@@ -271,11 +246,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "衬线引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "主标题上方的衬线斜体引言。",
         "publicKey": "showLede",
-        "publicLabel": "衬线引言",
+        "publicLabel": "装饰小字",
         "desc": "主标题上方的衬线斜体引言。",
         "description": "主标题上方的衬线斜体引言。"
       },
@@ -306,25 +281,14 @@ export const pages = [
         "type": "slider",
         "label": "指标数量",
         "default": 3,
-        "min": 2,
+        "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "指标条中的指标数量。",
+        "describe": "指标条中的指标数量；为 0 时隐藏指标条。",
         "publicKey": "statCount",
         "publicLabel": "指标数量",
-        "desc": "指标条中的指标数量。",
-        "description": "指标条中的指标数量。"
-      },
-      {
-        "key": "showGhostMark",
-        "type": "toggle",
-        "label": "背景大字符",
-        "default": false,
-        "describe": "角落超大幽灵字符装饰（满铺图上默认关闭）。",
-        "publicKey": "showGhostMark",
-        "publicLabel": "背景大字符",
-        "desc": "角落超大幽灵字符装饰（满铺图上默认关闭）。",
-        "description": "角落超大幽灵字符装饰（满铺图上默认关闭）。"
+        "desc": "指标条中的指标数量；为 0 时隐藏指标条。",
+        "description": "指标条中的指标数量；为 0 时隐藏指标条。"
       },
       {
         "key": "showScaffold",
@@ -571,11 +535,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "衬线引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "左栏标题下方的衬线引言。",
         "publicKey": "showLede",
-        "publicLabel": "衬线引言",
+        "publicLabel": "装饰小字",
         "desc": "左栏标题下方的衬线引言。",
         "description": "左栏标题下方的衬线引言。"
       },
@@ -592,17 +556,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 0,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "右栏图片槽数量：0 = 呈现指标堆叠，1 = 呈现一张满栏图。",
+        "type": "toggle",
+        "label": "图片",
+        "default": false,
+        "describe": "右栏图片开关；关闭时呈现指标堆叠，开启时呈现一张满栏图。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "右栏图片槽数量：0 = 呈现指标堆叠，1 = 呈现一张满栏图。",
-        "description": "右栏图片槽数量：0 = 呈现指标堆叠，1 = 呈现一张满栏图。"
+        "publicLabel": "图片",
+        "desc": "右栏图片开关；关闭时呈现指标堆叠，开启时呈现一张满栏图。",
+        "description": "右栏图片开关；关闭时呈现指标堆叠，开启时呈现一张满栏图。"
       },
       {
         "key": "statCount",
@@ -612,20 +573,20 @@ export const pages = [
         "min": 2,
         "max": 3,
         "step": 1,
-        "describe": "右栏指标堆叠的条目数量（仅图片槽数量为 0 时）。",
+        "describe": "右栏指标堆叠的条目数量（仅图片关闭时）。",
         "publicKey": "itemCount",
         "publicLabel": "指标数量",
-        "desc": "右栏指标堆叠的条目数量（仅图片槽数量为 0 时）。",
-        "description": "右栏指标堆叠的条目数量（仅图片槽数量为 0 时）。"
+        "desc": "右栏指标堆叠的条目数量（仅图片关闭时）。",
+        "description": "右栏指标堆叠的条目数量（仅图片关闭时）。"
       },
       {
         "key": "showGhostMark",
         "type": "toggle",
-        "label": "背景大字符",
+        "label": "底对齐",
         "default": true,
         "describe": "左栏的超大幽灵字符装饰。",
         "publicKey": "showGhostMark",
-        "publicLabel": "背景大字符",
+        "publicLabel": "底对齐",
         "desc": "左栏的超大幽灵字符装饰。",
         "description": "左栏的超大幽灵字符装饰。"
       },
@@ -889,11 +850,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "导语",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题下方的衬线斜体导语。",
         "publicKey": "showLede",
-        "publicLabel": "导语",
+        "publicLabel": "装饰小字",
         "desc": "标题下方的衬线斜体导语。",
         "description": "标题下方的衬线斜体导语。"
       },
@@ -941,11 +902,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的导览序号（从 0 起）。",
+        "describe": "需要突出的导览序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的导览序号。",
+        "description": "需要突出的导览序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的导览序号（从 0 起）。",
-        "description": "需要突出的导览序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showGhostMark",
@@ -1093,20 +1055,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要高亮的章节序号（从 0 起）。",
+        "describe": "需要高亮的章节序号。",
+        "displayOffset": 1,
+        "desc": "需要高亮的章节序号。",
+        "description": "需要高亮的章节序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要高亮的章节序号（从 0 起）。",
-        "description": "需要高亮的章节序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -1261,11 +1224,11 @@ export const pages = [
       {
         "key": "showCaption",
         "type": "toggle",
-        "label": "数字说明",
+        "label": "说明文案",
         "default": true,
         "describe": "大数字正下方的说明文案。",
         "publicKey": "showCaption",
-        "publicLabel": "数字说明",
+        "publicLabel": "说明文案",
         "desc": "大数字正下方的说明文案。",
         "description": "大数字正下方的说明文案。"
       },
@@ -1285,14 +1248,14 @@ export const pages = [
         "type": "slider",
         "label": "辅助数据数量",
         "default": 3,
-        "min": 1,
+        "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "底部辅助数据的条目数量。",
+        "describe": "底部辅助数据的条目数量；为 0 时隐藏整行。",
         "publicKey": "itemCount",
         "publicLabel": "辅助数据数量",
-        "desc": "底部辅助数据的条目数量。",
-        "description": "底部辅助数据的条目数量。"
+        "desc": "底部辅助数据的条目数量；为 0 时隐藏整行。",
+        "description": "底部辅助数据的条目数量；为 0 时隐藏整行。"
       },
       {
         "key": "emphasis",
@@ -1313,11 +1276,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的辅助数据序号（从 0 起）。",
+        "describe": "需要突出的辅助数据序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的辅助数据序号。",
+        "description": "需要突出的辅助数据序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的辅助数据序号（从 0 起）。",
-        "description": "需要突出的辅助数据序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showNote",
@@ -1496,14 +1460,14 @@ export const pages = [
         "type": "slider",
         "label": "图片数量",
         "default": 1,
-        "min": 0,
+        "min": 1,
         "max": 2,
         "step": 1,
-        "describe": "满铺图片槽数量：0 为留白占位，1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。",
+        "describe": "满铺图片槽数量：1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。",
         "publicKey": "imageCount",
         "publicLabel": "图片数量",
-        "desc": "满铺图片槽数量：0 为留白占位，1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。",
-        "description": "满铺图片槽数量：0 为留白占位，1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。"
+        "desc": "满铺图片槽数量：1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。",
+        "description": "满铺图片槽数量：1 为整幅，2 为左右双联。点击画面上的图片区域即可上传/更换。"
       },
       {
         "key": "overlayPosition",
@@ -1558,17 +1522,6 @@ export const pages = [
         "publicLabel": "标签行",
         "desc": "标题上方的分类标签行。",
         "description": "标题上方的分类标签行。"
-      },
-      {
-        "key": "showGhostMark",
-        "type": "toggle",
-        "label": "背景大字符",
-        "default": false,
-        "describe": "角落超大幽灵字符装饰（满铺图片时通常关闭）。",
-        "publicKey": "showGhostMark",
-        "publicLabel": "背景大字符",
-        "desc": "角落超大幽灵字符装饰（满铺图片时通常关闭）。",
-        "description": "角落超大幽灵字符装饰（满铺图片时通常关闭）。"
       },
       {
         "key": "showScaffold",
@@ -1674,11 +1627,11 @@ export const pages = [
       {
         "key": "showAttribution",
         "type": "toggle",
-        "label": "署名区块",
+        "label": "辅助文本",
         "default": true,
         "describe": "金句下方的署名与来源行。",
         "publicKey": "showAttribution",
-        "publicLabel": "署名区块",
+        "publicLabel": "辅助文本",
         "desc": "金句下方的署名与来源行。",
         "description": "金句下方的署名与来源行。"
       },
@@ -1695,17 +1648,14 @@ export const pages = [
       },
       {
         "key": "avatarCount",
-        "type": "slider",
-        "label": "头像图片槽",
-        "default": 0,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "署名旁的头像图片槽数量（0 或 1），自动裁为圆形。",
+        "type": "toggle",
+        "label": "图片",
+        "default": false,
+        "describe": "署名旁的圆形头像图片槽。",
         "publicKey": "avatarCount",
-        "publicLabel": "头像图片槽",
-        "desc": "署名旁的头像图片槽数量（0 或 1），自动裁为圆形。",
-        "description": "署名旁的头像图片槽数量（0 或 1），自动裁为圆形。"
+        "publicLabel": "图片",
+        "desc": "署名旁的圆形头像图片槽。",
+        "description": "署名旁的圆形头像图片槽。"
       },
       {
         "key": "showKicker",
@@ -1717,17 +1667,6 @@ export const pages = [
         "publicLabel": "装饰副标题",
         "desc": "顶部导航处的章节标识。",
         "description": "顶部导航处的章节标识。"
-      },
-      {
-        "key": "showGhostMark",
-        "type": "toggle",
-        "label": "背景大字符",
-        "default": true,
-        "describe": "角落超大幽灵数字装饰。",
-        "publicKey": "showGhostMark",
-        "publicLabel": "背景大字符",
-        "desc": "角落超大幽灵数字装饰。",
-        "description": "角落超大幽灵数字装饰。"
       },
       {
         "key": "showScaffold",
@@ -1757,7 +1696,7 @@ export const pages = [
       "showMark": true,
       "showRule": true,
       "showAttribution": true,
-      "avatarCount": 0,
+      "avatarCount": false,
       "avatar": [],
       "showKicker": true,
       "showGhostMark": true,
@@ -1859,11 +1798,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的步骤序号（从 0 起），仅在“重点突出”开启时生效。",
+        "describe": "需要突出的步骤序号，仅在“重点突出”开启时生效。",
+        "displayOffset": 1,
+        "desc": "需要突出的步骤序号，仅在“重点突出”开启时生效。",
+        "description": "需要突出的步骤序号，仅在“重点突出”开启时生效。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的步骤序号（从 0 起），仅在“重点突出”开启时生效。",
-        "description": "需要突出的步骤序号（从 0 起），仅在“重点突出”开启时生效。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showGhostMark",
@@ -2065,11 +2005,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的条目序号（从 0 起）。",
+        "describe": "需要突出的条目序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的条目序号。",
+        "description": "需要突出的条目序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的条目序号（从 0 起）。",
-        "description": "需要突出的条目序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showPills",
@@ -2269,11 +2210,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的渠道序号（从 0 起）。",
+        "describe": "需要突出的渠道序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的渠道序号。",
+        "description": "需要突出的渠道序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的渠道序号（从 0 起）。",
-        "description": "需要突出的渠道序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showLegend",
@@ -2465,11 +2407,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的数据卡序号（从 0 起）。",
+        "describe": "需要突出的数据卡序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的数据卡序号。",
+        "description": "需要突出的数据卡序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的数据卡序号（从 0 起）。",
-        "description": "需要突出的数据卡序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showBars",
@@ -2510,27 +2453,24 @@ export const pages = [
       {
         "key": "showQuote",
         "type": "toggle",
-        "label": "引述区块",
+        "label": "二级正文",
         "default": true,
         "describe": "底部客户引述显示与隐藏。",
         "publicKey": "showQuote",
-        "publicLabel": "引述区块",
+        "publicLabel": "二级正文",
         "desc": "底部客户引述显示与隐藏。",
         "description": "底部客户引述显示与隐藏。"
       },
       {
         "key": "avatarCount",
-        "type": "slider",
-        "label": "头像图片槽",
-        "default": 0,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "引述旁的头像图片槽数量（0 或 1），自动按原图比例裁切为圆形。",
+        "type": "toggle",
+        "label": "图片",
+        "default": false,
+        "describe": "引述旁的圆形头像图片槽。",
         "publicKey": "avatarCount",
-        "publicLabel": "头像图片槽",
-        "desc": "引述旁的头像图片槽数量（0 或 1），自动按原图比例裁切为圆形。",
-        "description": "引述旁的头像图片槽数量（0 或 1），自动按原图比例裁切为圆形。"
+        "publicLabel": "图片",
+        "desc": "引述旁的圆形头像图片槽。",
+        "description": "引述旁的圆形头像图片槽。"
       },
       {
         "key": "showNote",
@@ -2575,7 +2515,7 @@ export const pages = [
       "showRibbon": true,
       "ribbonStepCount": 5,
       "showQuote": true,
-      "avatarCount": 0,
+      "avatarCount": false,
       "avatar": [],
       "showNote": true,
       "showGhostMark": true,
@@ -2720,11 +2660,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的阶段序号（从 0 起）。",
+        "describe": "需要突出的阶段序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的阶段序号。",
+        "description": "需要突出的阶段序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的阶段序号（从 0 起）。",
-        "description": "需要突出的阶段序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showRates",
@@ -2740,11 +2681,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -2887,17 +2828,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "主图图片槽数量；为 0 时回退为单栏文字版式。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "是否显示配图槽。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "主图图片槽数量；为 0 时回退为单栏文字版式。",
-        "description": "主图图片槽数量；为 0 时回退为单栏文字版式。"
+        "publicLabel": "图片",
+        "desc": "是否显示配图槽。",
+        "description": "是否显示配图槽。"
       },
       {
         "key": "imagePosition",
@@ -2964,11 +2902,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的指标序号（从 0 起）。",
+        "describe": "需要突出的指标序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的指标序号。",
+        "description": "需要突出的指标序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的指标序号（从 0 起）。",
-        "description": "需要突出的指标序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showCaption",
@@ -3109,17 +3048,14 @@ export const pages = [
       },
       {
         "key": "avatarCount",
-        "type": "slider",
-        "label": "头像数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "客户头像图片槽数量（0 为留白占位）。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "客户头像图片槽，关闭时留白占位。",
         "publicKey": "avatarCount",
-        "publicLabel": "头像数量",
-        "desc": "客户头像图片槽数量（0 为留白占位）。",
-        "description": "客户头像图片槽数量（0 为留白占位）。"
+        "publicLabel": "图片",
+        "desc": "客户头像图片槽，关闭时留白占位。",
+        "description": "客户头像图片槽，关闭时留白占位。"
       },
       {
         "key": "portraitShape",
@@ -3176,17 +3112,6 @@ export const pages = [
         "description": "导航旁的装饰标签。"
       },
       {
-        "key": "showGhostMark",
-        "type": "toggle",
-        "label": "背景大字符",
-        "default": true,
-        "describe": "角落超大幽灵引号装饰。",
-        "publicKey": "showGhostMark",
-        "publicLabel": "背景大字符",
-        "desc": "角落超大幽灵引号装饰。",
-        "description": "角落超大幽灵引号装饰。"
-      },
-      {
         "key": "showScaffold",
         "type": "toggle",
         "label": "边框骨架",
@@ -3211,7 +3136,7 @@ export const pages = [
     ],
     "defaultProps": {
       "surface": "ember",
-      "avatarCount": 1,
+      "avatarCount": true,
       "avatar": [],
       "portraitShape": "rounded",
       "showRating": true,
@@ -3310,11 +3235,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的价值柱序号（从 0 起），仅在“重点突出”开启时生效。",
+        "describe": "需要突出的价值柱序号，仅在“重点突出”开启时生效。",
+        "displayOffset": 1,
+        "desc": "需要突出的价值柱序号，仅在“重点突出”开启时生效。",
+        "description": "需要突出的价值柱序号，仅在“重点突出”开启时生效。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的价值柱序号（从 0 起），仅在“重点突出”开启时生效。",
-        "description": "需要突出的价值柱序号（从 0 起），仅在“重点突出”开启时生效。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showStat",
@@ -3514,11 +3440,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -3680,16 +3606,16 @@ export const pages = [
       {
         "key": "serviceCount",
         "type": "slider",
-        "label": "服务条目数",
+        "label": "条目数量",
         "default": 4,
-        "min": 3,
+        "min": 1,
         "max": 5,
         "step": 1,
-        "describe": "左侧服务清单的条目数量。",
+        "describe": "左侧清单的条目数量。",
         "publicKey": "itemCount",
-        "publicLabel": "服务条目数",
-        "desc": "左侧服务清单的条目数量。",
-        "description": "左侧服务清单的条目数量。"
+        "publicLabel": "条目数量",
+        "desc": "左侧清单的条目数量。",
+        "description": "左侧清单的条目数量。"
       },
       {
         "key": "emphasis",
@@ -3710,11 +3636,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的服务序号（从 0 起）。",
+        "describe": "需要突出的服务序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的服务序号。",
+        "description": "需要突出的服务序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的服务序号（从 0 起）。",
-        "description": "需要突出的服务序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showArrow",
@@ -3760,11 +3687,12 @@ export const pages = [
         "min": 0,
         "max": 7,
         "step": 1,
-        "describe": "高亮为实底的标签序号（从 0 起）。",
+        "describe": "高亮为实底的标签序号。",
+        "displayOffset": 1,
+        "desc": "高亮为实底的标签序号。",
+        "description": "高亮为实底的标签序号。",
         "publicKey": "pillActiveIndex",
-        "publicLabel": "高亮标签序号",
-        "desc": "高亮为实底的标签序号（从 0 起）。",
-        "description": "高亮为实底的标签序号（从 0 起）。"
+        "publicLabel": "高亮标签序号"
       },
       {
         "key": "showKicker",
@@ -3895,16 +3823,16 @@ export const pages = [
       {
         "key": "milestoneCount",
         "type": "slider",
-        "label": "里程碑数量",
+        "label": "条目数量",
         "default": 5,
-        "min": 3,
+        "min": 1,
         "max": 5,
         "step": 1,
-        "describe": "时间轴里程碑的数量。",
-        "publicKey": "milestoneCount",
-        "publicLabel": "里程碑数量",
-        "desc": "时间轴里程碑的数量。",
-        "description": "时间轴里程碑的数量。"
+        "describe": "时间轴条目的数量。",
+        "publicKey": "itemCount",
+        "publicLabel": "条目数量",
+        "desc": "时间轴条目的数量。",
+        "description": "时间轴条目的数量。"
       },
       {
         "key": "emphasis",
@@ -3925,11 +3853,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的里程碑序号（从 0 起）。",
+        "describe": "需要突出的里程碑序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的里程碑序号。",
+        "description": "需要突出的里程碑序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的里程碑序号（从 0 起）。",
-        "description": "需要突出的里程碑序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showAxis",
@@ -3945,11 +3874,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -4098,36 +4027,36 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "拼贴图片槽数量：0 占位、1 单图、2 主图+叠加小图。",
+        "describe": "拼贴图片数量：0 无图、1 单图、2 主图+叠加小图。",
         "publicKey": "imageCount",
         "publicLabel": "图片数量",
-        "desc": "拼贴图片槽数量：0 占位、1 单图、2 主图+叠加小图。",
-        "description": "拼贴图片槽数量：0 占位、1 单图、2 主图+叠加小图。"
+        "desc": "拼贴图片数量：0 无图、1 单图、2 主图+叠加小图。",
+        "description": "拼贴图片数量：0 无图、1 单图、2 主图+叠加小图。"
       },
       {
         "key": "showPoints",
         "type": "toggle",
-        "label": "要点清单",
+        "label": "列表",
         "default": true,
-        "describe": "左侧编号要点清单。",
+        "describe": "左侧编号列表。",
         "publicKey": "showPoints",
-        "publicLabel": "要点清单",
-        "desc": "左侧编号要点清单。",
-        "description": "左侧编号要点清单。"
+        "publicLabel": "列表",
+        "desc": "左侧编号列表。",
+        "description": "左侧编号列表。"
       },
       {
         "key": "pointCount",
         "type": "slider",
-        "label": "要点数量",
+        "label": "列表数量",
         "default": 3,
-        "min": 2,
+        "min": 1,
         "max": 3,
         "step": 1,
-        "describe": "编号要点的条目数量。",
+        "describe": "编号列表的条目数量。",
         "publicKey": "itemCount",
-        "publicLabel": "要点数量",
-        "desc": "编号要点的条目数量。",
-        "description": "编号要点的条目数量。"
+        "publicLabel": "列表数量",
+        "desc": "编号列表的条目数量。",
+        "description": "编号列表的条目数量。"
       },
       {
         "key": "showCaptions",
@@ -4154,11 +4083,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -4320,11 +4249,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的节点序号（从 0 起）。",
+        "describe": "需要突出的节点序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的节点序号。",
+        "description": "需要突出的节点序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的节点序号（从 0 起）。",
-        "description": "需要突出的节点序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showCaptions",
@@ -4537,11 +4467,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的指标序号（从 0 起）。",
+        "describe": "需要突出的指标序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的指标序号。",
+        "description": "需要突出的指标序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的指标序号（从 0 起）。",
-        "description": "需要突出的指标序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showBars",
@@ -4720,7 +4651,7 @@ export const pages = [
         "type": "slider",
         "label": "对比行数",
         "default": 6,
-        "min": 3,
+        "min": 1,
         "max": 6,
         "step": 1,
         "describe": "对比维度（行）的数量。",
@@ -4737,11 +4668,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要高亮的方案列序号（从 0 起，默认燃点列）。",
+        "describe": "需要高亮的方案列序号（默认燃点列）。",
+        "displayOffset": 1,
+        "desc": "需要高亮的方案列序号（默认燃点列）。",
+        "description": "需要高亮的方案列序号（默认燃点列）。",
         "publicKey": "highlightColumnIndex",
-        "publicLabel": "高亮列",
-        "desc": "需要高亮的方案列序号（从 0 起，默认燃点列）。",
-        "description": "需要高亮的方案列序号（从 0 起，默认燃点列）。"
+        "publicLabel": "高亮列"
       },
       {
         "key": "showHeadRow",
@@ -4939,16 +4871,16 @@ export const pages = [
       {
         "key": "rowCount",
         "type": "slider",
-        "label": "能力行数",
+        "label": "条目数量",
         "default": 7,
-        "min": 4,
+        "min": 1,
         "max": 7,
         "step": 1,
-        "describe": "矩阵中的能力维度行数。",
-        "publicKey": "rowCount",
-        "publicLabel": "能力行数",
-        "desc": "矩阵中的能力维度行数。",
-        "description": "矩阵中的能力维度行数。"
+        "describe": "清单的条目数量。",
+        "publicKey": "itemCount",
+        "publicLabel": "条目数量",
+        "desc": "清单的条目数量。",
+        "description": "清单的条目数量。"
       },
       {
         "key": "columnCount",
@@ -4972,11 +4904,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要高亮的列序号（从 0 起，超出列数自动收敛）。",
+        "describe": "需要高亮的列序号（超出列数自动收敛）。",
+        "displayOffset": 1,
+        "desc": "需要高亮的列序号（超出列数自动收敛）。",
+        "description": "需要高亮的列序号（超出列数自动收敛）。",
         "publicKey": "highlightColumnIndex",
-        "publicLabel": "高亮列",
-        "desc": "需要高亮的列序号（从 0 起，超出列数自动收敛）。",
-        "description": "需要高亮的列序号（从 0 起，超出列数自动收敛）。"
+        "publicLabel": "高亮列"
       },
       {
         "key": "showHeadRow",
@@ -5003,11 +4936,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -5202,14 +5135,14 @@ export const pages = [
       {
         "key": "planCount",
         "type": "slider",
-        "label": "套餐数量",
+        "label": "卡片数量",
         "default": 3,
-        "min": 2,
+        "min": 1,
         "max": 3,
         "step": 1,
         "describe": "价格套餐卡片的数量。",
         "publicKey": "planCount",
-        "publicLabel": "套餐数量",
+        "publicLabel": "卡片数量",
         "desc": "价格套餐卡片的数量。",
         "description": "价格套餐卡片的数量。"
       },
@@ -5232,11 +5165,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "主推套餐的序号（从 0 起），仅在“主推套餐”开启时生效。",
+        "describe": "主推套餐的序号，仅在“主推套餐”开启时生效。",
+        "displayOffset": 1,
+        "desc": "主推套餐的序号，仅在“主推套餐”开启时生效。",
+        "description": "主推套餐的序号，仅在“主推套餐”开启时生效。",
         "publicKey": "featuredIndex",
-        "publicLabel": "主推序号",
-        "desc": "主推套餐的序号（从 0 起），仅在“主推套餐”开启时生效。",
-        "description": "主推套餐的序号（从 0 起），仅在“主推套餐”开启时生效。"
+        "publicLabel": "主推序号"
       },
       {
         "key": "featureCount",
@@ -5255,11 +5189,11 @@ export const pages = [
       {
         "key": "showPriceNote",
         "type": "toggle",
-        "label": "价格注释",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题旁的衬线说明文案。",
         "publicKey": "showPriceNote",
-        "publicLabel": "价格注释",
+        "publicLabel": "装饰小字",
         "desc": "标题旁的衬线说明文案。",
         "description": "标题旁的衬线说明文案。"
       },
@@ -5418,14 +5352,14 @@ export const pages = [
       {
         "key": "principleCount",
         "type": "slider",
-        "label": "原则数量",
+        "label": "条目数量",
         "default": 6,
-        "min": 3,
+        "min": 1,
         "max": 6,
         "step": 1,
         "describe": "列出的操作原则条目数量。",
         "publicKey": "itemCount",
-        "publicLabel": "原则数量",
+        "publicLabel": "条目数量",
         "desc": "列出的操作原则条目数量。",
         "description": "列出的操作原则条目数量。"
       },
@@ -5448,20 +5382,21 @@ export const pages = [
         "min": 0,
         "max": 5,
         "step": 1,
-        "describe": "需要突出的原则序号（从 0 起）。",
+        "describe": "需要突出的原则序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的原则序号。",
+        "description": "需要突出的原则序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的原则序号（从 0 起）。",
-        "description": "需要突出的原则序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -5757,11 +5692,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "主标题上方的衬线斜体引言。",
         "publicKey": "showLede",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "主标题上方的衬线斜体引言。",
         "description": "主标题上方的衬线斜体引言。"
       },
@@ -5790,27 +5725,27 @@ export const pages = [
       {
         "key": "showChannels",
         "type": "toggle",
-        "label": "联系方式",
+        "label": "信息组",
         "default": true,
-        "describe": "邮箱 / 电话 / 地点等联系信息组。",
+        "describe": "邮箱 / 电话 / 地点等信息组。",
         "publicKey": "showChannels",
-        "publicLabel": "联系方式",
-        "desc": "邮箱 / 电话 / 地点等联系信息组。",
-        "description": "邮箱 / 电话 / 地点等联系信息组。"
+        "publicLabel": "信息组",
+        "desc": "邮箱 / 电话 / 地点等信息组。",
+        "description": "邮箱 / 电话 / 地点等信息组。"
       },
       {
         "key": "channelCount",
         "type": "slider",
-        "label": "联系方式数量",
+        "label": "条目数量",
         "default": 3,
         "min": 1,
         "max": 3,
         "step": 1,
-        "describe": "展示的联系方式条目数量。",
+        "describe": "展示的信息条目数量。",
         "publicKey": "itemCount",
-        "publicLabel": "联系方式数量",
-        "desc": "展示的联系方式条目数量。",
-        "description": "展示的联系方式条目数量。"
+        "publicLabel": "条目数量",
+        "desc": "展示的信息条目数量。",
+        "description": "展示的信息条目数量。"
       },
       {
         "key": "showBigMark",
@@ -6013,11 +5948,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -6179,11 +6114,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -6201,11 +6136,11 @@ export const pages = [
       {
         "key": "showCaptions",
         "type": "toggle",
-        "label": "数字说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每栏大数字下方的说明文案。",
         "publicKey": "showCaptions",
-        "publicLabel": "数字说明",
+        "publicLabel": "说明文案",
         "desc": "每栏大数字下方的说明文案。",
         "description": "每栏大数字下方的说明文案。"
       },
@@ -6448,13 +6383,13 @@ export const pages = [
       {
         "key": "showRoles",
         "type": "toggle",
-        "label": "职务",
+        "label": "副标题",
         "default": true,
-        "describe": "姓名下方的中文职务。",
+        "describe": "姓名下方的副标题。",
         "publicKey": "showRoles",
-        "publicLabel": "职务",
-        "desc": "姓名下方的中文职务。",
-        "description": "姓名下方的中文职务。"
+        "publicLabel": "副标题",
+        "desc": "姓名下方的副标题。",
+        "description": "姓名下方的副标题。"
       },
       {
         "key": "showEn",
@@ -6481,11 +6416,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -6616,7 +6551,7 @@ export const pages = [
         "type": "slider",
         "label": "指标环数量",
         "default": 4,
-        "min": 2,
+        "min": 1,
         "max": 4,
         "step": 1,
         "describe": "展示的 KPI 进度环数量。",
@@ -6644,11 +6579,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的环序号（从 0 起）。",
+        "describe": "需要突出的环序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的环序号。",
+        "description": "需要突出的环序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的环序号（从 0 起）。",
-        "description": "需要突出的环序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showCenterValue",
@@ -6675,11 +6611,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -6819,16 +6755,16 @@ export const pages = [
       {
         "key": "rowCount",
         "type": "slider",
-        "label": "账目行数",
+        "label": "列表行数",
         "default": 6,
-        "min": 3,
+        "min": 1,
         "max": 6,
         "step": 1,
-        "describe": "账目表的明细行数。",
+        "describe": "列表的明细行数。",
         "publicKey": "rowCount",
-        "publicLabel": "账目行数",
-        "desc": "账目表的明细行数。",
-        "description": "账目表的明细行数。"
+        "publicLabel": "列表行数",
+        "desc": "列表的明细行数。",
+        "description": "列表的明细行数。"
       },
       {
         "key": "showColHeads",
@@ -6860,11 +6796,12 @@ export const pages = [
         "min": 0,
         "max": 5,
         "step": 1,
-        "describe": "需要高亮的明细行序号（从 0 起）。",
+        "describe": "需要高亮的明细行序号。",
+        "displayOffset": 1,
+        "desc": "需要高亮的明细行序号。",
+        "description": "需要高亮的明细行序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要高亮的明细行序号（从 0 起）。",
-        "description": "需要高亮的明细行序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showNetRow",
@@ -6891,11 +6828,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -7064,17 +7001,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "样机内的截图槽数量；为 0 时显示条纹占位。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "样机内截图的显示与隐藏。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "样机内的截图槽数量；为 0 时显示条纹占位。",
-        "description": "样机内的截图槽数量；为 0 时显示条纹占位。"
+        "publicLabel": "图片",
+        "desc": "样机内截图的显示与隐藏。",
+        "description": "样机内截图的显示与隐藏。"
       },
       {
         "key": "imagePosition",
@@ -7122,16 +7056,16 @@ export const pages = [
       {
         "key": "pinCount",
         "type": "slider",
-        "label": "标注数量",
+        "label": "列表数量",
         "default": 3,
-        "min": 2,
+        "min": 1,
         "max": 3,
         "step": 1,
-        "describe": "编号标注点的数量。",
+        "describe": "编号标注列表的数量。",
         "publicKey": "pinCount",
-        "publicLabel": "标注数量",
-        "desc": "编号标注点的数量。",
-        "description": "编号标注点的数量。"
+        "publicLabel": "列表数量",
+        "desc": "编号标注列表的数量。",
+        "description": "编号标注列表的数量。"
       },
       {
         "key": "showCaption",
@@ -7300,11 +7234,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "宣言上方的装饰性引导标签。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "宣言上方的装饰性引导标签。",
         "description": "宣言上方的装饰性引导标签。"
       },
@@ -7322,11 +7256,11 @@ export const pages = [
       {
         "key": "showFootLine",
         "type": "toggle",
-        "label": "落款句",
+        "label": "辅助文本",
         "default": true,
         "describe": "宣言下方的衬线收束句。",
         "publicKey": "showFootLine",
-        "publicLabel": "落款句",
+        "publicLabel": "辅助文本",
         "desc": "宣言下方的衬线收束句。",
         "description": "宣言下方的衬线收束句。"
       },
@@ -7425,17 +7359,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "配图槽数量；为 0 时正文扩展为单栏满宽。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "是否显示配图槽。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "配图槽数量；为 0 时正文扩展为单栏满宽。",
-        "description": "配图槽数量；为 0 时正文扩展为单栏满宽。"
+        "publicLabel": "图片",
+        "desc": "是否显示配图槽。",
+        "description": "是否显示配图槽。"
       },
       {
         "key": "imagePosition",
@@ -7486,22 +7417,22 @@ export const pages = [
       {
         "key": "showPullQuote",
         "type": "toggle",
-        "label": "插入金句",
+        "label": "二级正文",
         "default": true,
         "describe": "正文中的衬线引文段落。",
         "publicKey": "showPullQuote",
-        "publicLabel": "插入金句",
+        "publicLabel": "二级正文",
         "desc": "正文中的衬线引文段落。",
         "description": "正文中的衬线引文段落。"
       },
       {
         "key": "showByline",
         "type": "toggle",
-        "label": "署名行",
+        "label": "辅助文本",
         "default": true,
         "describe": "正文末尾的作者署名。",
         "publicKey": "showByline",
-        "publicLabel": "署名行",
+        "publicLabel": "辅助文本",
         "desc": "正文末尾的作者署名。",
         "description": "正文末尾的作者署名。"
       },
@@ -7693,11 +7624,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -7952,20 +7883,21 @@ export const pages = [
         "min": 0,
         "max": 5,
         "step": 1,
-        "describe": "需要突出的柱序号（含基线，从 0 起）。",
+        "describe": "需要突出的柱序号（含基线）。",
+        "displayOffset": 1,
+        "desc": "需要突出的柱序号（含基线）。",
+        "description": "需要突出的柱序号（含基线）。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的柱序号（含基线，从 0 起）。",
-        "description": "需要突出的柱序号（含基线，从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -8154,11 +8086,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -8360,22 +8292,22 @@ export const pages = [
       {
         "key": "showStat",
         "type": "toggle",
-        "label": "信任数据",
+        "label": "成果数字",
         "default": true,
         "describe": "右上角的客户数量大数字。",
         "publicKey": "showStat",
-        "publicLabel": "信任数据",
+        "publicLabel": "成果数字",
         "desc": "右上角的客户数量大数字。",
         "description": "右上角的客户数量大数字。"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -8530,7 +8462,7 @@ export const pages = [
         "type": "slider",
         "label": "问答行数",
         "default": 4,
-        "min": 3,
+        "min": 1,
         "max": 5,
         "step": 1,
         "describe": "问答表的行数。",
@@ -8580,20 +8512,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要高亮的行序号（从 0 起）。",
+        "describe": "需要高亮的行序号。",
+        "displayOffset": 1,
+        "desc": "需要高亮的行序号。",
+        "description": "需要高亮的行序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要高亮的行序号（从 0 起）。",
-        "description": "需要高亮的行序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -8731,39 +8664,6 @@ export const pages = [
         "description": "页面背景主题，用于在相邻页之间制造色彩跳跃。"
       },
       {
-        "key": "chapterNo",
-        "type": "select",
-        "label": "章节编号",
-        "default": "03",
-        "options": [
-          {
-            "value": "01",
-            "label": "01"
-          },
-          {
-            "value": "02",
-            "label": "02"
-          },
-          {
-            "value": "03",
-            "label": "03"
-          },
-          {
-            "value": "04",
-            "label": "04"
-          },
-          {
-            "value": "05",
-            "label": "05"
-          }
-        ],
-        "describe": "巨型章节序号。",
-        "publicKey": "chapterNo",
-        "publicLabel": "章节编号",
-        "desc": "巨型章节序号。",
-        "description": "巨型章节序号。"
-      },
-      {
         "key": "showNumber",
         "type": "toggle",
         "label": "巨型序号",
@@ -8801,7 +8701,7 @@ export const pages = [
         "type": "slider",
         "label": "目录条数",
         "default": 4,
-        "min": 2,
+        "min": 1,
         "max": 4,
         "step": 1,
         "describe": "小目录的条目数量。",
@@ -8818,20 +8718,21 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "小目录中高亮的当前条目序号（从 0 起）。",
+        "describe": "小目录中高亮的当前条目序号。",
+        "displayOffset": 1,
+        "desc": "小目录中高亮的当前条目序号。",
+        "description": "小目录中高亮的当前条目序号。",
         "publicKey": "agendaCurrent",
-        "publicLabel": "当前条目",
-        "desc": "小目录中高亮的当前条目序号（从 0 起）。",
-        "description": "小目录中高亮的当前条目序号（从 0 起）。"
+        "publicLabel": "当前条目"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的章节引导标签。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的章节引导标签。",
         "description": "标题上方的章节引导标签。"
       },
@@ -8871,7 +8772,6 @@ export const pages = [
     ],
     "defaultProps": {
       "surface": "ink",
-      "chapterNo": "03",
       "showNumber": true,
       "showSub": true,
       "showAgenda": true,
@@ -8881,6 +8781,7 @@ export const pages = [
       "showGhostMark": true,
       "showScaffold": true,
       "showMeta": true,
+      "chapterNo": "03",
       "railText": "Chapter — 章节",
       "navItems": [
         "章节"
@@ -9000,11 +8901,11 @@ export const pages = [
       {
         "key": "showCaptions",
         "type": "toggle",
-        "label": "数字说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每个数字的说明文案。",
         "publicKey": "showCaptions",
-        "publicLabel": "数字说明",
+        "publicLabel": "说明文案",
         "desc": "每个数字的说明文案。",
         "description": "每个数字的说明文案。"
       },
@@ -9027,11 +8928,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的数字序号（从 0 起）。",
+        "describe": "需要突出的数字序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的数字序号。",
+        "description": "需要突出的数字序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的数字序号（从 0 起）。",
-        "description": "需要突出的数字序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
@@ -9173,17 +9075,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "配图槽数量；为 0 时正文区扩展为整宽。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "是否显示配图槽。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "配图槽数量；为 0 时正文区扩展为整宽。",
-        "description": "配图槽数量；为 0 时正文区扩展为整宽。"
+        "publicLabel": "图片",
+        "desc": "是否显示配图槽。",
+        "description": "是否显示配图槽。"
       },
       {
         "key": "imagePosition",
@@ -9223,11 +9122,11 @@ export const pages = [
       {
         "key": "showLede",
         "type": "toggle",
-        "label": "导语",
+        "label": "说明文案",
         "default": true,
         "describe": "标题下方的说明段落。",
         "publicKey": "showLede",
-        "publicLabel": "导语",
+        "publicLabel": "说明文案",
         "desc": "标题下方的说明段落。",
         "description": "标题下方的说明段落。"
       },
@@ -9460,20 +9359,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的群组行序号（从 0 起）。",
+        "describe": "需要突出的群组行序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的群组行序号。",
+        "description": "需要突出的群组行序号。",
         "publicKey": "emphasisRow",
-        "publicLabel": "重点行",
-        "desc": "需要突出的群组行序号（从 0 起）。",
-        "description": "需要突出的群组行序号（从 0 起）。"
+        "publicLabel": "重点行"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -9741,11 +9641,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -9930,20 +9830,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "「当前所在」节点序号（从 0 起）；之前为已完成，之后为待办。",
+        "describe": "「当前所在」节点序号；之前为已完成，之后为待办。",
+        "displayOffset": 1,
+        "desc": "「当前所在」节点序号；之前为已完成，之后为待办。",
+        "description": "「当前所在」节点序号；之前为已完成，之后为待办。",
         "publicKey": "currentIndex",
-        "publicLabel": "当前阶段",
-        "desc": "「当前所在」节点序号（从 0 起）；之前为已完成，之后为待办。",
-        "description": "「当前所在」节点序号（从 0 起）；之前为已完成，之后为待办。"
+        "publicLabel": "当前阶段"
       },
       {
         "key": "showDesc",
         "type": "toggle",
-        "label": "节点描述",
+        "label": "说明文案",
         "default": true,
         "describe": "每个里程碑下方的描述句。",
         "publicKey": "showDesc",
-        "publicLabel": "节点描述",
+        "publicLabel": "说明文案",
         "desc": "每个里程碑下方的描述句。",
         "description": "每个里程碑下方的描述句。"
       },
@@ -9972,11 +9873,11 @@ export const pages = [
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -10163,33 +10064,22 @@ export const pages = [
       {
         "key": "showInset",
         "type": "toggle",
-        "label": "图片插角",
-        "default": false,
-        "describe": "地图右下角的图片插角（自适应比例）。",
+        "label": "现场配图",
+        "default": true,
+        "describe": "地图右下角的配图框;开启后点击该框即可上传/更换图片。",
         "publicKey": "showInset",
-        "publicLabel": "图片插角",
-        "desc": "地图右下角的图片插角（自适应比例）。",
-        "description": "地图右下角的图片插角（自适应比例）。"
-      },
-      {
-        "key": "insetImage",
-        "type": "image",
-        "label": "插角图片",
-        "default": "",
-        "describe": "上传插角图片，按原图比例自适应。",
-        "publicKey": "insetImage",
-        "publicLabel": "插角图片",
-        "desc": "上传插角图片，按原图比例自适应。",
-        "description": "上传插角图片，按原图比例自适应。"
+        "publicLabel": "现场配图",
+        "desc": "地图右下角的配图框;开启后点击该框即可上传/更换图片。",
+        "description": "地图右下角的配图框;开启后点击该框即可上传/更换图片。"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -10244,7 +10134,7 @@ export const pages = [
       "showPins": true,
       "showRegionList": true,
       "showValues": true,
-      "showInset": false,
+      "showInset": true,
       "insetImage": "",
       "showKicker": true,
       "showLede": true,
@@ -10423,20 +10313,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要高亮的对比项序号（从 0 起）。",
+        "describe": "需要高亮的对比项序号。",
+        "displayOffset": 1,
+        "desc": "需要高亮的对比项序号。",
+        "description": "需要高亮的对比项序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要高亮的对比项序号（从 0 起）。",
-        "description": "需要高亮的对比项序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -10642,44 +10533,44 @@ export const pages = [
       {
         "key": "showLeadQuote",
         "type": "toggle",
-        "label": "主推证言",
+        "label": "重点突出",
         "default": true,
         "describe": "首条证言作为左侧大号引述锚点；关闭则全部并入列表。",
         "publicKey": "showLeadQuote",
-        "publicLabel": "主推证言",
+        "publicLabel": "重点突出",
         "desc": "首条证言作为左侧大号引述锚点；关闭则全部并入列表。",
         "description": "首条证言作为左侧大号引述锚点；关闭则全部并入列表。"
       },
       {
         "key": "showBylines",
         "type": "toggle",
-        "label": "署名",
+        "label": "辅助文本",
         "default": true,
         "describe": "每条证言下方的姓名与职务。",
         "publicKey": "showBylines",
-        "publicLabel": "署名",
+        "publicLabel": "辅助文本",
         "desc": "每条证言下方的姓名与职务。",
         "description": "每条证言下方的姓名与职务。"
       },
       {
         "key": "showStat",
         "type": "toggle",
-        "label": "信任数据",
+        "label": "成果数字",
         "default": true,
         "describe": "右上角的满意度大数字。",
         "publicKey": "showStat",
-        "publicLabel": "信任数据",
+        "publicLabel": "成果数字",
         "desc": "右上角的满意度大数字。",
         "description": "右上角的满意度大数字。"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -10877,20 +10768,21 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的环节序号（从 0 起）。",
+        "describe": "需要突出的环节序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的环节序号。",
+        "description": "需要突出的环节序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的环节序号（从 0 起）。",
-        "description": "需要突出的环节序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "标题上方的衬线引言。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "标题上方的衬线引言。",
         "description": "标题上方的衬线引言。"
       },
@@ -11079,11 +10971,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的序列序号（从 0 起）。",
+        "describe": "需要突出的序列序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的序列序号。",
+        "description": "需要突出的序列序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的序列序号（从 0 起）。",
-        "description": "需要突出的序列序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showGrid",
@@ -11405,7 +11298,7 @@ export const pages = [
         "type": "slider",
         "label": "指标数量",
         "default": 3,
-        "min": 2,
+        "min": 1,
         "max": 3,
         "step": 1,
         "describe": "指标条中的指标数量。",
@@ -11767,11 +11660,12 @@ export const pages = [
         "min": 0,
         "max": 5,
         "step": 1,
-        "describe": "需要高亮的模块行序号（从 0 起）。",
+        "describe": "需要高亮的模块行序号。",
+        "displayOffset": 1,
+        "desc": "需要高亮的模块行序号。",
+        "description": "需要高亮的模块行序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "高亮行序号",
-        "desc": "需要高亮的模块行序号（从 0 起）。",
-        "description": "需要高亮的模块行序号（从 0 起）。"
+        "publicLabel": "高亮行序号"
       },
       {
         "key": "showKicker",
@@ -11969,11 +11863,11 @@ export const pages = [
       {
         "key": "showResult",
         "type": "toggle",
-        "label": "成果描述",
+        "label": "说明文案",
         "default": true,
         "describe": "每张卡的一句话成果描述。",
         "publicKey": "showResult",
-        "publicLabel": "成果描述",
+        "publicLabel": "说明文案",
         "desc": "每张卡的一句话成果描述。",
         "description": "每张卡的一句话成果描述。"
       },
@@ -11996,11 +11890,12 @@ export const pages = [
         "min": 0,
         "max": 2,
         "step": 1,
-        "describe": "需要突出的卡片序号（从 0 起）。",
+        "describe": "需要突出的卡片序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的卡片序号。",
+        "description": "需要突出的卡片序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的卡片序号（从 0 起）。",
-        "description": "需要突出的卡片序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
@@ -12165,11 +12060,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的区块序号（从 0 起）。",
+        "describe": "需要突出的区块序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的区块序号。",
+        "description": "需要突出的区块序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的区块序号（从 0 起）。",
-        "description": "需要突出的区块序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKeys",
@@ -12376,11 +12272,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的配对序号（从 0 起）。",
+        "describe": "需要突出的配对序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的配对序号。",
+        "description": "需要突出的配对序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的配对序号（从 0 起）。",
-        "description": "需要突出的配对序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
@@ -12396,11 +12293,11 @@ export const pages = [
       {
         "key": "showFootLine",
         "type": "toggle",
-        "label": "收束句",
+        "label": "辅助文本",
         "default": true,
         "describe": "列表下方的衬线收束句。",
         "publicKey": "showFootLine",
-        "publicLabel": "收束句",
+        "publicLabel": "辅助文本",
         "desc": "列表下方的衬线收束句。",
         "description": "列表下方的衬线收束句。"
       },
@@ -12533,11 +12430,11 @@ export const pages = [
       {
         "key": "showCaptions",
         "type": "toggle",
-        "label": "面板说明",
+        "label": "说明文案",
         "default": true,
         "describe": "面板底部的说明文案。",
         "publicKey": "showCaptions",
-        "publicLabel": "面板说明",
+        "publicLabel": "说明文案",
         "desc": "面板底部的说明文案。",
         "description": "面板底部的说明文案。"
       },
@@ -12738,11 +12635,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的层级序号（0 = 顶层）。",
+        "describe": "需要突出的层级序号（1 = 顶层）。",
+        "displayOffset": 1,
+        "desc": "需要突出的层级序号（1 = 顶层）。",
+        "description": "需要突出的层级序号（1 = 顶层）。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的层级序号（0 = 顶层）。",
-        "description": "需要突出的层级序号（0 = 顶层）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showValues",
@@ -13423,11 +13321,11 @@ export const pages = [
       {
         "key": "showDeck",
         "type": "toggle",
-        "label": "主标语",
+        "label": "主标题",
         "default": true,
         "describe": "底部的大号封面主标语。",
         "publicKey": "showDeck",
-        "publicLabel": "主标语",
+        "publicLabel": "主标题",
         "desc": "底部的大号封面主标语。",
         "description": "底部的大号封面主标语。"
       },
@@ -13614,11 +13512,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的指标序号（从 0 起）。",
+        "describe": "需要突出的指标序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的指标序号。",
+        "description": "需要突出的指标序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的指标序号（从 0 起）。",
-        "description": "需要突出的指标序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showValues",
@@ -13861,11 +13760,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的词条序号（从 0 起）。",
+        "describe": "需要突出的词条序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的词条序号。",
+        "description": "需要突出的词条序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的词条序号（从 0 起）。",
-        "description": "需要突出的词条序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showNote",
@@ -14045,11 +13945,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的画格序号（从 0 起）。",
+        "describe": "需要突出的画格序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的画格序号。",
+        "description": "需要突出的画格序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的画格序号（从 0 起）。",
-        "description": "需要突出的画格序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showPerf",
@@ -14065,11 +13966,11 @@ export const pages = [
       {
         "key": "showCaptions",
         "type": "toggle",
-        "label": "画格说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每个画格下方的编号说明。",
         "publicKey": "showCaptions",
-        "publicLabel": "画格说明",
+        "publicLabel": "说明文案",
         "desc": "每个画格下方的编号说明。",
         "description": "每个画格下方的编号说明。"
       },
@@ -14271,11 +14172,11 @@ export const pages = [
       {
         "key": "showSignoff",
         "type": "toggle",
-        "label": "署名",
+        "label": "辅助文本",
         "default": true,
         "describe": "分隔线旁的品牌署名。",
         "publicKey": "showSignoff",
-        "publicLabel": "署名",
+        "publicLabel": "辅助文本",
         "desc": "分隔线旁的品牌署名。",
         "description": "分隔线旁的品牌署名。"
       },
@@ -14413,11 +14314,11 @@ export const pages = [
       {
         "key": "showCaptions",
         "type": "toggle",
-        "label": "步骤说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每屏下方的一句话说明。",
         "publicKey": "showCaptions",
-        "publicLabel": "步骤说明",
+        "publicLabel": "说明文案",
         "desc": "每屏下方的一句话说明。",
         "description": "每屏下方的一句话说明。"
       },
@@ -14440,11 +14341,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的屏序号（从 0 起）。",
+        "describe": "需要突出的屏序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的屏序号。",
+        "description": "需要突出的屏序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的屏序号（从 0 起）。",
-        "description": "需要突出的屏序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showKicker",
@@ -14607,11 +14509,12 @@ export const pages = [
         "min": 0,
         "max": 5,
         "step": 1,
-        "describe": "需要突出的条目序号（从 0 起）。",
+        "describe": "需要突出的条目序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的条目序号。",
+        "description": "需要突出的条目序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的条目序号（从 0 起）。",
-        "description": "需要突出的条目序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showValues",
@@ -15160,11 +15063,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "点亮为暖橙的工作流序号（从 0 起）。",
+        "describe": "点亮为暖橙的工作流序号。",
+        "displayOffset": 1,
+        "desc": "点亮为暖橙的工作流序号。",
+        "description": "点亮为暖橙的工作流序号。",
         "publicKey": "highlightRowIndex",
-        "publicLabel": "高亮工作流",
-        "desc": "点亮为暖橙的工作流序号（从 0 起）。",
-        "description": "点亮为暖橙的工作流序号（从 0 起）。"
+        "publicLabel": "高亮工作流"
       },
       {
         "key": "showColHeads",
@@ -15417,11 +15321,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的指标序号（从 0 起）。",
+        "describe": "需要突出的指标序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的指标序号。",
+        "description": "需要突出的指标序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的指标序号（从 0 起）。",
-        "description": "需要突出的指标序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showBands",
@@ -15680,11 +15585,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的条带序号（从 0 起）。",
+        "describe": "需要突出的条带序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的条带序号。",
+        "description": "需要突出的条带序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的条带序号（从 0 起）。",
-        "description": "需要突出的条带序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showIndex",
@@ -15872,14 +15778,14 @@ export const pages = [
       {
         "key": "stepCount",
         "type": "slider",
-        "label": "步骤数量",
+        "label": "条目数量",
         "default": 3,
         "min": 2,
         "max": 4,
         "step": 1,
         "describe": "下一步行动的条目数量。",
         "publicKey": "itemCount",
-        "publicLabel": "步骤数量",
+        "publicLabel": "条目数量",
         "desc": "下一步行动的条目数量。",
         "description": "下一步行动的条目数量。"
       },
@@ -15902,11 +15808,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的步骤序号（从 0 起）。",
+        "describe": "需要突出的步骤序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的步骤序号。",
+        "description": "需要突出的步骤序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的步骤序号（从 0 起）。",
-        "description": "需要突出的步骤序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showTag",
@@ -15944,11 +15851,11 @@ export const pages = [
       {
         "key": "showDesc",
         "type": "toggle",
-        "label": "步骤说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每步的一句话说明。",
         "publicKey": "showDesc",
-        "publicLabel": "步骤说明",
+        "publicLabel": "说明文案",
         "desc": "每步的一句话说明。",
         "description": "每步的一句话说明。"
       },
@@ -16036,6 +15943,10 @@ export const pages = [
         {
           "t": "点火，开始复利",
           "d": "上线、测量、放大赢家——让引擎自己转起来。"
+        },
+        {
+          "t": "长燃不熄",
+          "d": "把打法沉淀成系统，让增长成为可复制的习惯。"
         }
       ],
       "metaLeft": "IGNIS — 燃点 · 下一步",
@@ -16130,11 +16041,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的标注序号（从 0 起）。",
+        "describe": "需要突出的标注序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的标注序号。",
+        "description": "需要突出的标注序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的标注序号（从 0 起）。",
-        "description": "需要突出的标注序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showLede",
@@ -16306,11 +16218,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的类别序号（从 0 起）。",
+        "describe": "需要突出的类别序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的类别序号。",
+        "description": "需要突出的类别序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的类别序号（从 0 起）。",
-        "description": "需要突出的类别序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showLegend",
@@ -16512,11 +16425,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的维度序号（从 0 起）。",
+        "describe": "需要突出的维度序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的维度序号。",
+        "description": "需要突出的维度序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的维度序号（从 0 起）。",
-        "description": "需要突出的维度序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showColHeads",
@@ -16748,11 +16662,12 @@ export const pages = [
         "min": 0,
         "max": 3,
         "step": 1,
-        "describe": "需要突出的标注序号（从 0 起）。",
+        "describe": "需要突出的标注序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的标注序号。",
+        "description": "需要突出的标注序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的标注序号（从 0 起）。",
-        "description": "需要突出的标注序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showPins",
@@ -16955,11 +16870,12 @@ export const pages = [
         "min": 0,
         "max": 4,
         "step": 1,
-        "describe": "需要突出的指标序号（从 0 起）。",
+        "describe": "需要突出的指标序号。",
+        "displayOffset": 1,
+        "desc": "需要突出的指标序号。",
+        "description": "需要突出的指标序号。",
         "publicKey": "emphasisIndex",
-        "publicLabel": "重点序号",
-        "desc": "需要突出的指标序号（从 0 起）。",
-        "description": "需要突出的指标序号（从 0 起）。"
+        "publicLabel": "重点序号"
       },
       {
         "key": "showValues",
@@ -17208,11 +17124,11 @@ export const pages = [
       {
         "key": "showAttribution",
         "type": "toggle",
-        "label": "署名区块",
+        "label": "辅助文本",
         "default": true,
         "describe": "金句下方的署名与来源。",
         "publicKey": "showAttribution",
-        "publicLabel": "署名区块",
+        "publicLabel": "辅助文本",
         "desc": "金句下方的署名与来源。",
         "description": "金句下方的署名与来源。"
       },
@@ -17500,10 +17416,11 @@ export const pages = [
         "max": 4,
         "step": 1,
         "describe": "点亮为暖橙的「当前」阶段序号（进度填充至此）。",
-        "publicKey": "currentIndex",
-        "publicLabel": "当前阶段",
+        "displayOffset": 1,
         "desc": "点亮为暖橙的「当前」阶段序号（进度填充至此）。",
-        "description": "点亮为暖橙的「当前」阶段序号（进度填充至此）。"
+        "description": "点亮为暖橙的「当前」阶段序号（进度填充至此）。",
+        "publicKey": "currentIndex",
+        "publicLabel": "当前阶段"
       },
       {
         "key": "showYears",
@@ -17519,11 +17436,11 @@ export const pages = [
       {
         "key": "showDesc",
         "type": "toggle",
-        "label": "阶段说明",
+        "label": "说明文案",
         "default": true,
         "describe": "每个节点下方的一句话说明。",
         "publicKey": "showDesc",
-        "publicLabel": "阶段说明",
+        "publicLabel": "说明文案",
         "desc": "每个节点下方的一句话说明。",
         "description": "每个节点下方的一句话说明。"
       },
@@ -17963,29 +17880,14 @@ export const pages = [
       },
       {
         "key": "imageCount",
-        "type": "slider",
-        "label": "图片槽数量",
-        "default": 1,
-        "min": 0,
-        "max": 1,
-        "step": 1,
-        "describe": "配图槽数量；为 0 时谢幕语整宽居中。",
+        "type": "toggle",
+        "label": "图片",
+        "default": true,
+        "describe": "显示配图区;开启后点击该区域即可上传/更换图片。",
         "publicKey": "imageCount",
-        "publicLabel": "图片槽数量",
-        "desc": "配图槽数量；为 0 时谢幕语整宽居中。",
-        "description": "配图槽数量；为 0 时谢幕语整宽居中。"
-      },
-      {
-        "key": "image",
-        "type": "image",
-        "label": "配图上传",
-        "default": "",
-        "boundCount": "imageCount",
-        "describe": "上传谢幕配图，按原图比例自适应。",
-        "publicKey": "image",
-        "publicLabel": "配图上传",
-        "desc": "上传谢幕配图，按原图比例自适应。",
-        "description": "上传谢幕配图，按原图比例自适应。"
+        "publicLabel": "图片",
+        "desc": "显示配图区;开启后点击该区域即可上传/更换图片。",
+        "description": "显示配图区;开启后点击该区域即可上传/更换图片。"
       },
       {
         "key": "imagePosition",
@@ -18032,11 +17934,11 @@ export const pages = [
       {
         "key": "showSub",
         "type": "toggle",
-        "label": "谢幕说明",
+        "label": "说明文案",
         "default": true,
         "describe": "谢幕语下方的说明句。",
         "publicKey": "showSub",
-        "publicLabel": "谢幕说明",
+        "publicLabel": "说明文案",
         "desc": "谢幕语下方的说明句。",
         "description": "谢幕语下方的说明句。"
       },
@@ -18054,36 +17956,36 @@ export const pages = [
       {
         "key": "showContact",
         "type": "toggle",
-        "label": "联系方式",
+        "label": "信息组",
         "default": true,
-        "describe": "排版化的联系方式清单（非按钮控件）。",
+        "describe": "排版化的信息清单（非按钮控件）。",
         "publicKey": "showContact",
-        "publicLabel": "联系方式",
-        "desc": "排版化的联系方式清单（非按钮控件）。",
-        "description": "排版化的联系方式清单（非按钮控件）。"
+        "publicLabel": "信息组",
+        "desc": "排版化的信息清单（非按钮控件）。",
+        "description": "排版化的信息清单（非按钮控件）。"
       },
       {
         "key": "contactCount",
         "type": "slider",
-        "label": "联系条数",
+        "label": "条目数量",
         "default": 3,
         "min": 1,
         "max": 3,
         "step": 1,
-        "describe": "联系方式的条目数量。",
+        "describe": "信息条目的数量。",
         "publicKey": "itemCount",
-        "publicLabel": "联系条数",
-        "desc": "联系方式的条目数量。",
-        "description": "联系方式的条目数量。"
+        "publicLabel": "条目数量",
+        "desc": "信息条目的数量。",
+        "description": "信息条目的数量。"
       },
       {
         "key": "showKicker",
         "type": "toggle",
-        "label": "装饰引言",
+        "label": "装饰小字",
         "default": true,
         "describe": "谢幕语上方的装饰引导标签。",
         "publicKey": "showKicker",
-        "publicLabel": "装饰引言",
+        "publicLabel": "装饰小字",
         "desc": "谢幕语上方的装饰引导标签。",
         "description": "谢幕语上方的装饰引导标签。"
       },
@@ -18123,7 +18025,7 @@ export const pages = [
     ],
     "defaultProps": {
       "surface": "ink",
-      "imageCount": 1,
+      "imageCount": true,
       "image": "",
       "imagePosition": "right",
       "imageMode": "fill",

@@ -74,11 +74,11 @@ export const coverSplitControls = [
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '左栏标题上方的状态小标。' },
-  { key: 'showLede', type: 'toggle', label: '衬线引言', default: true, describe: '左栏标题下方的衬线引言。' },
+  { key: 'showLede', type: 'toggle', label: '装饰小字', default: true, describe: '左栏标题下方的衬线引言。' },
   { key: 'showArrow', type: 'toggle', label: '翻页箭头', default: true, describe: '左栏底部的箭头母题与提示。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 0, min: 0, max: 1, step: 1, describe: '右栏图片槽数量：0 = 呈现指标堆叠，1 = 呈现一张满栏图。' },
-  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 2, max: 3, step: 1, describe: '右栏指标堆叠的条目数量（仅图片槽数量为 0 时）。' },
-  { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '左栏的超大幽灵字符装饰。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: false, describe: '右栏图片开关；关闭时呈现指标堆叠，开启时呈现一张满栏图。' },
+  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 2, max: 3, step: 1, describe: '右栏指标堆叠的条目数量（仅图片关闭时）。' },
+  { key: 'showGhostMark', type: 'toggle', label: '底对齐', default: true, describe: '左栏的超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
 ];
 

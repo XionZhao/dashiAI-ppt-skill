@@ -85,12 +85,12 @@ export const gridControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'rowCount', type: 'slider', label: '能力行数', default: 7, min: 4, max: 7, step: 1, describe: '矩阵中的能力维度行数。' },
+  { key: 'rowCount', type: 'slider', label: '条目数量', default: 7, min: 1, max: 7, step: 1, describe: '清单的条目数量。' },
   { key: 'columnCount', type: 'slider', label: '对比列数', default: 4, min: 2, max: 4, step: 1, describe: '对比的方案列数（最后一列始终为「燃点」）。' },
   { key: 'highlightColumnIndex', type: 'slider', label: '高亮列', default: 3, min: 0, max: 3, step: 1, describe: '需要高亮的列序号（从 0 起，超出列数自动收敛）。' },
   { key: 'showHeadRow', type: 'toggle', label: '表头行', default: true, describe: '顶部的方案名称表头。' },
   { key: 'showLegend', type: 'toggle', label: '图例', default: true, describe: '底部的符号含义图例。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -101,7 +101,7 @@ export default function GridSlide(props) {
   injectCSS('ign-grd-css', CSS);
   const p = { ...gridDefaultProps, ...props };
   const ncol = clampInt(p.columnCount, 2, 4);
-  const rows = (Array.isArray(p.rows) ? p.rows : []).slice(0, clampInt(p.rowCount, 4, 7));
+  const rows = (Array.isArray(p.rows) ? p.rows : []).slice(0, clampInt(p.rowCount, 1, 7));
   const colLabels = Array.isArray(p.colLabels) ? p.colLabels : [];
   const cols = [...colLabels.slice(0, ncol - 1), p.usLabel];   // shown column labels
   const colSrc = [...Array(ncol - 1).keys(), 3];           // map shown col → cell index (us = 3)
@@ -178,7 +178,7 @@ export default function GridSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '27%' }} /></span> 22 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '27%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">22</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

@@ -15,6 +15,7 @@ const CSS = `
   background:radial-gradient(50% 50% at 50% 50%,rgba(255,120,52,0.38),rgba(226,42,12,0) 66%);filter:blur(56px)}
 .ign-spr .ign-ghost{font-size:600px;right:20px;top:-130px}
 .ign-spr-body{flex:1;display:grid;grid-template-columns:1.04fr 1.16fr;gap:80px;align-items:center;margin-top:6px}
+.ign-spr-body.noimg{grid-template-columns:1fr;max-width:980px}
 .ign-spr-txt .lead{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:28px;color:var(--ign-a);margin-bottom:14px}
 .ign-spr-txt h2{font-size:78px;font-weight:900;line-height:0.98;letter-spacing:-0.03em}
 .ign-spr-txt h2 .ign-serif{color:var(--ign-a)}
@@ -76,12 +77,12 @@ export const spreadControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片数量', default: 2, min: 0, max: 2, step: 1, describe: '拼贴图片槽数量：0 占位、1 单图、2 主图+叠加小图。' },
-  { key: 'showPoints', type: 'toggle', label: '要点清单', default: true, describe: '左侧编号要点清单。' },
-  { key: 'pointCount', type: 'slider', label: '要点数量', default: 3, min: 2, max: 3, step: 1, describe: '编号要点的条目数量。' },
+  { key: 'imageCount', type: 'slider', label: '图片数量', default: 2, min: 0, max: 2, step: 1, describe: '拼贴图片数量：0 无图、1 单图、2 主图+叠加小图。' },
+  { key: 'showPoints', type: 'toggle', label: '列表', default: true, describe: '左侧编号列表。' },
+  { key: 'pointCount', type: 'slider', label: '列表数量', default: 3, min: 1, max: 3, step: 1, describe: '编号列表的条目数量。' },
   { key: 'showCaptions', type: 'toggle', label: '图片标签', default: true, describe: '图片角标分类标签。' },
   { key: 'showNumber', type: 'toggle', label: '装饰编号', default: true, describe: '拼贴角落的大号装饰编号。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -91,8 +92,9 @@ export default function SpreadSlide(props) {
   injectCSS('ign-spr-css', CSS);
   const p = { ...spreadDefaultProps, ...props };
   const count = clampInt(p.imageCount, 0, 2);
+  const hasImages = count > 0;
   const imgs = Array.isArray(p.images) ? p.images : [];
-  const pts = (Array.isArray(p.pts) ? p.pts : []).slice(0, clampInt(p.pointCount, 2, 3));
+  const pts = (Array.isArray(p.pts) ? p.pts : []).slice(0, clampInt(p.pointCount, 1, 3));
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
 
   return (
@@ -112,7 +114,7 @@ export default function SpreadSlide(props) {
           <div className="ign-ix"><b>{p.ixNo}</b> — {p.ixLabel}</div>
         </header>
 
-        <div className="ign-spr-body">
+        <div className={`ign-spr-body ${hasImages ? '' : 'noimg'}`}>
           <div className="ign-spr-txt ign-a1">
             {p.showKicker && <div className="lead">{p.lead}</div>}
             <h2 dangerouslySetInnerHTML={{ __html: p.headingHtml }} />
@@ -130,30 +132,32 @@ export default function SpreadSlide(props) {
             )}
           </div>
 
-          <div className="ign-spr-col ign-a2">
-            <div className="ign-spr-primary">
-              <div className="ign-spr-frame">
-                {p.showCaptions && <span className="ign-spr-tag">{p.primaryTag}</span>}
-                <ImageSlot src={count >= 1 ? imgs[0] : undefined} mode="ratio" placeholder={p.primaryPlaceholder} />
-              </div>
-              {p.showNumber && <span className="ign-spr-num">{p.decoNumber}</span>}
-            </div>
-            {count >= 2 && (
-              <div className="ign-spr-secondary">
-                <div className="ign-spr-frame accent">
-                  {p.showCaptions && <span className="ign-spr-tag">{p.secondaryTag}</span>}
-                  <ImageSlot src={imgs[1]} mode="fill" height={232} radius={2} placeholder={p.secondaryPlaceholder} />
+          {hasImages && (
+            <div className="ign-spr-col ign-a2">
+              <div className="ign-spr-primary">
+                <div className="ign-spr-frame">
+                  {p.showCaptions && <span className="ign-spr-tag">{p.primaryTag}</span>}
+                  <ImageSlot src={imgs[0]} mode="ratio" placeholder={p.primaryPlaceholder} />
                 </div>
+                {p.showNumber && <span className="ign-spr-num">{p.decoNumber}</span>}
               </div>
-            )}
-          </div>
+              {count >= 2 && (
+                <div className="ign-spr-secondary">
+                  <div className="ign-spr-frame accent">
+                    {p.showCaptions && <span className="ign-spr-tag">{p.secondaryTag}</span>}
+                    <ImageSlot src={imgs[1]} mode="fill" height={232} width="100%" radius={2} placeholder={p.secondaryPlaceholder} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {p.showMeta && (
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '22%' }} /></span> 18 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '22%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">18</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

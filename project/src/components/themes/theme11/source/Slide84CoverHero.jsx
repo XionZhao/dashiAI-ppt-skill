@@ -71,16 +71,12 @@ export const coverHeroDefaultProps = {
 export const coverHeroControls = [
   UNICORN_BACKGROUND_CONTROL,
   createUnicornSceneControl('automations'),
-  { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
-    options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
-    describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showScrim', type: 'toggle', label: '压暗叠层', default: true, describe: '图片上的渐变压暗层，保证文字可读。' },
   { key: 'showStatus', type: 'toggle', label: '状态胶囊', default: true, describe: '顶部的接单状态胶囊。' },
-  { key: 'showLede', type: 'toggle', label: '衬线引言', default: true, describe: '主标题上方的衬线斜体引言。' },
+  { key: 'showLede', type: 'toggle', label: '装饰小字', default: true, describe: '主标题上方的衬线斜体引言。' },
   { key: 'showSub', type: 'toggle', label: '副标题', default: true, describe: '主标题下方的副标题。' },
   { key: 'showStrip', type: 'toggle', label: '指标条', default: true, describe: '底部的关键指标条。' },
-  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 2, max: 3, step: 1, describe: '指标条中的指标数量。' },
-  { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: false, describe: '角落超大幽灵字符装饰（满铺图上默认关闭）。' },
+  { key: 'statCount', type: 'slider', label: '指标数量', default: 3, min: 0, max: 3, step: 1, describe: '指标条中的指标数量；为 0 时隐藏指标条。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
 ];
 
@@ -88,7 +84,8 @@ export default function CoverHeroSlide(props) {
   injectCSS('ign-cvh-css', CSS);
   const p = { ...coverHeroDefaultProps, ...props };
   const images = Array.isArray(p.images) ? p.images : [];
-  const stats = (Array.isArray(p.stats) ? p.stats : []).slice(0, clampInt(p.statCount, 2, 3));
+  const stats = (Array.isArray(p.stats) ? p.stats : []).slice(0, clampInt(p.statCount, 0, 3));
+  const showStats = p.showStrip && stats.length > 0;
   const useUnicorn = p.backgroundMode === 'unicorn';
 
   return (
@@ -115,7 +112,7 @@ export default function CoverHeroSlide(props) {
           {p.showLede && <div className="ign-cvh-lede">{p.lede}</div>}
           <h1 className="ign-cvh-h" dangerouslySetInnerHTML={{ __html: p.headlineHtml }} />
           {p.showSub && <div className="ign-cvh-sub ign-a2">{p.sub}</div>}
-          {p.showStrip && (
+          {showStats && (
             <div className="ign-cvh-strip ign-a2">
               {stats.map((s, i) => (
                 <div key={i} className="ign-cvh-stat"><EmberText className="v">{s.v}</EmberText><div className="l">{s.l}</div></div>

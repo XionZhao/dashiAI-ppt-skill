@@ -10,8 +10,6 @@ const CSS = `
   background:radial-gradient(50% 50% at 50% 50%,rgba(255,110,46,0.28),rgba(226,42,12,0) 68%);filter:blur(56px)}
 .ign-feat .ign-ghost{font-size:520px;left:40px;bottom:-110px}
 .ign-feat-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:84px;align-items:center;margin-top:18px}
-.ign-feat-body.flip{direction:rtl}
-.ign-feat-body.flip > *{direction:ltr}
 .ign-feat-body.solo{grid-template-columns:1fr;max-width:1180px}
 .ign-feat-txt h2{font-size:74px;font-weight:900;line-height:1.02;letter-spacing:-0.03em;margin-top:24px}
 .ign-feat-txt h2 .ign-serif{color:var(--ign-a)}
@@ -21,7 +19,8 @@ const CSS = `
 .ign-feat-stat + .ign-feat-stat{border-left:1px solid var(--ign-hair);padding-left:40px}
 .ign-feat-stat .sv{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:52px;line-height:0.9;letter-spacing:-0.03em}
 .ign-feat-stat .sl{font-size:24px;font-weight:300;color:var(--ign-ink2);margin-top:10px}
-.ign-feat-media{position:relative}
+.ign-feat-media{position:relative;min-width:0}
+.ign-feat-media .ign-imgslot{max-height:600px;overflow:hidden}
 .ign-feat-cap{display:flex;align-items:center;gap:14px;margin-top:20px;font-family:'Space Grotesk',sans-serif;
   font-size:24px;letter-spacing:0.08em;color:var(--ign-ink3)}
 .ign-feat-cap .tag{color:var(--ign-a)}
@@ -75,7 +74,7 @@ export const featureControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 1, min: 0, max: 1, step: 1, describe: '主图图片槽数量；为 0 时回退为单栏文字版式。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: true, describe: '是否显示配图槽。' },
   { key: 'imagePosition', type: 'select', label: '图片位置', default: 'right',
     options: [{ value: 'left', label: '左' }, { value: 'right', label: '右' }], describe: '主图相对文字的位置。' },
   { key: 'showStats', type: 'toggle', label: '指标行', default: true, describe: '正文下方的关键指标行。' },
@@ -152,7 +151,7 @@ export default function FeatureSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '15%' }} /></span> 12 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '15%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">12</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

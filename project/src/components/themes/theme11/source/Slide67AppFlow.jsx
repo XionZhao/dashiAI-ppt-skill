@@ -23,7 +23,7 @@ const CSS = `
 .ign-afl-head .note{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:24px;color:var(--ign-ink3);text-align:right;max-width:320px;line-height:1.4}
 .ign-afl-row{flex:1;display:flex;align-items:center;justify-content:center;gap:0;margin-top:8px}
 .ign-afl-step{display:flex;flex-direction:column;align-items:center;gap:22px;flex:0 0 auto}
-.ign-afl-phone{position:relative;width:228px;aspect-ratio:9 / 19;border-radius:30px;padding:9px;
+.ign-afl-phone{position:relative;flex:none;width:228px;height:481px;border-radius:30px;padding:9px;
   background:linear-gradient(150deg,rgba(255,255,255,0.10),rgba(255,255,255,0.02));
   border:1px solid var(--ign-hair2);box-shadow:0 30px 60px rgba(0,0,0,0.42)}
 .ign-afl-screen{position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;background:var(--ign-panel)}
@@ -85,7 +85,7 @@ export const appflowControls = [
   { key: 'screenCount', type: 'slider', label: '屏幕数量', default: 4, min: 2, max: 4, step: 1, describe: '横向排列的手机屏数量（流程步数）。' },
   { key: 'showArrows', type: 'toggle', label: '连接箭头', default: true, describe: '屏与屏之间的流向箭头。' },
   { key: 'showSteps', type: 'toggle', label: '步骤序号', default: true, describe: '每屏下方的步骤序号。' },
-  { key: 'showCaptions', type: 'toggle', label: '步骤说明', default: true, describe: '每屏下方的一句话说明。' },
+  { key: 'showCaptions', type: 'toggle', label: '说明文案', default: true, describe: '每屏下方的一句话说明。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一屏，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 3, step: 1, describe: '需要突出的屏序号（从 0 起）。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
@@ -153,7 +153,7 @@ export default function AppFlowSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '80%' }} /></span> 66 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '80%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">66</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

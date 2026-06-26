@@ -67,6 +67,7 @@ export const nextDefaultProps = {
     { t: '一次增长诊断', d: '我们看你的数据，给出可执行的增长缺口清单。' },
     { t: '锁定首月路线', d: '挑出 2–3 个高杠杆动作，排进六个月节奏。' },
     { t: '点火，开始复利', d: '上线、测量、放大赢家——让引擎自己转起来。' },
+    { t: '长燃不熄', d: '把打法沉淀成系统，让增长成为可复制的习惯。' },
   ],
   metaLeft: 'IGNIS — 燃点 · 下一步',
   metaMid: '少说一句，多走一步',
@@ -76,13 +77,13 @@ export const nextControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'paper',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'stepCount', type: 'slider', label: '步骤数量', default: 3, min: 2, max: 4, step: 1, describe: '下一步行动的条目数量。' },
+  { key: 'stepCount', type: 'slider', label: '条目数量', default: 3, min: 2, max: 4, step: 1, describe: '下一步行动的条目数量。' },
   { key: 'emphasis', type: 'toggle', label: '首步突出', default: true, describe: '开启后第一步点亮为暖橙。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 3, step: 1, describe: '需要突出的步骤序号（从 0 起）。' },
   { key: 'showTag', type: 'toggle', label: '顶部标签', default: true, describe: '大标题上方的小标签。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '大标题下方的说明段落。' },
   { key: 'showArrows', type: 'toggle', label: '箭头母题', default: true, describe: '每步右侧的流向箭头。' },
-  { key: 'showDesc', type: 'toggle', label: '步骤说明', default: true, describe: '每步的一句话说明。' },
+  { key: 'showDesc', type: 'toggle', label: '说明文案', default: true, describe: '每步的一句话说明。' },
   { key: 'showWhen', type: 'toggle', label: '时间注脚', default: true, describe: '步骤下方的「最快多久启动」注脚。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -144,7 +145,7 @@ export default function NextSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '89%' }} /></span> 73 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '89%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">73</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

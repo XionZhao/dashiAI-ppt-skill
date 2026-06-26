@@ -84,10 +84,10 @@ export const roadmapControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'milestoneCount', type: 'slider', label: '里程碑数量', default: 5, min: 3, max: 5, step: 1, describe: '路线图上的阶段节点数量。' },
   { key: 'currentIndex', type: 'slider', label: '当前阶段', default: 2, min: 0, max: 4, step: 1, describe: '「当前所在」节点序号（从 0 起）；之前为已完成，之后为待办。' },
-  { key: 'showDesc', type: 'toggle', label: '节点描述', default: true, describe: '每个里程碑下方的描述句。' },
+  { key: 'showDesc', type: 'toggle', label: '说明文案', default: true, describe: '每个里程碑下方的描述句。' },
   { key: 'showPhaseLabel', type: 'toggle', label: '阶段标签', default: true, describe: '每个节点的 Phase 标签。' },
   { key: 'showProgress', type: 'toggle', label: '进度填充', default: true, describe: '主轴上的暖橙进度填充。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -157,7 +157,7 @@ export default function RoadmapSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '55%' }} /></span> 45 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '55%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">45</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

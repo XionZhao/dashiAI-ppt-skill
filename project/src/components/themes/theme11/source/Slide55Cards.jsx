@@ -19,7 +19,7 @@ const CSS = `
 .ign-cd-head h2{font-size:58px;font-weight:900;line-height:1.0;letter-spacing:-0.03em}
 .ign-cd-head h2 .ign-serif{color:var(--ign-a)}
 .ign-cd-head .note{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:25px;color:var(--ign-ink3);text-align:right;max-width:340px;line-height:1.4}
-.ign-cd-row{flex:1;display:grid;gap:36px;align-items:stretch;margin-top:30px}
+.ign-cd-row{flex:1;display:grid;gap:36px;align-items:stretch;margin-top:30px;min-height:0;grid-template-rows:1fr}
 .ign-cd-card{display:flex;flex-direction:column;min-width:0;min-height:0}
 .ign-cd-media{flex:1;min-height:0}
 .ign-cd-media .ign-imgslot{width:100%;height:100%;aspect-ratio:auto}
@@ -71,7 +71,7 @@ export const cardsControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'cardCount', type: 'slider', label: '卡片数量', default: 3, min: 2, max: 3, step: 1, describe: '并列案例卡的数量。' },
   { key: 'showMetric', type: 'toggle', label: '成果数字', default: true, describe: '每张卡底部的成果数字。' },
-  { key: 'showResult', type: 'toggle', label: '成果描述', default: true, describe: '每张卡的一句话成果描述。' },
+  { key: 'showResult', type: 'toggle', label: '说明文案', default: true, describe: '每张卡的一句话成果描述。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一张卡，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 2, step: 1, describe: '需要突出的卡片序号（从 0 起）。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
@@ -133,7 +133,7 @@ export default function CardsSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '66%' }} /></span> 54 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '66%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">54</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

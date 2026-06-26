@@ -87,9 +87,9 @@ export const splitControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'paper',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showDelta', type: 'toggle', label: '中间增幅章', default: true, describe: '两栏之间的增幅对比标记。' },
-  { key: 'showCaptions', type: 'toggle', label: '数字说明', default: true, describe: '每栏大数字下方的说明文案。' },
+  { key: 'showCaptions', type: 'toggle', label: '说明文案', default: true, describe: '每栏大数字下方的说明文案。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: true, describe: '开启后点亮其中一栏，另一栏弱化为「现状」。' },
   { key: 'emphasisSide', type: 'select', label: '重点栏位', default: 'right',
     options: [{ value: 'left', label: '左栏' }, { value: 'right', label: '右栏' }], describe: '被点亮（暖橙）的栏位。' },
@@ -139,7 +139,7 @@ export default function SplitSlide(props) {
         <div className="ign-vs-body ign-a2">
           <div className={`ign-vs-side left ${leftLit ? 'lit' : ''}`}>
             <div className="ign-vs-tag"><span className="dot" />{p.leftTag}</div>
-            {leftLit ? <EmberText className="ign-vs-num">{p.afterValue}</EmberText> : <div className="ign-vs-num">{p.beforeValue}</div>}
+            {leftLit ? <EmberText className="ign-vs-num">{p.beforeValue}</EmberText> : <div className="ign-vs-num">{p.beforeValue}</div>}
             {p.showCaptions && <div className="ign-vs-cap">{p.leftCaption}</div>}
           </div>
 
@@ -174,7 +174,7 @@ export default function SplitSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.showNote ? p.noteText : ''}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '34%' }} /></span> 28 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '34%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">28</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

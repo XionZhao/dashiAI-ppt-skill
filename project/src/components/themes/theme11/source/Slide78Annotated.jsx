@@ -22,8 +22,8 @@ const CSS = `
 .ign-ant-head .note{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:23px;color:var(--ign-ink3);text-align:right;max-width:320px;line-height:1.4}
 .ign-ant-stage{flex:1;position:relative;margin-top:22px;border-radius:8px;overflow:hidden;border:1px solid var(--ign-hair);min-height:0}
 .ign-ant-stage .ign-imgslot{position:absolute;inset:0;width:100%;height:100%;border-radius:8px}
-.ign-ant-scrim{position:absolute;inset:0;z-index:2;background:radial-gradient(120% 120% at 50% 40%,rgba(6,5,4,0) 55%,rgba(6,5,4,0.42) 100%)}
-.ign-ant-pin{position:absolute;z-index:3;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;
+.ign-ant-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(120% 120% at 50% 40%,rgba(6,5,4,0) 55%,rgba(6,5,4,0.42) 100%)}
+.ign-ant-pin{position:absolute;z-index:3;pointer-events:none;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:22px;
   color:#F6EFE6;background:rgba(8,6,5,0.55);backdrop-filter:blur(5px);border:1px solid rgba(246,239,230,0.4);
   box-shadow:0 6px 20px rgba(0,0,0,0.4)}
@@ -151,7 +151,7 @@ export default function AnnotatedSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 20 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '94%' }} /></span> 77 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '94%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">77</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

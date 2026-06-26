@@ -27,7 +27,7 @@ const CSS = `
 .ign-flm-perf i{flex:1;max-width:34px;height:16px;margin:0 7px;border-radius:3px;background:rgba(244,238,230,0.14)}
 .ign-flm-frames{display:flex;gap:14px;padding:16px 8px}
 .ign-flm-frame{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
-.ign-flm-frame .ign-imgslot{width:100%;height:230px;border-radius:3px;border:1px solid rgba(244,238,230,0.16)}
+.ign-flm-frame .ign-imgslot{border-radius:3px;border:1px solid rgba(244,238,230,0.16)}
 .ign-flm-frame .ign-imgslot img,.ign-flm-frame .ign-imgslot-ph{border-radius:3px}
 .ign-flm-cap{display:flex;align-items:baseline;gap:10px;padding:14px 4px 2px}
 .ign-flm-cap .no{font-family:'Space Grotesk',sans-serif;font-size:19px;color:var(--ign-a);flex:none}
@@ -78,7 +78,7 @@ export const filmstripControls = [
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后高亮某一画格的边框与说明。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 4, step: 1, describe: '需要突出的画格序号（从 0 起）。' },
   { key: 'showPerf', type: 'toggle', label: '齿孔', default: true, describe: '胶片上下的齿孔装饰。' },
-  { key: 'showCaptions', type: 'toggle', label: '画格说明', default: true, describe: '每个画格下方的编号说明。' },
+  { key: 'showCaptions', type: 'toggle', label: '说明文案', default: true, describe: '每个画格下方的编号说明。' },
   { key: 'showNote', type: 'toggle', label: '右上注释', default: true, describe: '标题右侧的衬线注释。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '主标题上方的装饰标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
@@ -127,7 +127,7 @@ export default function FilmstripSlide(props) {
             <div className="ign-flm-frames">
               {frames.map((f, i) => (
                 <div key={i} className={`ign-flm-frame ${p.emphasis && i === emi ? 'lead' : ''}`}>
-                  <ImageSlot src={images[i]} placeholder={f.ph} mode="fill" height="100%" radius={3} />
+                  <ImageSlot src={images[i]} placeholder={f.ph} mode="fill" height={230} width="100%" radius={3} />
                   {p.showCaptions && (
                     <div className="ign-flm-cap"><span className="no">{String(i + 1).padStart(2, '0')}</span><span className="tx">{f.tx}</span></div>
                   )}
@@ -142,7 +142,7 @@ export default function FilmstripSlide(props) {
           <footer className="ign-meta" style={{ marginTop: 18 }}>
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '78%' }} /></span> 64 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '78%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">64</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

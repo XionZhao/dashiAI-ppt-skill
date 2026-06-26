@@ -62,10 +62,10 @@ export const principlesControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ember',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'principleCount', type: 'slider', label: '原则数量', default: 6, min: 3, max: 6, step: 1, describe: '列出的操作原则条目数量。' },
+  { key: 'principleCount', type: 'slider', label: '条目数量', default: 6, min: 1, max: 6, step: 1, describe: '列出的操作原则条目数量。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一条原则，其余弱化。' },
   { key: 'emphasisIndex', type: 'slider', label: '重点序号', default: 0, min: 0, max: 5, step: 1, describe: '需要突出的原则序号（从 0 起）。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '右上角的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -75,7 +75,7 @@ export const principlesControls = [
 export default function PrinciplesSlide(props) {
   injectCSS('ign-prn-css', CSS);
   const p = { ...principlesDefaultProps, ...props };
-  const count = clampInt(p.principleCount, 3, 6);
+  const count = clampInt(p.principleCount, 1, 6);
   const items = (Array.isArray(p.principles) ? p.principles : []).slice(0, count);
   const emi = clampInt(p.emphasisIndex, 0, count - 1);
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
@@ -118,7 +118,7 @@ export default function PrinciplesSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '29%' }} /></span> 24 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '29%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">24</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

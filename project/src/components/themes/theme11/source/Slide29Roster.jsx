@@ -73,10 +73,10 @@ export const rosterControls = [
   { key: 'avatarCount', type: 'slider', label: '头像槽数量', default: 0, min: 0, max: 4, step: 1, describe: '使用真实照片的成员数量；其余回退为字号大的姓氏字符。' },
   { key: 'portraitShape', type: 'select', label: '头像形状', default: 'rounded',
     options: [{ value: 'rounded', label: '竖版方形' }, { value: 'circle', label: '圆形' }], describe: '头像槽的裁切形状。' },
-  { key: 'showRoles', type: 'toggle', label: '职务', default: true, describe: '姓名下方的中文职务。' },
+  { key: 'showRoles', type: 'toggle', label: '副标题', default: true, describe: '姓名下方的副标题。' },
   { key: 'showEn', type: 'toggle', label: '英文标签', default: true, describe: '卡片底部的英文职能标签。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '左侧标题下方的说明段落。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -136,7 +136,7 @@ export default function RosterSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '35%' }} /></span> 29 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '35%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">29</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

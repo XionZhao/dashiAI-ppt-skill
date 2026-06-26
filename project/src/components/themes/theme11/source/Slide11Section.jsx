@@ -64,7 +64,7 @@ export const sectionControls = [
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showTag', type: 'toggle', label: '章节标签', default: true, describe: '主标题上方的「第 N 章」标签行。' },
-  { key: 'showLede', type: 'toggle', label: '导语', default: true, describe: '标题下方的衬线斜体导语。' },
+  { key: 'showLede', type: 'toggle', label: '装饰小字', default: true, describe: '标题下方的衬线斜体导语。' },
   { key: 'showAgenda', type: 'toggle', label: '本章导览', default: true, describe: '底部分栏的章节导览条目。' },
   { key: 'agendaCount', type: 'slider', label: '导览条目数', default: 3, min: 2, max: 4, step: 1, describe: '本章导览的条目数量。' },
   { key: 'emphasis', type: 'toggle', label: '重点突出', default: false, describe: '开启后突出某一条导览，其余弱化。' },
@@ -124,7 +124,7 @@ export default function SectionSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '2%' }} /></span> 2 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '2%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">2</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

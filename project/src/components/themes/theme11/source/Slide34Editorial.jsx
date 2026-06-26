@@ -26,8 +26,8 @@ const CSS = `
 .ign-edt-cols{column-gap:48px;margin-top:34px;font-size:24px;font-weight:300;line-height:1.62;color:var(--ign-ink2);text-wrap:pretty}
 .ign-edt-cols p{margin-bottom:18px;break-inside:avoid}
 .ign-edt-cols p:last-child{margin-bottom:0}
-.ign-edt-cols .cap::first-letter{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:104px;line-height:0.74;
-  float:left;margin:8px 16px 0 0;background:var(--ign-ember);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ign-edt-cols .cap::first-letter{font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:104px;line-height:1;
+  float:left;margin:4px 16px 0 0;padding-top:0.1em;background:var(--ign-ember);-webkit-background-clip:text;background-clip:text;color:transparent}
 .ign-edt-pull{border-left:3px solid;border-image:var(--ign-ember) 1;padding-left:26px;margin:30px 0;
   font-family:'Newsreader','Noto Serif SC',serif;font-style:italic;font-weight:800;font-size:34px;line-height:1.34;color:var(--ign-ink);max-width:560px;text-wrap:pretty}
 .ign-edt-by{display:flex;align-items:center;gap:14px;margin-top:30px;font-family:'Space Grotesk',sans-serif;
@@ -77,13 +77,13 @@ export const editorialControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'paper',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'imageCount', type: 'slider', label: '图片槽数量', default: 1, min: 0, max: 1, step: 1, describe: '配图槽数量；为 0 时正文扩展为单栏满宽。' },
+  { key: 'imageCount', type: 'toggle', label: '图片', default: true, describe: '是否显示配图槽。' },
   { key: 'imagePosition', type: 'select', label: '配图位置', default: 'right',
     options: [{ value: 'left', label: '左' }, { value: 'right', label: '右' }], describe: '配图相对正文的位置。' },
   { key: 'columnCount', type: 'slider', label: '正文栏数', default: 2, min: 1, max: 2, step: 1, describe: '正文的分栏数量。' },
   { key: 'showDropCap', type: 'toggle', label: '首字下沉', default: true, describe: '正文首段的大号首字母装饰。' },
-  { key: 'showPullQuote', type: 'toggle', label: '插入金句', default: true, describe: '正文中的衬线引文段落。' },
-  { key: 'showByline', type: 'toggle', label: '署名行', default: true, describe: '正文末尾的作者署名。' },
+  { key: 'showPullQuote', type: 'toggle', label: '二级正文', default: true, describe: '正文中的衬线引文段落。' },
+  { key: 'showByline', type: 'toggle', label: '辅助文本', default: true, describe: '正文末尾的作者署名。' },
   { key: 'showKicker', type: 'toggle', label: '装饰副标题', default: true, describe: '标题上方的装饰标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -150,7 +150,7 @@ export default function EditorialSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '41%' }} /></span> 34 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '41%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">34</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

@@ -21,7 +21,10 @@ const CSS = `
 .ign-mh-scrim.side{background:linear-gradient(180deg,rgba(8,5,3,0.62),rgba(8,5,3,0.1) 24%),linear-gradient(270deg,rgba(8,5,3,0.66) 0%,rgba(8,5,3,0) 46%)}
 .ign-mh .ign-grain,.ign-mh .ign-edge{z-index:2}
 .ign-mh .ign-ghost{z-index:1;font-size:560px;left:-10px;bottom:-180px;color:rgba(255,255,255,0.05)}
-.ign-mh-frame{position:absolute;inset:0;z-index:5;padding:64px 92px 60px;display:flex;flex-direction:column;color:#F6EFE6}
+.ign-mh-frame{position:absolute;inset:0;z-index:5;padding:64px 92px 60px;display:flex;flex-direction:column;color:#F6EFE6;pointer-events:none}
+/* frame chrome is click-through in its empty gaps so the full-bleed ImageSlot
+ * behind it (image mode) stays click-to-upload; real content re-enables. */
+.ign-mh-frame > *{pointer-events:auto}
 .ign-mh-top{display:flex;align-items:center;justify-content:space-between;font-family:'Space Grotesk',sans-serif;
   font-size:21px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(246,239,230,0.72)}
 .ign-mh-mast{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-0.04em;line-height:0.82;
@@ -30,7 +33,7 @@ const CSS = `
 .ign-mh-issue{display:flex;align-items:center;gap:18px;margin-top:18px;font-family:'Space Grotesk',sans-serif;
   font-size:22px;letter-spacing:0.06em;color:rgba(246,239,230,0.82)}
 .ign-mh-issue .bar{width:42px;height:1px;background:rgba(246,239,230,0.5)}
-.ign-mh-spacer{flex:1}
+.ign-mh-spacer{flex:1;pointer-events:none}
 .ign-mh-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:48px}
 .ign-mh-deck{font-size:46px;font-weight:300;line-height:1.12;letter-spacing:-0.02em;max-width:760px;text-wrap:pretty}
 .ign-mh-deck b{font-weight:700}
@@ -80,7 +83,7 @@ export const mastheadControls = [
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
   { key: 'showMast', type: 'toggle', label: '刊头', default: true, describe: '顶部超大刊头字。' },
   { key: 'showIssue', type: 'toggle', label: '刊期行', default: true, describe: '刊头下方的刊期与署名行。' },
-  { key: 'showDeck', type: 'toggle', label: '主标语', default: true, describe: '底部的大号封面主标语。' },
+  { key: 'showDeck', type: 'toggle', label: '主标题', default: true, describe: '底部的大号封面主标语。' },
   { key: 'showLines', type: 'toggle', label: '导读条目', default: true, describe: '右下角的封面导读条目列表。' },
   { key: 'lineCount', type: 'slider', label: '导读数量', default: 4, min: 2, max: 4, step: 1, describe: '封面导读条目的数量。' },
   { key: 'showBarcode', type: 'toggle', label: '条码装饰', default: true, describe: '杂志封面式的条码装饰。' },
@@ -142,7 +145,7 @@ export default function MastheadSlide(props) {
         {p.showMeta && (
           <div className="ign-mh-top" style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid rgba(246,239,230,0.18)' }}>
             <span>{p.metaLeft}</span>
-            <span>61 / 82</span>
+            <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">61</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span>
           </div>
         )}
       </div>

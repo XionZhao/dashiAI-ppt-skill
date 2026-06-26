@@ -56,7 +56,7 @@ export const geoDefaultProps = {
   showPins: true,
   showRegionList: true,
   showValues: true,
-  showInset: false,
+  showInset: true,
   insetImage: '',
   showKicker: true,
   showLede: true,
@@ -93,9 +93,8 @@ export const geoControls = [
   { key: 'showPins', type: 'toggle', label: '市场光点', default: true, describe: '地图上的发光市场光点。' },
   { key: 'showRegionList', type: 'toggle', label: '区域清单', default: true, describe: '左侧的区域占比清单。' },
   { key: 'showValues', type: 'toggle', label: '占比数值', default: true, describe: '区域清单右侧的占比数值。' },
-  { key: 'showInset', type: 'toggle', label: '图片插角', default: false, describe: '地图右下角的图片插角（自适应比例）。' },
-  { key: 'insetImage', type: 'image', label: '插角图片', default: '', describe: '上传插角图片，按原图比例自适应。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的衬线引言。' },
+  { key: 'showInset', type: 'toggle', label: '现场配图', default: true, describe: '地图右下角的配图框;开启后点击该框即可上传/更换图片。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的衬线引言。' },
   { key: 'showLede', type: 'toggle', label: '说明文案', default: true, describe: '标题下方的说明段落。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大幽灵字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
@@ -110,6 +109,12 @@ export default function GeoSlide(props) {
   const W = 780, H = 470;
   const pins = regions.flatMap((r) => r.pins);
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
+  // Media uploads (slot click + panel "插角图片" control) land in the shared
+  // images[] array via the bridge; insetImage is kept only as a back-compat
+  // fallback. Drive both the gate and src from that array so an uploaded inset
+  // actually appears (the bare insetImage prop never receives bridge writes).
+  const images = Array.isArray(p.images) ? p.images : [];
+  const insetSrc = images[0] || p.insetImage || undefined;
 
   return (
     <Slide surface={p.surface} className="ign-geo">
@@ -162,9 +167,9 @@ export default function GeoSlide(props) {
                 </g>
               ))}
             </svg>
-            {p.showInset && (
+            {(p.showInset || insetSrc) && (
               <div className="ign-geo-inset">
-                <ImageSlot src={p.insetImage || undefined} placeholder={p.insetPlaceholder} mode="ratio" radius={0} />
+                <ImageSlot src={insetSrc} placeholder={p.insetPlaceholder} mode="ratio" radius={0} />
               </div>
             )}
           </div>
@@ -174,7 +179,7 @@ export default function GeoSlide(props) {
           <footer className="ign-meta">
             <div>{p.metaLeft}</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '56%' }} /></span> 46 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '56%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">46</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>

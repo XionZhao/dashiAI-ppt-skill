@@ -93,6 +93,7 @@ export function buildLayoutManifestFromContracts(contracts) {
 export function createContract(page, themePack) {
   const controls = normalizeControls(page);
   const countBindings = controls
+    .filter(control => !isBooleanControl(control))
     .map(control => ({
       control,
       arrays: normalizeCountArrays(control.countArrays) || COUNT_ARRAY_BINDINGS[control.key] || inferCountArrayBindings(control.key, page.defaultProps),
@@ -526,6 +527,10 @@ function normalizeCountArrays(value) {
   if (typeof value === 'string' && value) return [value];
   if (Array.isArray(value)) return value.filter(item => typeof item === 'string' && item);
   return null;
+}
+
+function isBooleanControl(control) {
+  return control?.type === 'toggle' || typeof control?.default === 'boolean';
 }
 
 function normalizeControlType(type) {

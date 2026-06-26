@@ -15,6 +15,10 @@ const CSS = `
 .ign-chp .ign-ghost{font-size:300px;right:96px;bottom:60px;color:transparent;
   -webkit-text-stroke:2px var(--ign-hair2)}
 .ign-chp-body{flex:1;display:grid;grid-template-columns:0.78fr 1.22fr;gap:72px;align-items:center}
+/* numeral hidden → reflow: text + agenda share the full width (no empty column).
+   With no agenda either, the text block spans the whole frame. */
+.ign-chp-body.no-num{grid-template-columns:1.05fr 0.95fr}
+.ign-chp-body.no-num.no-agenda{grid-template-columns:1fr}
 .ign-chp-num{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:440px;line-height:0.74;letter-spacing:-0.06em;
   background:var(--ign-ember);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 0 60px rgba(255,110,46,0.32));text-align:center}
@@ -39,7 +43,6 @@ const CSS = `
 
 export const chapterDefaultProps = {
   surface: 'ink',
-  chapterNo: '03',
   showNumber: true,
   showSub: true,
   showAgenda: true,
@@ -50,6 +53,9 @@ export const chapterDefaultProps = {
   showScaffold: true,
   showMeta: true,
   // --- visible content defaults (override via props for migration) ---
+  // chapterNo is plain editable copy (shown in the giant numeral, lead, ghost
+  // mark and footer) — edit it directly on the page, no dedicated control.
+  chapterNo: '03',
   railText: 'Chapter — 章节',
   navItems: ['章节'],
   navCurrent: 0,
@@ -72,15 +78,12 @@ export const chapterControls = [
   { key: 'surface', type: 'select', label: '背景基调', default: 'ink',
     options: [{ value: 'ink', label: '深色' }, { value: 'paper', label: '浅色' }, { value: 'ember', label: '暖橙' }],
     describe: '页面背景主题，用于在相邻页之间制造色彩跳跃。' },
-  { key: 'chapterNo', type: 'select', label: '章节编号', default: '03',
-    options: [{ value: '01', label: '01' }, { value: '02', label: '02' }, { value: '03', label: '03' }, { value: '04', label: '04' }, { value: '05', label: '05' }],
-    describe: '巨型章节序号。' },
   { key: 'showNumber', type: 'toggle', label: '巨型序号', default: true, describe: '左侧的超大章节数字。' },
   { key: 'showSub', type: 'toggle', label: '副标题', default: true, describe: '章节标题下方的说明句。' },
   { key: 'showAgenda', type: 'toggle', label: '小目录', default: true, describe: '右侧本章覆盖要点的小目录。' },
-  { key: 'agendaCount', type: 'slider', label: '目录条数', default: 4, min: 2, max: 4, step: 1, describe: '小目录的条目数量。' },
+  { key: 'agendaCount', type: 'slider', label: '目录条数', default: 4, min: 1, max: 4, step: 1, describe: '小目录的条目数量。' },
   { key: 'agendaCurrent', type: 'slider', label: '当前条目', default: 0, min: 0, max: 3, step: 1, describe: '小目录中高亮的当前条目序号（从 0 起）。' },
-  { key: 'showKicker', type: 'toggle', label: '装饰引言', default: true, describe: '标题上方的章节引导标签。' },
+  { key: 'showKicker', type: 'toggle', label: '装饰小字', default: true, describe: '标题上方的章节引导标签。' },
   { key: 'showGhostMark', type: 'toggle', label: '背景大字符', default: true, describe: '角落超大描边字符装饰。' },
   { key: 'showScaffold', type: 'toggle', label: '边框骨架', default: true, describe: '侧边竖排标签与四角括线。' },
   { key: 'showMeta', type: 'toggle', label: '底部信息条', default: true, describe: '底部页脚信息与进度条。' },
@@ -89,10 +92,25 @@ export const chapterControls = [
 export default function ChapterSlide(props) {
   injectCSS('ign-chp-css', CSS);
   const p = { ...chapterDefaultProps, ...props };
-  const n = clampInt(p.agendaCount, 2, 4);
+  const n = clampInt(p.agendaCount, 1, 4);
   const items = (Array.isArray(p.agenda) ? p.agenda : []).slice(0, n);
   const cur = clampInt(p.agendaCurrent, 0, n - 1);
   const nav = Array.isArray(p.navItems) ? p.navItems : [];
+
+  // Rendered once; lives inside the left column when the giant numeral is shown,
+  // and becomes the body's second column when it is hidden (so the freed space
+  // is filled instead of left empty).
+  const agenda = p.showAgenda && (
+    <div className="ign-chp-agenda">
+      {items.map((it, i) => (
+        <div key={i} className={`ign-chp-item ${i === cur ? 'on' : ''}`}>
+          <span className="ix">{String(i + 1).padStart(2, '0')}</span>
+          <span className="tt">{it.tt}<span className="en">{it.en}</span></span>
+          <span className="ar">{i === cur ? '→' : ''}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <Slide surface={p.surface} className="ign-chp">
@@ -111,32 +129,24 @@ export default function ChapterSlide(props) {
           <div className="ign-ix"><b>{p.ixNo}</b> — {p.ixLabel}</div>
         </header>
 
-        <div className="ign-chp-body">
+        <div className={`ign-chp-body${p.showNumber ? '' : ' no-num'}${p.showAgenda ? '' : ' no-agenda'}`}>
           {p.showNumber && <div className="ign-chp-num ign-a1">{p.chapterNo}</div>}
 
           <div className="ign-chp-left ign-a2">
             {p.showKicker && <div className="lead"><span className="no">{p.leadEnPrefix} {p.chapterNo}</span><span className="tick" /><span>{p.leadZh}</span></div>}
             <h2 className="ign-chp-h" dangerouslySetInnerHTML={{ __html: p.headingHtml }} />
             {p.showSub && <p className="ign-chp-sub">{p.sub}</p>}
-            {p.showAgenda && (
-              <div className="ign-chp-agenda">
-                {items.map((it, i) => (
-                  <div key={i} className={`ign-chp-item ${i === cur ? 'on' : ''}`}>
-                    <span className="ix">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="tt">{it.tt}<span className="en">{it.en}</span></span>
-                    <span className="ar">{i === cur ? '→' : ''}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {p.showNumber && agenda}
           </div>
+
+          {!p.showNumber && agenda}
         </div>
 
         {p.showMeta && (
           <footer className="ign-meta">
             <div>IGNIS — 燃点 · 第 {p.chapterNo} 章</div>
             <div className="mid">{p.metaMid}</div>
-            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" style={{ width: '49%' }} /></span> 40 / 82</span></div>
+            <div className="r"><span className="ign-prog"><span className="track"><span className="fill" data-dashi-page-progress="" style={{ width: '49%' }} /></span> <span data-dashi-page-number="fraction" data-dashi-page-pad="1" data-dashi-page-total-pad="1" data-dashi-page-separator=" / " data-editable-skip="true"><b data-dashi-page-current="">40</b><span data-dashi-page-separator="true"> / </span><span data-dashi-page-total="">82</span></span></span></div>
           </footer>
         )}
       </Frame>
