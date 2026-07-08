@@ -22,8 +22,12 @@ import {
   handlePdfProgress,
   handlePdfDownload,
 } from './preview/export-routes.mjs';
+import { ensureUsableTmpdir } from './preview/ensure-tmpdir.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+
+// 启动即校验一次 tmpdir(宿主沙箱环境启动的场景);运行中被清理的场景由导出路由再兜一次。
+ensureUsableTmpdir(message => console.warn(message));
 // 相对路径按调用方目录解析:npm run(含 --prefix)会把脚本 cwd 切到项目根,INIT_CWD 才是用户所在目录。
 // 未显式传参时的默认值仍锚定项目根(内部调试预览目录),不随调用方目录漂移;绝对路径入参(常见于
 // start-preview-server.mjs 已完成解析后 spawn 传入)不受 CALLER_CWD 影响。

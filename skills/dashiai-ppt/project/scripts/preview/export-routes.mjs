@@ -8,6 +8,7 @@ import { getChromeExecutablePath } from '../chrome-path.mjs';
 import { isExportRequestAllowed } from '../preview-export-auth.mjs';
 import { atomicWriteFileSync, extractDataUrlMedia, isValidDeckState, mergeStateIntoIndexHtml } from '../persist-deck-state.mjs';
 import { isPathInside } from './static-serve.mjs';
+import { ensureUsableTmpdir } from './ensure-tmpdir.mjs';
 
 let ROOT;
 let SERVE_ROOT;
@@ -56,6 +57,7 @@ export async function handleEditablePptxExport(req, res) {
       import('../../packages/html-deck-to-pptx/src/editable.mjs'),
     ]);
     updateExportProgress(progressId, { stage: 'launching', detail: '启动导出浏览器', percent: 6 });
+    ensureUsableTmpdir(message => console.warn(message));
     const browser = await chromium.launch({ headless: true, executablePath: getChromePath() });
     const baseName = `${timestampForFile()}-${safeDownloadName(payload.fileName || 'presentation')}`;
     const outFile = path.join(EXPORT_DIR, `${baseName}.pptx`);
@@ -153,6 +155,7 @@ export async function handlePdfExport(req, res) {
       import('../../packages/html-deck-to-pptx/src/screenshot.mjs'),
     ]);
     updateExportProgress(progressId, { stage: 'launching', detail: '启动截图浏览器', percent: 6 });
+    ensureUsableTmpdir(message => console.warn(message));
     const browser = await chromium.launch({ headless: true, executablePath: getChromePath() });
     const baseName = `${timestampForFile()}-${safeDownloadName(payload.fileName || 'presentation')}`;
     const outFile = path.join(EXPORT_DIR, `${baseName}.pdf`);
