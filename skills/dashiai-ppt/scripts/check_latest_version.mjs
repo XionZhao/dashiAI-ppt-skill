@@ -8,7 +8,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = path.resolve(SCRIPT_DIR, '..');
 const INSTALLED_PACKAGE = path.join(SKILL_ROOT, 'project/package.json');
 const SOURCE_PACKAGE = path.join(SKILL_ROOT, 'package.json');
-const REMOTE_PACKAGE_URL = 'https://raw.githubusercontent.com/chuspeeism/dashiAI-ppt-skill/main/project/package.json';
+const REMOTE_PACKAGE_URL = 'https://raw.githubusercontent.com/chuspeeism/dashiAI-ppt-skill/main/skills/dashiai-ppt/project/package.json';
 const REQUEST_TIMEOUT_MS = 8000;
 
 main().catch(() => {});
