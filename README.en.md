@@ -316,3 +316,13 @@ This project is licensed under the **GNU Affero General Public License v3.0 (AGP
 **Exception:** the subpackage [`project/packages/html-deck-to-pptx`](skills/dashiai-ppt/project/packages/html-deck-to-pptx) is independently licensed under the **MIT License** (see the LICENSE file in that directory) and may be freely used in closed-source or commercial projects.
 
 Copyright (c) 2026 [chuspeeism](https://github.com/chuspeeism). See the [LICENSE](LICENSE) file for the full text. For commercial licensing beyond AGPL-3.0, please contact the author.
+
+## Star History
+
+<a href="https://www.star-history.com/#chuspeeism/dashiAI-ppt-skill&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=chuspeeism/dashiAI-ppt-skill&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=chuspeeism/dashiAI-ppt-skill&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=chuspeeism/dashiAI-ppt-skill&type=Date" />
+ </picture>
+</a>
