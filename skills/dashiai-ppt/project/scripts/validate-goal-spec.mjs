@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isCssColorLike, isMediaArrayKey, isSerializedReactElementLike } from '../src/prop-contract-core.mjs';
+// 与预算生成同一把尺:视觉宽度折算(全角=1、半角=0.5),见 copy-contract.mjs(issue #15)。
+import { charLength } from './workflow/copy-contract.mjs';
 import {
   NEUTRAL_PLACEHOLDERS,
   THEME_PAGES,
@@ -978,10 +980,6 @@ function stripInlineMarkers(value) {
 
 function normalizeRepeatedCopy(value) {
   return stripInlineMarkers(value).replace(/\s+/g, '').trim();
-}
-
-function charLength(value) {
-  return Array.from(String(value || '')).length;
 }
 
 function lastPathKey(pathName) {
