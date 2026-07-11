@@ -112,8 +112,9 @@ function injectPreviewOptions(html, options, { includeThemeSwitcher = false, lan
     // 不应烧回 index.html(会污染 render:themes 与其上运行的其他测试)。
     ...(includeThemeSwitcher ? { autosave: false } : {}),
     language,
-    // 英文 deck 才注入词典子集(按本 deck 用到的页面裁剪);中文 deck 零开销。
-    ...(language === 'en' && viewModel ? { i18n: buildDeckI18nDict(viewModel) } : {}),
+    // 词典子集始终注入(按本 deck 用到的页面裁剪,通常几 KB):运行时语言可由
+    // 系统语言/用户手动切换决定,中文 deck 也可能要切到英文界面。
+    ...(viewModel ? { i18n: buildDeckI18nDict(viewModel) } : {}),
   };
   const json = escapeScriptJson(JSON.stringify(previewOptions));
   return html.replace(

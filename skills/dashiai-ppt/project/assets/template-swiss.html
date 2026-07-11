@@ -1596,9 +1596,10 @@
   #deck-topbar #preview-export-main{width:auto;height:34px;padding:0 13px}
   #deck-topbar .pp-export-menu{top:calc(100% + 6px);bottom:auto;left:auto;right:0}
   #deck-topbar #preview-reset{height:34px;min-width:0;padding:0 13px}
-  #preview-theme-toggle{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--pp-border);border-radius:6px;background:var(--pp-bg);color:var(--pp-icon);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
-  #preview-theme-toggle:hover{background:var(--pp-chip);color:var(--pp-fg)}
+  #preview-theme-toggle,#preview-lang-toggle{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--pp-border);border-radius:6px;background:var(--pp-bg);color:var(--pp-icon);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  #preview-theme-toggle:hover,#preview-lang-toggle:hover{background:var(--pp-chip);color:var(--pp-fg)}
   #preview-theme-toggle svg{width:17px;height:17px}
+  #preview-lang-toggle{font-size:12px;font-weight:650;letter-spacing:.02em}
   #deck-page-pager{position:fixed;left:calc(var(--deck-left) + var(--deck-w)/2);bottom:24px;z-index:120;display:flex;align-items:center;gap:4px;padding:5px;border:1px solid var(--pp-border);border-radius:12px;background:var(--pp-bg);box-shadow:0 8px 26px rgba(0,0,0,.18);color:var(--pp-fg);transform:translateX(-50%);font-family:var(--sans);transition:opacity .22s var(--ease-prod),transform .22s var(--ease-prod);pointer-events:auto}
   body.editor-panels-collapsed #deck-page-pager,body[data-mode="present"] #deck-page-pager{display:none}
   #deck-page-pager button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--pp-fg2);cursor:pointer;transition:background .15s,color .15s}
@@ -1871,6 +1872,7 @@
       <span>重置</span>
     </button>
     <span class="pp-topbar-sep" aria-hidden="true"></span>
+    <button id="preview-lang-toggle" type="button" aria-label="切换语言 / Switch language" title="切换语言 / Switch language"></button>
     <button id="preview-theme-toggle" type="button" aria-label="切换明暗" title="切换明暗"></button>
   </div>
 </header>
@@ -1964,13 +1966,34 @@
 // 翻控件 label/desc/选项/页面名;UI_STRINGS_EN 翻 template 自身的界面文案。
 // 查不到的词条一律回退中文,保证词典缺失只是显示降级,不产生任何功能差异。
 (function(){
+  // 界面语言解析优先级:用户手动选择(localStorage)> 系统语言(zh* → 中文,
+  // 其它 → 英文)> goal.language(渲染时指定,系统语言不可得时的回退)> 中文。
+  const LANG_KEY = 'dashi-deck-lang';
   let language = 'zh';
+  let deckLanguage = 'zh';
   let metaDict = {};
   try {
     const opts = JSON.parse(document.getElementById('preview-options')?.textContent || '{}');
-    if(opts.language === 'en') language = 'en';
+    if(opts.language === 'en') deckLanguage = 'en';
     if(opts.i18n && typeof opts.i18n === 'object') metaDict = opts.i18n;
   } catch (err) { /* keep zh */ }
+  let savedLanguage = null;
+  try { savedLanguage = localStorage.getItem(LANG_KEY); } catch (err) { /* private mode 等 */ }
+  if(savedLanguage === 'zh' || savedLanguage === 'en'){
+    language = savedLanguage;
+  } else {
+    const systemLanguage = String(navigator.language || '').toLowerCase();
+    if(systemLanguage.startsWith('zh')) language = 'zh';
+    else if(systemLanguage) language = 'en';
+    else language = deckLanguage;
+  }
+
+  function setLanguage(next){
+    const lang = next === 'en' ? 'en' : 'zh';
+    try { localStorage.setItem(LANG_KEY, lang); } catch (err) { /* ignore */ }
+    // 刷新后按新语言重新初始化;编辑内容经自动保存/草稿机制在刷新后恢复。
+    location.reload();
+  }
 
   // template 自身 UI 文案词典(中文原文 → 英文)。动态插值词条用 {name} 占位符。
   const UI_STRINGS_EN = {
@@ -2166,15 +2189,16 @@
     });
   }
 
-  window.__deckI18n = { language, isEn, meta, ui, exportDetail, translateStaticDom, uiStrings: UI_STRINGS_EN };
+  window.__deckI18n = { language, isEn, meta, ui, exportDetail, setLanguage, translateStaticDom, uiStrings: UI_STRINGS_EN };
 
   if(isEn){
     const run = () => translateStaticDom(document.body);
     document.readyState === 'loading'
       ? document.addEventListener('DOMContentLoaded', run, { once: true })
       : run();
-    document.documentElement.setAttribute('lang', 'en');
   }
+  // html lang 跟随运行时语言(SSR 写入的初始值可能与运行时决定不一致)。
+  document.documentElement.setAttribute('lang', isEn ? 'en' : 'zh-CN');
 })();
 </script>
 <script src="assets/imported-theme-runtime.js"></script>
@@ -8668,6 +8692,20 @@ refreshRailCatalog();
 		    }
 		    return direction > 0 ? index : count - index - 1;
 		  }
+})();
+</script>
+<script>
+/* =============== Quiet topbar · 语言切换 =============== */
+(function(){
+  const btn=document.getElementById('preview-lang-toggle');
+  const i18n=window.__deckI18n;
+  if(!btn||!i18n) return;
+  // 按钮显示目标语言(点击后切到的那种),title 用目标语言书写给目标用户看。
+  btn.textContent=i18n.isEn?'中':'EN';
+  const hint=i18n.isEn?'切换到中文':'Switch to English';
+  btn.setAttribute('title',hint);
+  btn.setAttribute('aria-label',hint);
+  btn.addEventListener('click',()=>i18n.setLanguage(i18n.isEn?'zh':'en'));
 })();
 </script>
 <script>
