@@ -61,10 +61,16 @@ npx dashiai-ppt-skill
 
 > GitHub 安装方式的 skill 内容在仓库的 `skills/dashiai-ppt/` 子目录，Agent 应把该子目录放进自己的 skills 目录；没有固定 skills 目录约定的 Agent（如 Marvis / Workbuddy / Dumate / Qclaw），把该子目录放到任意位置、让它读取其中的 `SKILL.md` 执行即可。
 
-已经安装过的话，重跑上面的 npx 命令即可原地更新，或把这句话发给 Agent：
+已经安装过的话，同一条命令加 `@latest` 即可原地更新（自动保留已装依赖）：
+
+```bash
+npx --registry=https://registry.npmmirror.com dashiai-ppt-skill@latest
+```
+
+或把这句话发给 Agent：
 
 ```text
-帮我更新 dashiai-ppt 这个 skill（国内用 npx --registry=https://registry.npmmirror.com dashiai-ppt-skill）
+帮我更新 dashiai-ppt 这个 skill（运行 npx --registry=https://registry.npmmirror.com dashiai-ppt-skill@latest）
 ```
 
 环境要求：本机能运行 **Node.js 18+ 和 npm**（首次生成时依赖自动安装）；导出 PPTX / PDF 需要本机装有 Chrome / Chromium / Edge。

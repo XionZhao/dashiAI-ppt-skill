@@ -57,7 +57,7 @@ Install the dashiai-ppt skill for me: run `npx dashiai-ppt-skill`, or clone http
 
 > When installing from the repo instead of npm, the skill content lives in the `skills/dashiai-ppt/` subdirectory — the agent should place that subdirectory into its own skills directory. Agents with no fixed skills-directory convention (e.g. Marvis / Workbuddy / Dumate / Qclaw) can just drop that subdirectory anywhere and point them at its `SKILL.md`.
 
-Already installed? Re-run `npx dashiai-ppt-skill` to update in place.
+Already installed? Run `npx dashiai-ppt-skill@latest` to update in place (installed dependencies are preserved).
 
 Requirements: a machine that runs **Node.js 18+ and npm** (dependencies auto-install on first generation); exporting PPTX / PDF requires Chrome / Chromium / Edge installed locally.
 
