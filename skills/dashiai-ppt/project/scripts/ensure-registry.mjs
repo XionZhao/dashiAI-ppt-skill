@@ -19,8 +19,9 @@ async function reachable(base, timeoutMs = 3000) {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const res = await fetch(`${base}/-/ping`, { signal: controller.signal, redirect: 'follow' });
     clearTimeout(timer);
-    // 个别镜像不实现 /-/ping;能拿到任何 HTTP 响应即证明该源可达。
-    return res.status > 0;
+    // 必须 2xx 才算可达:403/5xx(企业代理拦截页、镜像故障)下 npm install
+    // 实际会失败,不能据此选源。
+    return res.ok;
   } catch {
     return false;
   }
