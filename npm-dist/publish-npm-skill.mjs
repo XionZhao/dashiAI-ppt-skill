@@ -63,7 +63,7 @@ function main() {
       description: 'DashiAI PPT skill installer — offline-editable HTML decks with PPTX/PDF export. 国内可经 npmmirror 安装。',
       bin: { 'dashiai-ppt-skill': 'bin/install.mjs' },
       files: ['bin', 'skill', 'LICENSE'],
-      // 与仓库一致:skill 本体 AGPL-3.0(仅 html-deck-to-pptx 子包为 MIT,见其目录内 LICENSE)。
+      // 与仓库一致:skill 本体 AGPL-3.0(html-deck-to-pptx 子包为专有组件,见其目录内 LICENSE)。
       license: 'AGPL-3.0-only',
       repository: { type: 'git', url: 'git+https://github.com/chuspeeism/dashiAI-ppt-skill.git' },
       homepage: 'https://github.com/chuspeeism/dashiAI-ppt-skill#readme',
@@ -85,7 +85,7 @@ function main() {
       '',
       'Options: `--dir <skills-root>` to target a specific skills directory, `--list` to show detected locations.',
       '',
-      'Licensed under AGPL-3.0 (the bundled `html-deck-to-pptx` subpackage is MIT). Installer source: `npm-dist/` in the repository.',
+      'Licensed under AGPL-3.0; the bundled `html-deck-to-pptx` export engine is proprietary, licensed for use only as part of this skill (see its LICENSE). Installer source: `npm-dist/` in the repository.',
       '',
     ].join('\n'));
 
