@@ -26,7 +26,7 @@ async function main() {
   if (!remoteVersion) return;
   if (compareVersions(remoteVersion, localVersion) <= 0) return;
   process.stdout.write(
-    `发现 DashiAI PPT 新版本 ${remoteVersion}（当前 ${localVersion}）。更新方式：npx dashi-ppt-skill@latest（国内加 --registry=https://registry.npmmirror.com），或重新拉取 https://github.com/chuspeeism/dashi-ppt-skill。\n`
+    `发现 Dashi PPT 新版本 ${remoteVersion}（当前 ${localVersion}）。更新方式：npx dashi-ppt-skill@latest（国内加 --registry=https://registry.npmmirror.com），或重新拉取 https://github.com/chuspeeism/dashi-ppt-skill。\n`
   );
 }
 

@@ -76,7 +76,7 @@ function main() {
     fs.writeFileSync(path.join(staging, 'package.json'), `${JSON.stringify({
       name: PACKAGE_NAME,
       version,
-      description: 'DashiAI PPT skill installer — offline-editable HTML decks with PPTX/PDF export. 国内可经 npmmirror 安装。',
+      description: 'Dashi PPT skill installer — offline-editable HTML decks with PPTX/PDF export. 国内可经 npmmirror 安装。',
       bin: { 'dashi-ppt-skill': 'bin/install.mjs' },
       files: ['bin', 'skill', 'LICENSE'],
       // 与仓库一致:skill 本体 AGPL-3.0(html-deck-to-pptx 子包为专有组件,见其目录内 LICENSE)。
@@ -90,7 +90,7 @@ function main() {
     fs.writeFileSync(path.join(staging, 'README.md'), [
       '# dashi-ppt-skill',
       '',
-      'Installer package for the [DashiAI PPT](https://github.com/chuspeeism/dashi-ppt-skill) agent skill.',
+      'Installer package for the [Dashi PPT](https://github.com/chuspeeism/dashi-ppt-skill) agent skill.',
       '',
       '```bash',
       '# International',
