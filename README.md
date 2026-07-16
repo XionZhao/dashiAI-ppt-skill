@@ -196,10 +196,11 @@ npm --prefix <project目录> run export:pdf  -- <PPT输出目录>/ppt
 Copyright (c) 2026 [chuspeeism](https://github.com/chuspeeism)。完整协议文本见根目录 [LICENSE](LICENSE) 文件。如需 AGPL-3.0 之外的商业授权，请联系作者。
 
 ## Star History
+
 <a href="https://www.star-history.com/?repos=chuspeeism%2Fdashi-ppt-skill&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&theme=dark&legend=top-left&sealed_token=U3gRkm794u4qnXIGSGM51xweW2r79vR1G0kp9AcwlAYR6O_QGdKwI8ZFD9cbI4ZVWU9KmXQn2n74NAJRcwu2X0O3tiB3IOc4U5R44dR5CjTadftJPQZq3Q" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&legend=top-left&sealed_token=U3gRkm794u4qnXIGSGM51xweW2r79vR1G0kp9AcwlAYR6O_QGdKwI8ZFD9cbI4ZVWU9KmXQn2n74NAJRcwu2X0O3tiB3IOc4U5R44dR5CjTadftJPQZq3Q" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&legend=top-left&sealed_token=U3gRkm794u4qnXIGSGM51xweW2r79vR1G0kp9AcwlAYR6O_QGdKwI8ZFD9cbI4ZVWU9KmXQn2n74NAJRcwu2X0O3tiB3IOc4U5R44dR5CjTadftJPQZq3Q" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&theme=dark&legend=top-left&sealed_token=MpgO76zZLzPPs8bi8jDFZyG1b8gYNbtA8RQhnghNJ0wtwmM9UwUwNiBiy0rtx1stNTntfSl1TJCqxLCMvnTKnj6He8CPK9MYawX-G8i4x4HabmaLVCC0gg" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&legend=top-left&sealed_token=MpgO76zZLzPPs8bi8jDFZyG1b8gYNbtA8RQhnghNJ0wtwmM9UwUwNiBiy0rtx1stNTntfSl1TJCqxLCMvnTKnj6He8CPK9MYawX-G8i4x4HabmaLVCC0gg" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=chuspeeism/dashi-ppt-skill&type=date&legend=top-left&sealed_token=MpgO76zZLzPPs8bi8jDFZyG1b8gYNbtA8RQhnghNJ0wtwmM9UwUwNiBiy0rtx1stNTntfSl1TJCqxLCMvnTKnj6He8CPK9MYawX-G8i4x4HabmaLVCC0gg" />
  </picture>
 </a>
